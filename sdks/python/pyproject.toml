@@ -3,7 +3,7 @@ name = "forjio-suppuo"
 version = "0.1.0"
 description = "Suppuo SDK — typed Python client for the suppuo.com REST API. Sister to the JS + Go SDKs."
 authors = [{ name = "Forjio", email = "support@forjio.com" }]
-license = "Proprietary"
+license = { text = "Proprietary" }
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
