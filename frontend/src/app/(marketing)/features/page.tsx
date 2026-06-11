@@ -1,63 +1,86 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Boxes, Layers, Activity, ShieldCheck, Zap, Code2, ArrowRight } from 'lucide-react';
-
-/*
- * FORKERS: replace the placeholder feature copy with what Suppuo
- * actually ships. Keep the structure (centered hero → 2-col grid →
- * CTA) — it's the family standard.
- */
+import {
+  Inbox,
+  Flag,
+  MessageSquareText,
+  ClipboardList,
+  Link2,
+  Code2,
+  ArrowRight,
+} from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Features',
-  description: 'Everything Suppuo ships — replace this with your real feature summary.',
+  description:
+    'Everything Suppuo ships — shared ticket inbox, priorities and assignment, internal notes, canned replies, a hosted ticket form, requester status links, and an API + CLI.',
 };
 
 const features = [
   {
-    Icon: Boxes,
-    title: 'Feature one',
-    body: 'A concrete capability and what the user gets from it. One or two sentences.',
+    Icon: Inbox,
+    title: 'Shared ticket inbox',
+    body: 'One queue for the whole team, so support stops living in someone’s personal chat history.',
     details: [
-      'A specific sub-capability',
-      'Another concrete detail',
-      'A third, measurable detail',
-      'A fourth if you have one',
+      'Statuses: open → pending → resolved → closed',
+      'Filter by status, priority, and assignee',
+      'Full ticket thread — every reply in one place',
+      'Multi-workspace: separate inboxes per brand or team',
     ],
   },
   {
-    Icon: Layers,
-    title: 'Feature two',
-    body: 'Another shipped capability. Name it specifically; avoid marketing adjectives.',
-    details: ['Sub-capability', 'Concrete detail', 'Measurable detail', 'One more'],
+    Icon: Flag,
+    title: 'Priorities + assignment',
+    body: 'Route each ticket to the right agent and make urgency visible, so complaints don’t sit behind routine questions.',
+    details: [
+      'Assign tickets to a specific agent',
+      'Per-ticket priority levels',
+      'Unassigned tickets are visible to everyone — nothing falls through',
+      'Reassign anytime as the ticket evolves',
+    ],
   },
   {
-    Icon: Activity,
-    title: 'Feature three',
-    body: 'Something measurable or observable — analytics, a report, an export.',
-    details: ['Live, no batch delay', 'Per-record breakdown', 'Time-series view', 'CSV export'],
+    Icon: MessageSquareText,
+    title: 'Internal notes + canned replies',
+    body: 'Collaborate on the ticket itself, and stop retyping the same answer ten times a day.',
+    details: [
+      'Internal notes the requester never sees',
+      'Notes live in the ticket thread, next to the replies',
+      'Save canned replies for repeat questions',
+      'Insert a canned reply in two clicks, then personalize',
+    ],
   },
   {
-    Icon: ShieldCheck,
-    title: 'Feature four',
-    body: 'A trust or compliance capability if the product has one.',
-    details: ['Concrete guarantee', 'How it is enforced', 'What the user controls', 'Audit trail'],
+    Icon: ClipboardList,
+    title: 'Hosted ticket form',
+    body: 'A ready-made support form at a link you can share anywhere — your site, bio page, or WhatsApp auto-reply.',
+    details: [
+      'No customer account required to submit',
+      'Tickets appear in your inbox instantly',
+      'One form per workspace, ready on day one',
+      'Email-to-ticket is next on the roadmap',
+    ],
   },
   {
-    Icon: Zap,
-    title: 'Feature five',
-    body: 'A speed or automation capability — what the product does for the user.',
-    details: ['What is automated', 'What it replaces', 'How fast', 'Where it runs'],
+    Icon: Link2,
+    title: 'Status link + email updates',
+    body: 'Requesters always know where their ticket stands — without logging in or asking again.',
+    details: [
+      'Private, tokenized status link per ticket',
+      'Email on every agent reply',
+      'Email on every status change',
+      'No login or password for your customers, ever',
+    ],
   },
   {
     Icon: Code2,
     title: 'API + CLI',
-    body: 'REST API with idempotency keys, type-safe SDKs (Node, Python, Go), and a CLI: npm i -g @forjio/suppuo-cli.',
+    body: 'Suppuo is built API-first — the dashboard and your scripts use the same REST API.',
     details: [
-      'REST + idempotency keys',
-      'SDKs for Node, Python, Go',
-      '@forjio/suppuo-cli on npm',
-      'Per-workspace API keys with scoped permissions',
+      'REST API with Bearer-token auth',
+      'Consistent response envelope + request IDs',
+      'Webhooks delivered via a transactional outbox',
+      'CLI on npm: @forjio/suppuo-cli',
     ],
   },
 ];
@@ -67,11 +90,12 @@ export default function FeaturesPage() {
     <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Everything you need from Suppuo.
+          Everything a small support team needs.
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Replace this with a one-paragraph summary of what the product does and which
-          capabilities are free versus paid.
+          Suppuo is a helpdesk for Indonesian SMEs: customers submit tickets through a hosted
+          form, agents work them in a shared inbox, and requesters stay updated by email and a
+          private status link. During early access, all of it is free.
         </p>
       </div>
 
@@ -99,10 +123,11 @@ export default function FeaturesPage() {
 
       <div className="mt-20 text-center">
         <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Try the free tier — no card required.
+          Free during early access — no card required.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-          Describe the free plan honestly. Upgrade only when you outgrow it.
+          Every feature above is included while Suppuo is in early access. Paid plans in IDR
+          come later, with clear notice first.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link

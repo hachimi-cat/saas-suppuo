@@ -1,11 +1,16 @@
 [
   {
     "version": "0.1.0",
-    "date": "[DATE]",
-    "title": "Initial release",
+    "date": "2026-06-11",
+    "title": "Early access",
     "changes": [
-      "First public release of Suppuo.",
-      "Replace this entry with your real changelog — one object per release, newest first."
+      "First public release of Suppuo — helpdesk and ticketing for Indonesian SMEs.",
+      "Hosted ticket form: customers submit support tickets without an account.",
+      "Shared agent inbox with statuses (open / pending / resolved / closed), priorities, and assignment.",
+      "Internal notes and canned replies for agents.",
+      "Requesters get email updates plus a private, tokenized status link.",
+      "Multi-workspace via Huudis SSO, REST API with Bearer auth, webhooks via outbox, and the @forjio/suppuo-cli.",
+      "Free during early access — paid plans via Plugipay come later."
     ]
   }
 ]
