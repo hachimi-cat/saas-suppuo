@@ -13,6 +13,8 @@ export type IdPrefix =
   | 'tkt' // support ticket
   | 'tmsg' // ticket message
   | 'cnr' // canned reply
+  | 'ak' // API key
+  | 'whs' // webhook subscription
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

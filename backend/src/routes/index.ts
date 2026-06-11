@@ -13,6 +13,8 @@ import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
 import webhooksTwilioRouter from './webhooks-twilio.js';
 import adminCustomersRouter from './admin-customers.js';
+import apiKeysRouter from './api-keys.js';
+import webhookSubscriptionsRouter from './webhook-subscriptions.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -82,6 +84,11 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Inbound channel webhooks (Twilio WhatsApp). */
   router.use('/webhooks/twilio', webhooksTwilioRouter);
+  /** Programmatic access keys (session callers manage; keys themselves
+   *  authenticate via the sk_live_ Bearer path in middleware/auth.ts). */
+  router.use('/api-keys', requireAuth, apiKeysRouter);
+  /** Outbound webhook endpoints — suppuo.ticket.* event delivery. */
+  router.use('/webhook-subscriptions', requireAuth, webhookSubscriptionsRouter);
 
   // Products mount their own routers here, e.g.:
   //   router.use('/widgets', widgetsRouter);
