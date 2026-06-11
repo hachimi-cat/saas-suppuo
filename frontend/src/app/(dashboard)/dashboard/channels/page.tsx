@@ -1,10 +1,10 @@
 'use client';
 
 /*
- * Channels — where customer conversations come from. Always-on
- * channels (hosted form, manual logging), platform-provided ones
- * (email, WhatsApp when the shared number is live), and BYO provider
- * integrations (your own Twilio / Resend) per workspace.
+ * Channels — where customer conversations come from, grouped into
+ * Customer conversations / Outbound email / Team notifications /
+ * Built-in. WhatsApp is BYO-ONLY (the workspace's own Twilio or Meta
+ * Cloud API — Suppuo never provides a number).
  */
 
 import { useCallback, useEffect, useState } from 'react';
