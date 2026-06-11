@@ -6,6 +6,8 @@ import { apiRequest, CliApiError } from '../lib/api.js';
  * `suppuo tickets …` — the agent workspace surface from the terminal.
  *
  *   tickets list [--status open|pending|resolved|closed|all] [--limit N]
+ *                [--q "…"] [--tag <tag>] [--channel web|email|whatsapp|telegram]
+ *                [--assignee <sub>|me|unassigned]
  *   tickets show <id>
  *   tickets reply <id> --message "…" [--internal] [--author-name "…"]
  *   tickets close <id>
@@ -14,7 +16,7 @@ import { apiRequest, CliApiError } from '../lib/api.js';
  * sent as Bearer against suppuo.com.
  */
 
-interface Ticket {
+export interface Ticket {
   id: string;
   number: number;
   subject: string;
@@ -23,7 +25,10 @@ interface Ticket {
   channel: string;
   requesterEmail: string | null;
   requesterName: string | null;
+  requesterPhone?: string | null;
+  requesterExternalId?: string | null;
   assigneeSub: string | null;
+  tags: string[];
   lastMessageAt: string;
   createdAt: string;
 }
@@ -65,13 +70,32 @@ tickets
   .description('List tickets (newest activity first)')
   .option('--status <status>', 'filter: open|pending|resolved|closed|all')
   .option('--limit <n>', 'max tickets to return (1-100)', (v) => parseInt(v, 10))
-  .action(async (opts: { status?: string; limit?: number }) => {
+  .option('--q <text>', 'free-text search: subject + requester + message bodies')
+  .option('--tag <tag>', 'filter to tickets carrying the tag (exact, lowercase)')
+  .option('--channel <channel>', 'filter: web|email|whatsapp|telegram')
+  .option('--assignee <sub>', "filter: a Huudis sub, 'me', or 'unassigned'")
+  .action(
+    async (opts: {
+      status?: string;
+      limit?: number;
+      q?: string;
+      tag?: string;
+      channel?: string;
+      assignee?: string;
+    }) => {
     try {
       const { tickets: rows, counts } = await apiRequest<{
         tickets: Ticket[];
         counts: Record<string, number>;
       }>('GET', '/api/v1/tickets', {
-        query: { status: opts.status, limit: opts.limit },
+        query: {
+          status: opts.status,
+          limit: opts.limit,
+          q: opts.q,
+          tag: opts.tag,
+          channel: opts.channel,
+          assignee: opts.assignee,
+        },
       });
 
       if (rows.length === 0) {
@@ -79,12 +103,13 @@ tickets
       } else {
         for (const t of rows) {
           const requester = t.requesterName ?? t.requesterEmail ?? '—';
+          const tags = t.tags?.length ? ` ${chalk.cyan(t.tags.map((x) => `[${x}]`).join(''))}` : '';
           console.log(
             [
               chalk.bold(`#${t.number}`.padEnd(6)),
               paintStatus(t.status).padEnd(18), // padded incl. color codes
               chalk.dim(t.priority.padEnd(7)),
-              t.subject,
+              t.subject + tags,
               chalk.dim(`(${requester}, ${t.id})`),
             ].join(' '),
           );
@@ -116,6 +141,7 @@ tickets
         ? `${t.requesterName} <${t.requesterEmail ?? '—'}>`
         : (t.requesterEmail ?? '—');
       console.log(`requester: ${requester}`);
+      if (t.tags?.length) console.log(`tags:      ${t.tags.join(', ')}`);
       if (t.assigneeSub) console.log(`assignee:  ${t.assigneeSub}`);
       console.log(chalk.dim(`created:   ${t.createdAt}`));
       for (const m of t.messages) {

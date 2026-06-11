@@ -21,6 +21,15 @@ const (
 	ChannelWeb      = "web"
 	ChannelEmail    = "email"
 	ChannelWhatsApp = "whatsapp"
+	ChannelTelegram = "telegram"
+)
+
+// Billing tiers.
+const (
+	TierFree     = "free"
+	TierStarter  = "starter"
+	TierGrowth   = "growth"
+	TierBusiness = "business"
 )
 
 // Ticket is a helpdesk ticket as returned by the agent surface.
@@ -35,11 +44,17 @@ type Ticket struct {
 	RequesterEmail *string `json:"requesterEmail"`
 	RequesterName  *string `json:"requesterName"`
 	RequesterPhone *string `json:"requesterPhone,omitempty"`
-	AssigneeSub    *string `json:"assigneeSub"`
-	AccessToken    string  `json:"accessToken"`
-	LastMessageAt  string  `json:"lastMessageAt"`
-	CreatedAt      string  `json:"createdAt"`
-	UpdatedAt      string  `json:"updatedAt"`
+	// RequesterExternalID is the channel-native requester identity for
+	// non-phone channels — the Telegram chat id for telegram tickets.
+	RequesterExternalID *string `json:"requesterExternalId,omitempty"`
+	AssigneeSub         *string `json:"assigneeSub"`
+	// Tags are free-form labels (normalized server-side: trimmed,
+	// lowercased, deduped; max 10 tags x 40 chars).
+	Tags          []string `json:"tags"`
+	AccessToken   string   `json:"accessToken"`
+	LastMessageAt string   `json:"lastMessageAt"`
+	CreatedAt     string   `json:"createdAt"`
+	UpdatedAt     string   `json:"updatedAt"`
 }
 
 // TicketMessage is one message on a ticket's thread.
@@ -52,6 +67,8 @@ type TicketMessage struct {
 	Body       string  `json:"body"`
 	IsInternal bool    `json:"isInternal"`
 	CreatedAt  string  `json:"createdAt"`
+	// Attachments carries display-safe metadata (present on Tickets.Get).
+	Attachments []AttachmentMeta `json:"attachments,omitempty"`
 }
 
 // TicketWithMessages is a ticket including its full message thread.
@@ -61,10 +78,13 @@ type TicketWithMessages struct {
 }
 
 // TicketList is the list response: tickets plus per-status counts for
-// the whole workspace.
+// the whole workspace and a keyset cursor for the next page.
 type TicketList struct {
 	Tickets []Ticket       `json:"tickets"`
 	Counts  map[string]int `json:"counts"`
+	// Cursor is the opaque cursor for the next page (nil on the last page).
+	Cursor  *string `json:"cursor"`
+	HasMore bool    `json:"hasMore"`
 }
 
 // CannedReply is a per-workspace saved reply snippet.

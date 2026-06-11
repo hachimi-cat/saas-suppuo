@@ -3,4 +3,4 @@ from .client import SuppuoClient
 from .errors import SuppuoError
 
 __all__ = ["SuppuoClient", "SuppuoError"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

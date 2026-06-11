@@ -1,9 +1,10 @@
 // Package suppuo is the Go SDK for the suppuo.com helpdesk REST API.
 // Sister to @forjio/suppuo (JS) and forjio-suppuo (Python).
 //
-// Auth = Bearer JWT (a Huudis-minted access token). Pass Config.Token
-// or set SUPPUO_TOKEN. The Public resource (requester-facing
-// hosted-form endpoints) needs no token at all.
+// Auth = Bearer token — an sk_live_… API key from the dashboard (or a
+// Huudis-minted access token). Pass Config.Token or set SUPPUO_TOKEN.
+// The Public resource (requester-facing hosted-form endpoints) needs
+// no token at all.
 //
 // Every response rides the Forjio envelope {data, error, meta}; the
 // client unwraps it and returns *Error (carrying the envelope's
@@ -32,6 +33,12 @@ type Client struct {
 	// Resource namespaces — mirror the JS + Python SDKs.
 	Tickets       *TicketsResource
 	CannedReplies *CannedRepliesResource
+	Billing       *BillingResource
+	Channels      *ChannelsResource
+	Reports       *ReportsResource
+	Settings      *SettingsResource
+	CSAT          *CSATResource
+	Attachments   *AttachmentsResource
 	Public        *PublicResource
 }
 
@@ -72,6 +79,12 @@ func New(cfg Config) *Client {
 	}
 	c.Tickets = &TicketsResource{c: c}
 	c.CannedReplies = &CannedRepliesResource{c: c}
+	c.Billing = &BillingResource{c: c}
+	c.Channels = &ChannelsResource{c: c}
+	c.Reports = &ReportsResource{c: c}
+	c.Settings = &SettingsResource{c: c}
+	c.CSAT = &CSATResource{c: c}
+	c.Attachments = &AttachmentsResource{c: c}
 	c.Public = &PublicResource{c: c}
 	return c
 }

@@ -1,6 +1,6 @@
 {
   "name": "@forjio/suppuo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Suppuo SDK — typed JS/TS client for the suppuo.com REST API. Sister to the Python + Go SDKs.",
   "license": "UNLICENSED",
   "private": false,
