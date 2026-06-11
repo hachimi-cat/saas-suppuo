@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
-import { LayoutDashboard, Menu, Users } from 'lucide-react';
+import { Building2, LayoutDashboard, Menu, Ticket, Users } from 'lucide-react';
 import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
 
 /*
@@ -34,8 +34,12 @@ const SECTIONS: NavSection[] = [
     items: [{ href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }],
   },
   {
-    label: 'Customers',
-    items: [{ href: '/admin/customers', label: 'Customers', icon: Users }],
+    label: 'CRM',
+    items: [
+      { href: '/admin/customers', label: 'Customers', icon: Users },
+      { href: '/admin/workspaces', label: 'Workspaces', icon: Building2 },
+      { href: '/admin/tickets', label: 'Tickets', icon: Ticket },
+    ],
   },
   // Products add their own admin sections here, e.g.:
   // { label: 'Review', items: [{ href: '/admin/kyc', label: 'KYC', icon: ShieldCheck }] },

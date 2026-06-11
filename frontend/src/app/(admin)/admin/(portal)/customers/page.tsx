@@ -6,14 +6,27 @@
  * (/api/v1/admin/customers → Huudis /app/users) through the admin BFF
  * proxy at /api/v1/console/*; no secret in the browser.
  *
- * Styling uses inline `hsl(var(--token))` (the theme tokens every
- * forked product ships) so it renders correctly regardless of which
- * Tailwind utilities a product has configured.
+ * Built to the family admin standard (pawpado's users page): header
+ * stat chips, search box, tone badges, relative times, em-dash empties,
+ * defensive JSON fetch.
  *
  * rename.sh rewrites the "Suppuo" display name.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { RefreshCw, Search } from 'lucide-react';
+import {
+  adminFetch,
+  Badge,
+  ErrorBanner,
+  fmtDate,
+  fmtRelative,
+  LoadingHint,
+  StatCard,
+  TD,
+  TH,
+  TH_ROW,
+} from '@/components/admin/ui';
 
 const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
@@ -28,38 +41,13 @@ interface Customer {
   firstSignInAt: string;
   lastSignInAt: string;
 }
+
 interface Payload {
   client: { clientId: string; name: string };
   users: Customer[];
   nextCursor: string | null;
   stats: { users: { total: number; signupsLast30d: number } } | null;
 }
-
-function fmtDate(iso: string | null): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime())
-    ? '—'
-    : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-function fmtRelative(iso: string | null): string {
-  if (!iso) return 'never';
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.round(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.round(h / 24)}d ago`;
-}
-
-const card: React.CSSProperties = {
-  border: '1px solid hsl(var(--border))',
-  borderRadius: 12,
-  background: 'hsl(var(--card))',
-  padding: 16,
-};
-const muted: React.CSSProperties = { color: 'hsl(var(--muted-foreground))' };
 
 export default function AdminCustomersPage() {
   const [data, setData] = useState<Payload | null>(null);
@@ -71,12 +59,7 @@ export default function AdminCustomersPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/v1/console/customers?limit=200', {
-        credentials: 'include',
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body?.error?.message ?? body?.error?.code ?? 'Failed to load');
-      setData(body.data);
+      setData(await adminFetch<Payload>('/api/v1/console/customers?limit=200'));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -89,7 +72,7 @@ export default function AdminCustomersPage() {
   }, [load]);
 
   const filtered = useMemo(() => {
-    if (!data) return [];
+    if (!data) return null;
     const q = query.trim().toLowerCase();
     if (!q) return data.users;
     return data.users.filter(
@@ -98,99 +81,93 @@ export default function AdminCustomersPage() {
   }, [data, query]);
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <header style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 style={{ margin: 0 }}>Customers</h1>
-          <p style={{ ...muted, margin: '4px 0 0' }}>
+          <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Everyone who has signed into {brand} via Huudis SSO.
           </p>
         </div>
         <button
           onClick={load}
           disabled={loading}
-          style={{
-            border: '1px solid hsl(var(--border))',
-            background: 'hsl(var(--card))',
-            color: 'inherit',
-            borderRadius: 8,
-            padding: '6px 14px',
-            cursor: loading ? 'default' : 'pointer',
-            opacity: loading ? 0.6 : 1,
-          }}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm hover:border-primary disabled:opacity-50"
         >
-          {loading ? 'Loading…' : 'Refresh'}
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
         </button>
-      </header>
+      </div>
 
       {data?.stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 16 }}>
-          <div style={card}>
-            <div style={{ ...muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>Total customers</div>
-            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4 }}>{data.stats.users.total}</div>
-          </div>
-          <div style={card}>
-            <div style={{ ...muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>New (last 30d)</div>
-            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, color: data.stats.users.signupsLast30d > 0 ? 'hsl(var(--primary))' : undefined }}>
-              {data.stats.users.signupsLast30d}
-            </div>
-          </div>
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-md">
+          <StatCard label="Total customers" value={data.stats.users.total} />
+          <StatCard
+            label="New (last 30d)"
+            value={data.stats.users.signupsLast30d}
+            accent={data.stats.users.signupsLast30d > 0}
+          />
         </div>
       )}
 
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search email or name…"
-        style={{
-          width: '100%', maxWidth: 360, marginBottom: 16, padding: '8px 12px',
-          borderRadius: 8, border: '1px solid hsl(var(--border))',
-          background: 'hsl(var(--card))', color: 'inherit', outline: 'none',
-        }}
-      />
+      <div className="relative mt-5 max-w-sm">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search email or name…"
+          className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none focus:border-primary"
+        />
+      </div>
 
-      {error && (
-        <div style={{ border: '1px solid hsl(var(--destructive, 0 70% 50%))', background: 'hsl(var(--destructive, 0 70% 50%) / 0.1)', borderRadius: 8, padding: '8px 14px', marginBottom: 16, fontSize: 14 }}>
-          {error}
-        </div>
-      )}
+      {error && <ErrorBanner message={error} />}
+      {loading && !data && !error && <LoadingHint label="Loading customers…" />}
 
-      {!loading && data && (
-        <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+      {filtered && (
+        <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
+          <table className="w-full text-sm">
             <thead>
-              <tr style={{ textAlign: 'left', ...muted, fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                <th style={{ padding: '10px 14px', borderBottom: '1px solid hsl(var(--border))' }}>Customer</th>
-                <th style={{ padding: '10px 14px', borderBottom: '1px solid hsl(var(--border))' }}>Signed up</th>
-                <th style={{ padding: '10px 14px', borderBottom: '1px solid hsl(var(--border))' }}>Last seen</th>
-                <th style={{ padding: '10px 14px', borderBottom: '1px solid hsl(var(--border))' }}>Status</th>
+              <tr className={TH_ROW}>
+                <th className={TH}>Customer</th>
+                <th className={TH}>Status</th>
+                <th className={TH}>First sign-in</th>
+                <th className={TH}>Last sign-in</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: 24, textAlign: 'center', ...muted }}>
+                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
                     {query ? 'No customers match.' : 'No customers yet.'}
                   </td>
                 </tr>
               )}
               {filtered.map((u) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid hsl(var(--border) / 0.5)' }}>
-                  <td style={{ padding: '10px 14px' }}>
-                    <div style={{ fontWeight: 500 }}>{u.email}</div>
-                    {u.name && <div style={{ ...muted, fontSize: 12 }}>{u.name}</div>}
+                <tr key={u.id} className="border-b border-border/60 last:border-b-0 hover:bg-muted/30">
+                  <td className={TD}>
+                    <p className="truncate font-medium">{u.email}</p>
+                    {u.name ? (
+                      <p className="truncate text-xs text-muted-foreground">{u.name}</p>
+                    ) : null}
                   </td>
-                  <td style={{ padding: '10px 14px' }}>{fmtDate(u.firstSignInAt)}</td>
-                  <td style={{ padding: '10px 14px', ...muted }}>{fmtRelative(u.lastSignInAt ?? u.lastLoginAt)}</td>
-                  <td style={{ padding: '10px 14px' }}>
-                    <span style={{ display: 'inline-flex', gap: 6 }}>
+                  <td className={TD}>
+                    <span className="inline-flex gap-1.5">
                       {u.disabled ? (
-                        <Tag color="0 70% 55%">disabled</Tag>
+                        <Badge tone="disabled">disabled</Badge>
                       ) : (
-                        <Tag color="150 60% 45%">active</Tag>
+                        <Badge tone="active">active</Badge>
                       )}
-                      {!u.emailVerified && <Tag color="40 90% 55%">unverified</Tag>}
+                      {!u.emailVerified && <Badge tone="unverified">unverified</Badge>}
                     </span>
+                  </td>
+                  <td className={`${TD} whitespace-nowrap`}>
+                    {fmtDate(u.firstSignInAt)}
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      ({fmtRelative(u.firstSignInAt)})
+                    </span>
+                  </td>
+                  <td className={`${TD} whitespace-nowrap text-muted-foreground`}>
+                    {fmtRelative(u.lastSignInAt ?? u.lastLoginAt)}
                   </td>
                 </tr>
               ))}
@@ -199,23 +176,5 @@ export default function AdminCustomersPage() {
         </div>
       )}
     </div>
-  );
-}
-
-function Tag({ children, color }: { children: React.ReactNode; color: string }) {
-  return (
-    <span
-      style={{
-        fontSize: 11,
-        fontWeight: 500,
-        padding: '2px 8px',
-        borderRadius: 999,
-        border: `1px solid hsl(${color} / 0.35)`,
-        background: `hsl(${color} / 0.12)`,
-        color: `hsl(${color})`,
-      }}
-    >
-      {children}
-    </span>
   );
 }

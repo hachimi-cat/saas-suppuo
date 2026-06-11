@@ -50,9 +50,14 @@ router.get(
     });
     const customers = await Promise.all(
       grouped.map(async (g) => {
-        const openCount = await prisma.ticket.count({
-          where: { accountId: g.accountId, status: { in: ['open', 'pending'] } },
-        });
+        const [openCount, resolvedCount] = await Promise.all([
+          prisma.ticket.count({
+            where: { accountId: g.accountId, status: { in: ['open', 'pending'] } },
+          }),
+          prisma.ticket.count({
+            where: { accountId: g.accountId, status: { in: ['resolved', 'closed'] } },
+          }),
+        ]);
         return {
           id: g.accountId,
           email: null,
@@ -63,7 +68,13 @@ router.get(
           metrics: [
             { label: 'Tickets', value: fmtCount(g._count._all) },
             { label: 'Open', value: fmtCount(openCount) },
+            { label: 'Resolved', value: fmtCount(resolvedCount) },
           ],
+          // Raw numbers for the in-product admin portal (the central
+          // portal reads the formatted `metrics` above).
+          ticketCount: g._count._all,
+          openCount,
+          resolvedCount,
         };
       }),
     );
@@ -97,6 +108,14 @@ router.get(
         amount: null,
         status: t.status,
         description: `#${t.number} ${t.subject}`,
+        // Ticket detail for the in-product admin portal (additive — the
+        // central portal reads only the standardized fields above).
+        number: t.number,
+        subject: t.subject,
+        accountId: t.accountId,
+        channel: t.channel,
+        priority: t.priority,
+        lastMessageAt: t.lastMessageAt,
       })),
     });
   }),
