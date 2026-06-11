@@ -144,6 +144,7 @@ model ChannelIntegration {
   @@index([accountId, status])
   @@index([provider, externalId])
   @@map("channel_integrations")
+}
 
 // ─── Billing ─────────────────────────────────────────────────────────
 
@@ -167,6 +168,7 @@ model BillingSubscription {
 
   @@index([plugipayCheckoutSessionId])
   @@map("billing_subscriptions")
+}
 
 // ─── API keys + webhooks ─────────────────────────────────────────────
 
