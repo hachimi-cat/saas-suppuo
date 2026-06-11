@@ -19,7 +19,6 @@ export type IdPrefix =
   | 'ak' // API key
   | 'whs' // webhook subscription
   | 'csat' // CSAT response
-  | 'usg' // usage counter (platform-WA metering)
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

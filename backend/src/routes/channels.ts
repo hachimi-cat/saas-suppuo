@@ -24,7 +24,7 @@ import {
  *
  *   whatsapp_twilio — the workspace's OWN Twilio account + WA number;
  *                     inbound webhooks route by number, outbound replies
- *                     use their creds (= unlimited messages, the Bisnis
+ *                     use their creds (= unlimited messages, the Business
  *                     "BYO" promise).
  *   whatsapp_cloud  — the workspace's OWN Meta WhatsApp Business account
  *                     (Cloud API direct, no Twilio): access token +

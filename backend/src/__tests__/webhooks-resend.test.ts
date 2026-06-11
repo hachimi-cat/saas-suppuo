@@ -93,8 +93,8 @@ describe('parseFromAddress', () => {
     });
   });
   it('parses quoted "Name" <email>', () => {
-    expect(parseFromAddress('"Budi S." <budi@toko.id>')).toEqual({
-      email: 'budi@toko.id',
+    expect(parseFromAddress('"Budi S." <budi@growth.id>')).toEqual({
+      email: 'budi@growth.id',
       name: 'Budi S.',
     });
   });

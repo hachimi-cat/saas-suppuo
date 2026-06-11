@@ -13,14 +13,14 @@ import { TIER_DEFS, isPaidTier, tierDef, type BillingTier } from '../lib/billing
  *
  * Early access: purchases are real and recorded truthfully, but no
  * limits are enforced anywhere — every workspace currently gets
- * Toko-level features free. v1 intentionally ships no enforcement.
+ * Growth-level features free. v1 intentionally ships no enforcement.
  */
 
 const router = Router();
 
 const PUBLIC_URL = () => process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.forjio.com';
 
-/** GET / — current subscription (gratis default when no row) + the
+/** GET / — current subscription (free default when no row) + the
  *  tier table the portal renders. */
 router.get(
   '/',
@@ -31,7 +31,7 @@ router.get(
       subscription: sub ?? {
         id: null,
         accountId,
-        tier: 'gratis' as BillingTier,
+        tier: 'free' as BillingTier,
         status: 'active',
         plugipayCheckoutSessionId: null,
         currentPeriodEnd: null,
@@ -43,7 +43,7 @@ router.get(
 );
 
 const checkoutBody = z.object({
-  tier: z.enum(['gratis', 'warung', 'toko', 'bisnis']),
+  tier: z.enum(['free', 'starter', 'growth', 'business']),
 });
 
 /** POST /checkout {tier} — create a Plugipay hosted checkout session
@@ -55,7 +55,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { tier } = checkoutBody.parse(req.body);
     if (!isPaidTier(tier)) {
-      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'gratis needs no checkout', {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'free needs no checkout', {
         param: 'tier',
       });
     }
@@ -74,7 +74,7 @@ router.post(
       cancelUrl: `${PUBLIC_URL()}/dashboard/billing?status=canceled`,
       lineItems: [
         {
-          name: `Suppuo ${def.name} — Rp ${def.priceIdr.toLocaleString('id-ID')}/bln`,
+          name: `Suppuo ${def.name} — Rp ${def.priceIdr.toLocaleString('id-ID')}/mo`,
           quantity: 1,
           unitAmount: def.priceIdr,
         },

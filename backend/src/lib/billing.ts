@@ -8,11 +8,11 @@ import { writeOutbox } from './outbox.js';
  * The tier table mirrors frontend/src/app/(marketing)/pricing/page.tsx
  * EXACTLY (per-workspace flat IDR pricing, locked). Early access: paid
  * tiers are purchasable and recorded truthfully, but nothing is
- * enforced — every workspace gets Toko-level features free until
+ * enforced — every workspace gets Growth-level features free until
  * launch. Do NOT add limit enforcement here in v1.
  */
 
-export const BILLING_TIERS = ['gratis', 'warung', 'toko', 'bisnis'] as const;
+export const BILLING_TIERS = ['free', 'starter', 'growth', 'business'] as const;
 export type BillingTier = (typeof BILLING_TIERS)[number];
 
 export const SUBSCRIPTION_STATUSES = ['active', 'past_due', 'canceled'] as const;
@@ -37,8 +37,8 @@ export interface TierDef {
 
 export const TIER_DEFS: readonly TierDef[] = [
   {
-    id: 'gratis',
-    name: 'Gratis',
+    id: 'free',
+    name: 'Free',
     priceIdr: 0,
     agentLimit: 2,
     waNumberLimit: 0,
@@ -55,12 +55,12 @@ export const TIER_DEFS: readonly TierDef[] = [
       'Email notifications',
       'File attachments up to 8MB',
       'Reports — volume, response times, CSAT',
-      'Community support',
+      'Self-serve docs + best-effort email support',
     ],
   },
   {
-    id: 'warung',
-    name: 'Warung',
+    id: 'starter',
+    name: 'Starter',
     priceIdr: 99_000,
     agentLimit: 3,
     waNumberLimit: 1,
@@ -78,15 +78,15 @@ export const TIER_DEFS: readonly TierDef[] = [
     ],
   },
   {
-    id: 'toko',
-    name: 'Toko',
+    id: 'growth',
+    name: 'Growth',
     priceIdr: 299_000,
     agentLimit: 10,
     waNumberLimit: 3,
     blurb: 'For growing teams that want to build on the API.',
     features: [
       '10 agents',
-      'Everything in Warung',
+      'Everything in Starter',
       'Up to 3 connected WhatsApp numbers',
       'BYO email — your Resend account + domain',
       'REST API + CLI + webhooks',
@@ -94,15 +94,15 @@ export const TIER_DEFS: readonly TierDef[] = [
     ],
   },
   {
-    id: 'bisnis',
-    name: 'Bisnis',
+    id: 'business',
+    name: 'Business',
     priceIdr: 599_000,
     agentLimit: 25,
     waNumberLimit: 99,
     blurb: 'For bigger teams running support across many numbers.',
     features: [
       '25 agents',
-      'Everything in Toko',
+      'Everything in Growth',
       'Unlimited connected WhatsApp numbers',
       'Priority support',
     ],
@@ -124,7 +124,7 @@ export function isPaidTier(tier: BillingTier): boolean {
 
 /** Parse + validate the metadata stamped onto a Suppuo checkout
  *  session. Returns null unless it names a workspace AND a paid tier
- *  (gratis is never purchased — absence of a row IS gratis). */
+ *  (free is never purchased — absence of a row IS free). */
 export function parseCheckoutMetadata(
   metadata: Record<string, unknown> | null | undefined,
 ): { accountId: string; tier: BillingTier } | null {

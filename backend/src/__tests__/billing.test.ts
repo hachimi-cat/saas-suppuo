@@ -13,22 +13,22 @@ import {
 
 describe('tier definitions', () => {
   it('ships exactly the 4 public pricing tiers, in order', () => {
-    expect(BILLING_TIERS).toEqual(['gratis', 'warung', 'toko', 'bisnis']);
-    expect(TIER_DEFS.map((t) => t.id)).toEqual(['gratis', 'warung', 'toko', 'bisnis']);
+    expect(BILLING_TIERS).toEqual(['free', 'starter', 'growth', 'business']);
+    expect(TIER_DEFS.map((t) => t.id)).toEqual(['free', 'starter', 'growth', 'business']);
   });
 
   it('prices match the locked /pricing page exactly (whole IDR / month)', () => {
-    expect(tierDef('gratis').priceIdr).toBe(0);
-    expect(tierDef('warung').priceIdr).toBe(99_000);
-    expect(tierDef('toko').priceIdr).toBe(299_000);
-    expect(tierDef('bisnis').priceIdr).toBe(599_000);
+    expect(tierDef('free').priceIdr).toBe(0);
+    expect(tierDef('starter').priceIdr).toBe(99_000);
+    expect(tierDef('growth').priceIdr).toBe(299_000);
+    expect(tierDef('business').priceIdr).toBe(599_000);
   });
 
-  it('gratis is the only free tier', () => {
-    expect(isPaidTier('gratis')).toBe(false);
-    expect(isPaidTier('warung')).toBe(true);
-    expect(isPaidTier('toko')).toBe(true);
-    expect(isPaidTier('bisnis')).toBe(true);
+  it('free is the only free tier', () => {
+    expect(isPaidTier('free')).toBe(false);
+    expect(isPaidTier('starter')).toBe(true);
+    expect(isPaidTier('growth')).toBe(true);
+    expect(isPaidTier('business')).toBe(true);
   });
 
   it('every tier has a blurb + features', () => {
@@ -40,7 +40,7 @@ describe('tier definitions', () => {
   });
 
   it('guards tier names', () => {
-    expect(isBillingTier('toko')).toBe(true);
+    expect(isBillingTier('growth')).toBe(true);
     expect(isBillingTier('enterprise')).toBe(false);
     expect(isBillingTier(42)).toBe(false);
   });
@@ -48,17 +48,17 @@ describe('tier definitions', () => {
 
 describe('parseCheckoutMetadata', () => {
   it('accepts {accountId, tier} for a paid tier', () => {
-    expect(parseCheckoutMetadata({ accountId: 'acc_1', tier: 'warung' })).toEqual({
+    expect(parseCheckoutMetadata({ accountId: 'acc_1', tier: 'starter' })).toEqual({
       accountId: 'acc_1',
-      tier: 'warung',
+      tier: 'starter',
     });
   });
 
-  it('rejects gratis (never purchased), unknown tiers, and missing accountId', () => {
-    expect(parseCheckoutMetadata({ accountId: 'acc_1', tier: 'gratis' })).toBeNull();
+  it('rejects free (never purchased), unknown tiers, and missing accountId', () => {
+    expect(parseCheckoutMetadata({ accountId: 'acc_1', tier: 'free' })).toBeNull();
     expect(parseCheckoutMetadata({ accountId: 'acc_1', tier: 'platinum' })).toBeNull();
-    expect(parseCheckoutMetadata({ tier: 'toko' })).toBeNull();
-    expect(parseCheckoutMetadata({ accountId: '  ', tier: 'toko' })).toBeNull();
+    expect(parseCheckoutMetadata({ tier: 'growth' })).toBeNull();
+    expect(parseCheckoutMetadata({ accountId: '  ', tier: 'growth' })).toBeNull();
     expect(parseCheckoutMetadata(null)).toBeNull();
     expect(parseCheckoutMetadata(undefined)).toBeNull();
   });
@@ -85,7 +85,7 @@ function fakeDb(existingSessionIds: Set<string>) {
 }
 
 describe('applyCheckoutCompleted', () => {
-  const input = { sessionId: 'cs_abc', accountId: 'acc_1', tier: 'toko' as const };
+  const input = { sessionId: 'cs_abc', accountId: 'acc_1', tier: 'growth' as const };
 
   it('applies a fresh session: upserts the subscription + writes the outbox event', async () => {
     const { db, upsert, outboxCreate } = fakeDb(new Set());
@@ -99,14 +99,14 @@ describe('applyCheckoutCompleted', () => {
     };
     expect(args.where).toEqual({ accountId: 'acc_1' });
     expect(args.create.id).toMatch(/^bsub_/);
-    expect(args.create.tier).toBe('toko');
+    expect(args.create.tier).toBe('growth');
     expect(args.create.status).toBe('active');
     expect(args.create.plugipayCheckoutSessionId).toBe('cs_abc');
     const end = args.create.currentPeriodEnd as Date;
     const days = (end.getTime() - Date.now()) / 86_400_000;
     expect(days).toBeGreaterThan(29.9);
     expect(days).toBeLessThan(30.1);
-    expect(args.update.tier).toBe('toko');
+    expect(args.update.tier).toBe('growth');
 
     expect(outboxCreate).toHaveBeenCalledTimes(1);
     const evt = (outboxCreate.mock.calls[0] as unknown[])[0] as {

@@ -5,7 +5,7 @@
  * Plugipay hosted checkout.
  *
  * Early access: purchases are real and recorded truthfully, but
- * nothing is gated — every workspace gets Toko-level features free
+ * nothing is gated — every workspace gets Growth-level features free
  * until launch (mirrors the public /pricing copy). Upgrade buttons
  * POST /api/v1/billing/checkout and redirect to the returned
  * hostedUrl; Plugipay sends the browser back here with
@@ -131,7 +131,7 @@ function BillingContent() {
   }
 
   const sub = data?.subscription;
-  const currentTier = sub?.tier ?? 'gratis';
+  const currentTier = sub?.tier ?? 'free';
   const currentDef = data?.tiers.find((t) => t.id === currentTier);
 
   return (
@@ -145,7 +145,7 @@ function BillingContent() {
 
       {checkoutStatus === 'success' && (
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-700">
-          <p className="font-medium">Payment received — terima kasih!</p>
+          <p className="font-medium">Payment received — thank you!</p>
           <p className="mt-1">
             Your plan updates as soon as Plugipay confirms the payment (usually a few
             seconds). Refresh if it hasn&apos;t appeared yet.
@@ -165,7 +165,7 @@ function BillingContent() {
           Early access — everything free now, prices apply at launch.
         </p>
         <p className="mt-1 text-muted-foreground">
-          Every workspace currently gets Toko-level features free. Buying a plan today
+          Every workspace currently gets Growth-level features free. Buying a plan today
           records it truthfully — nothing is locked either way — and founding members get
           50% off for 12 months when billing starts.
         </p>
@@ -198,7 +198,7 @@ function BillingContent() {
             </span>
             <span className="text-sm text-muted-foreground">
               {currentDef && currentDef.priceIdr > 0
-                ? `${rupiah(currentDef.priceIdr)}/bln`
+                ? `${rupiah(currentDef.priceIdr)}/mo`
                 : 'Free'}
             </span>
             {sub?.currentPeriodEnd && (
@@ -248,7 +248,7 @@ function BillingContent() {
                     {rupiah(tier.priceIdr)}
                   </span>
                   {tier.priceIdr > 0 && (
-                    <span className="ml-1 text-sm text-muted-foreground">/bln</span>
+                    <span className="ml-1 text-sm text-muted-foreground">/mo</span>
                   )}
                 </p>
                 <ul className="mt-4 flex-1 space-y-2">

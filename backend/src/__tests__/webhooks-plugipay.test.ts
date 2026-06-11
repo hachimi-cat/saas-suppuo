@@ -66,14 +66,14 @@ describe('POST /api/v1/webhooks/plugipay', () => {
     const res = await request(app)
       .post('/api/v1/webhooks/plugipay')
       .set('Content-Type', 'application/json')
-      .send(completedEvent('cs_1', { accountId: 'acc_1', tier: 'warung' }));
+      .send(completedEvent('cs_1', { accountId: 'acc_1', tier: 'starter' }));
     expect(res.status).toBe(401);
     expect(res.body.error.code).toBe('signature_missing');
   });
 
   it('rejects a bad signature', async () => {
     const app = createApp();
-    const body = completedEvent('cs_1', { accountId: 'acc_1', tier: 'warung' });
+    const body = completedEvent('cs_1', { accountId: 'acc_1', tier: 'starter' });
     const res = await request(app)
       .post('/api/v1/webhooks/plugipay')
       .set('Content-Type', 'application/json')
@@ -86,7 +86,7 @@ describe('POST /api/v1/webhooks/plugipay', () => {
 
   it('applies a signed completed checkout, then no-ops the replay (idempotent)', async () => {
     const app = createApp();
-    const body = completedEvent('cs_42', { accountId: 'acc_1', tier: 'toko' });
+    const body = completedEvent('cs_42', { accountId: 'acc_1', tier: 'growth' });
 
     const first = await request(app)
       .post('/api/v1/webhooks/plugipay')

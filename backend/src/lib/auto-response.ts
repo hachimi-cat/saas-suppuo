@@ -5,7 +5,6 @@ import { sendWhatsApp } from './twilio.js';
 import { sendWhatsAppCloud } from './whatsapp-cloud.js';
 import { sendTelegramMessage } from './telegram.js';
 import { resolveWhatsAppForAccount, resolveTelegramForAccount } from './channels.js';
-import { meterWhatsAppSend } from './usage.js';
 
 /*
  * Feature wave: CSAT + automation — the auto-response consumer.
@@ -237,25 +236,20 @@ export async function maybeSendAutoResponse(ev: {
         if (!ch) {
           return console.warn('[auto-response] no whatsapp channel for', ticket.accountId);
         }
-        const sent =
-          ch.kind === 'cloud'
-            ? sendWhatsAppCloud({
-                accessToken: ch.accessToken,
-                phoneNumberId: ch.phoneNumberId,
-                to: ticket.requesterPhone!,
-                body,
-              })
-            : sendWhatsApp({
-                to: ticket.requesterPhone!,
-                body,
-                accountSid: ch.creds.accountSid,
-                authToken: ch.creds.authToken,
-                from: ch.from,
-              });
-        return sent.then((r) => {
-          meterWhatsAppSend(ticket.accountId, ch);
-          return r;
-        });
+        return ch.kind === 'cloud'
+          ? sendWhatsAppCloud({
+              accessToken: ch.accessToken,
+              phoneNumberId: ch.phoneNumberId,
+              to: ticket.requesterPhone!,
+              body,
+            })
+          : sendWhatsApp({
+              to: ticket.requesterPhone!,
+              body,
+              accountSid: ch.creds.accountSid,
+              authToken: ch.creds.authToken,
+              from: ch.from,
+            });
       })
       .catch((e) => console.error('[auto-response] whatsapp failed', ticket.id, e));
   }
