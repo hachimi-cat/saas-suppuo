@@ -3,6 +3,7 @@ import { buildWebhookSignature, SIGNATURE_HEADER } from '../lib/webhook-signatur
 import { notifyTeamChannels } from '../lib/team-notify.js';
 import { maybeSendAutoResponse } from '../lib/auto-response.js';
 import { maybeSendCsatSurvey } from '../lib/csat.js';
+import { sweepStagedAttachments } from '../lib/attachments.js';
 
 /**
  * Outbox polling worker — ADR-0006.
@@ -22,8 +23,12 @@ import { maybeSendCsatSurvey } from '../lib/csat.js';
 const POLL_MS = Number(process.env.OUTBOX_POLL_INTERVAL_MS ?? 1000);
 const BATCH = Number(process.env.OUTBOX_BATCH_SIZE ?? 100);
 const WEBHOOK_TIMEOUT_MS = Number(process.env.WEBHOOK_TIMEOUT_MS ?? 5000);
+/** Staged-attachment sweep cadence (the rows themselves expire after
+ *  1h — see lib/attachments.ts STAGED_TTL_MS). */
+const ATTACHMENT_SWEEP_MS = Number(process.env.ATTACHMENT_SWEEP_INTERVAL_MS ?? 10 * 60 * 1000);
 
 let stopped = false;
+let lastAttachmentSweep = 0;
 
 export async function startOutboxWorker() {
   console.log(`[outbox] polling every ${POLL_MS}ms, batch=${BATCH}`);
@@ -36,6 +41,14 @@ export async function startOutboxWorker() {
       });
       for (const ev of batch) {
         await deliver(ev);
+      }
+      // Piggybacked housekeeping: drop staged attachment uploads
+      // (messageId = null) older than 1h every ~10 minutes.
+      if (Date.now() - lastAttachmentSweep >= ATTACHMENT_SWEEP_MS) {
+        lastAttachmentSweep = Date.now();
+        await sweepStagedAttachments().catch((e) =>
+          console.error('[outbox] attachment sweep failed', e),
+        );
       }
     } catch (e) {
       console.error('[outbox] loop error', e);

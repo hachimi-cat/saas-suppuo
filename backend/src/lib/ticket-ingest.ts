@@ -1,7 +1,36 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from './db.js';
 import { newId } from './ids.js';
 import { writeOutbox } from './outbox.js';
 import { nextStatusOnMessage, generateAccessToken } from './ticket-flow.js';
+
+/** Channel media already fetched by the webhook (e.g. Twilio
+ *  MediaUrl{N} bytes) — stored as Attachment rows bound to the inbound
+ *  message inside the ingest transaction. */
+export interface IngestAttachment {
+  filename: string;
+  contentType: string;
+  data: Buffer;
+}
+
+async function createBoundAttachments(
+  tx: Prisma.TransactionClient,
+  opts: { accountId: string; messageId: string; attachments: IngestAttachment[] },
+): Promise<void> {
+  for (const a of opts.attachments) {
+    await tx.attachment.create({
+      data: {
+        id: newId('att'),
+        accountId: opts.accountId,
+        messageId: opts.messageId,
+        filename: a.filename,
+        contentType: a.contentType,
+        size: a.data.length,
+        data: new Uint8Array(a.data),
+      },
+    });
+  }
+}
 
 // Shared inbound-channel ingestion: a message from a phone-identified
 // requester (WhatsApp via Twilio OR Meta Cloud) either appends to the
@@ -17,8 +46,10 @@ export async function ingestInboundPhoneMessage(opts: {
   name: string | null;
   body: string;
   channel: 'whatsapp';
+  /** Pre-fetched channel media to store on the inbound message. */
+  attachments?: IngestAttachment[];
 }): Promise<{ ticketId: string; created: boolean }> {
-  const { accountId, phone, name, body, channel } = opts;
+  const { accountId, phone, name, body, channel, attachments = [] } = opts;
 
   const existing = await prisma.ticket.findFirst({
     where: { accountId, requesterPhone: phone, status: { not: 'closed' } },
@@ -37,6 +68,9 @@ export async function ingestInboundPhoneMessage(opts: {
           body,
         },
       });
+      if (attachments.length > 0) {
+        await createBoundAttachments(tx, { accountId, messageId: m.id, attachments });
+      }
       await tx.ticket.update({
         where: { id: existing.id },
         data: { status: nextStatus, lastMessageAt: new Date() },
@@ -71,7 +105,7 @@ export async function ingestInboundPhoneMessage(opts: {
         accessToken: generateAccessToken(),
       },
     });
-    await tx.ticketMessage.create({
+    const m = await tx.ticketMessage.create({
       data: {
         id: newId('tmsg'),
         ticketId: t.id,
@@ -80,6 +114,9 @@ export async function ingestInboundPhoneMessage(opts: {
         body,
       },
     });
+    if (attachments.length > 0) {
+      await createBoundAttachments(tx, { accountId, messageId: m.id, attachments });
+    }
     await writeOutbox(tx, {
       type: 'suppuo.ticket.created.v1',
       accountId,

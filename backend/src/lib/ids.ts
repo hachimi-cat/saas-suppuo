@@ -12,6 +12,7 @@ export type IdPrefix =
   | 'req' // request id (prefer the request-id middleware)
   | 'tkt' // support ticket
   | 'tmsg' // ticket message
+  | 'att' // ticket-message attachment
   | 'cnr' // canned reply
   | 'chn' // channel integration
   | 'bsub' // billing subscription

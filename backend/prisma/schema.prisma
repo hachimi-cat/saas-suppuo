@@ -114,10 +114,38 @@ model TicketMessage {
   isInternal Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket      Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  attachments Attachment[]
 
   @@index([ticketId, createdAt])
   @@map("ticket_messages")
+}
+
+// ─── Feature wave: attachments ───────────────────────────────────────
+
+/// A file attached to a ticket message. v1 stores the bytes inline in
+/// Postgres — SME volume is small (8MB/file, 5 files/message cap) and
+/// this avoids new infra. Rows are staged with `messageId = null` at
+/// upload time and bound to a message in the message-create
+/// transaction; unbound rows older than 1h are swept by the outbox
+/// worker tick.
+/// // TODO: DO Spaces when volume demands
+model Attachment {
+  id          String   @id // att_<ulid>
+  accountId   String
+  /// Null while staged (uploaded but not yet bound to a message).
+  messageId   String?
+  filename    String
+  contentType String
+  size        Int
+  data        Bytes
+  createdAt   DateTime @default(now())
+
+  message TicketMessage? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([accountId])
+  @@map("attachments")
 }
 
 /// Saved reply snippets, per workspace.

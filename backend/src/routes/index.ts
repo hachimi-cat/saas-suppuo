@@ -20,6 +20,7 @@ import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import webhooksResendRouter from './webhooks-resend.js';
 import adminCustomersRouter from './admin-customers.js';
 import billingRouter from './billing.js';
+import attachmentsRouter from './attachments.js';
 import apiKeysRouter from './api-keys.js';
 import webhookSubscriptionsRouter from './webhook-subscriptions.js';
 import settingsRouter from './settings.js';
@@ -90,6 +91,9 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/me', requireAuth, meRouter);
   router.use('/channels', requireAuth, channelsRouter);
   router.use('/tickets', requireAuth, ticketsRouter);
+  /** Ticket-message attachments — staged upload + account-scoped
+   *  download (the public token-scoped surface lives under /public). */
+  router.use('/attachments', requireAuth, attachmentsRouter);
   router.use('/canned-replies', requireAuth, cannedRepliesRouter);
   /** Feature wave: CSAT + automation — workspace automation settings
    *  (business hours + auto-response) and CSAT aggregates. */

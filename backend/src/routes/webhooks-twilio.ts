@@ -3,12 +3,19 @@ import express from 'express';
 import { sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import {
+  fetchTwilioMedia,
   normalizeWhatsAppFrom,
   webhookSecretMatches,
   validateTwilioSignature,
 } from '../lib/twilio.js';
 import { resolveWhatsAppByNumber } from '../lib/channels.js';
-import { ingestInboundPhoneMessage } from '../lib/ticket-ingest.js';
+import { ingestInboundPhoneMessage, type IngestAttachment } from '../lib/ticket-ingest.js';
+import {
+  ingestFilename,
+  isIngestAllowedContentType,
+  MAX_ATTACHMENT_BYTES,
+  MAX_ATTACHMENTS_PER_MESSAGE,
+} from '../lib/attachments.js';
 
 /*
  * POST /api/v1/webhooks/twilio/whatsapp?secret=… — Twilio inbound
@@ -66,18 +73,68 @@ router.post(
     }
 
     const phone = normalizeWhatsAppFrom(req.body?.From);
-    const body = typeof req.body?.Body === 'string' ? req.body.Body.trim() : '';
+    let body = typeof req.body?.Body === 'string' ? req.body.Body.trim() : '';
     const name =
       typeof req.body?.ProfileName === 'string' && req.body.ProfileName.trim()
         ? req.body.ProfileName.trim()
         : null;
-    if (!phone || !body) {
+    const numMedia = Math.min(
+      Number.parseInt(String(req.body?.NumMedia ?? '0'), 10) || 0,
+      MAX_ATTACHMENTS_PER_MESSAGE,
+    );
+    if (!phone || (!body && numMedia === 0)) {
       return sendErr(res, req, 400, 'VALIDATION_ERROR', 'From (whatsapp:) and Body required');
+    }
+
+    // Inbound media: fetch each MediaUrl{N} from Twilio (basic auth
+    // with the owning account's creds) and store as attachments on the
+    // inbound message. Oversize/unsupported items are skipped
+    // gracefully — a bad photo must never drop the conversation.
+    const attachments: IngestAttachment[] = [];
+    for (let i = 0; i < numMedia; i++) {
+      const url = req.body?.[`MediaUrl${i}`];
+      if (typeof url !== 'string' || !/^https:\/\/api\.twilio\.com\//.test(url)) continue;
+      const media = await fetchTwilioMedia({
+        url,
+        accountSid: channel.creds.accountSid,
+        authToken: channel.creds.authToken,
+        maxBytes: MAX_ATTACHMENT_BYTES,
+      });
+      if (!media) continue;
+      const contentType =
+        typeof req.body?.[`MediaContentType${i}`] === 'string' &&
+        req.body[`MediaContentType${i}`].trim()
+          ? String(req.body[`MediaContentType${i}`]).split(';')[0]!.trim().toLowerCase()
+          : media.contentType;
+      if (!isIngestAllowedContentType(contentType)) {
+        console.warn(`[twilio] inbound media type ${contentType} not allowed — skipped`);
+        continue;
+      }
+      attachments.push({
+        filename: ingestFilename(contentType, attachments.length),
+        contentType,
+        data: media.data,
+      });
+    }
+    if (!body && attachments.length === 0 && numMedia > 0) {
+      // Media-only message where every item failed/was skipped — still
+      // record the conversation turn rather than dropping it.
+      body = '[attachment could not be retrieved]';
+    }
+    if (!body && attachments.length > 0) {
+      body = attachments.map((a) => `[attachment: ${a.filename}]`).join('\n');
     }
 
     // Same find-or-create flow as the WhatsApp Cloud webhook — shared
     // in lib/ticket-ingest.ts.
-    await ingestInboundPhoneMessage({ accountId, phone, name, body, channel: 'whatsapp' });
+    await ingestInboundPhoneMessage({
+      accountId,
+      phone,
+      name,
+      body,
+      channel: 'whatsapp',
+      ...(attachments.length > 0 ? { attachments } : {}),
+    });
 
     // Empty TwiML — acknowledge without auto-reply.
     res.type('text/xml').send('<?xml version="1.0" encoding="UTF-8"?><Response/>');

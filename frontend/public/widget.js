@@ -118,6 +118,42 @@
     closed: 'Closed',
   };
 
+  // Raw-body attachment staging against the public API (token-scoped).
+  // 8MB/file, 5 files/message — mirrors the backend caps so most
+  // failures are caught before the round-trip.
+  var MAX_FILE_BYTES = 8 * 1024 * 1024;
+  var MAX_FILES = 5;
+
+  function uploadAttachment(file) {
+    return fetch(API + '/tickets/' + memToken + '/attachments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': file.type || 'application/octet-stream',
+        'X-Filename': encodeURIComponent(file.name),
+      },
+      body: file,
+    }).then(function (res) {
+      return res.json().then(function (envelope) {
+        if (!res.ok || envelope.error) {
+          throw new Error(
+            (envelope.error && envelope.error.message) || 'Upload failed',
+          );
+        }
+        return envelope.data; // { id, filename, contentType, size }
+      });
+    });
+  }
+
+  function attachmentUrl(id) {
+    return API + '/tickets/' + memToken + '/attachments/' + id;
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
   // ── DOM scaffold ───────────────────────────────────────────────────
   var root = el('div', null, { id: 'suppuo-widget-root' });
 
@@ -411,6 +447,57 @@
     );
     body.appendChild(loading);
 
+    // Pending attachment chips (above the composer row)
+    var pendingFiles = [];
+    var chips = el('div', { display: 'none', flexWrap: 'wrap', gap: '6px', paddingBottom: '6px' });
+
+    function redrawChips() {
+      chips.innerHTML = '';
+      chips.style.display = pendingFiles.length ? 'flex' : 'none';
+      pendingFiles.forEach(function (a) {
+        var chip = el('span', {
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '5px',
+          border: '1px solid #d7dde6',
+          borderRadius: '7px',
+          padding: '3px 7px',
+          fontSize: '11px',
+          color: '#4a5568',
+          background: '#f7f9fc',
+          maxWidth: '100%',
+        });
+        var nameSpan = el(
+          'span',
+          { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' },
+          { text: a.filename + ' (' + formatSize(a.size) + ')' },
+        );
+        var removeBtn = el(
+          'button',
+          {
+            border: 'none',
+            background: 'none',
+            color: '#8a94a6',
+            cursor: 'pointer',
+            padding: '0',
+            fontSize: '13px',
+            lineHeight: '1',
+          },
+          { type: 'button', text: '×', 'aria-label': 'Remove ' + a.filename },
+        );
+        removeBtn.onclick = function () {
+          pendingFiles = pendingFiles.filter(function (p) {
+            return p.id !== a.id;
+          });
+          redrawChips();
+        };
+        chip.appendChild(nameSpan);
+        chip.appendChild(removeBtn);
+        chips.appendChild(chip);
+      });
+    }
+    composer.appendChild(chips);
+
     // Reply composer
     var form = el('form', { display: 'flex', gap: '8px', alignItems: 'flex-end' });
     var replyLabel = el(
@@ -432,6 +519,62 @@
       placeholder: 'Write a reply…',
     });
     css(replyInput, { resize: 'none', minHeight: '38px', maxHeight: '110px', flex: '1' });
+
+    // Paperclip — staged uploads via the public attachments endpoint.
+    var fileInput = el('input', { display: 'none' }, {
+      type: 'file',
+      multiple: 'multiple',
+      accept:
+        'image/png,image/jpeg,image/gif,image/webp,.pdf,.txt,.csv,.docx,.xlsx,.zip',
+    });
+    var clipBtn = el(
+      'button',
+      {
+        border: '1px solid #d7dde6',
+        borderRadius: '8px',
+        background: '#fff',
+        color: '#8a94a6',
+        padding: '9px 10px',
+        cursor: 'pointer',
+        flexShrink: '0',
+        lineHeight: '0',
+      },
+      { type: 'button', 'aria-label': 'Attach a file' },
+    );
+    clipBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>';
+    clipBtn.onclick = function () {
+      fileInput.click();
+    };
+    fileInput.onchange = function () {
+      var files = Array.prototype.slice.call(fileInput.files || []);
+      fileInput.value = '';
+      function next() {
+        if (!files.length) return;
+        if (pendingFiles.length >= MAX_FILES) {
+          alert('At most ' + MAX_FILES + ' files per message.');
+          return;
+        }
+        var file = files.shift();
+        if (file.size > MAX_FILE_BYTES) {
+          alert(file.name + ' is over the 8MB limit.');
+          next();
+          return;
+        }
+        uploadAttachment(file)
+          .then(function (meta) {
+            pendingFiles.push(meta);
+            redrawChips();
+            next();
+          })
+          .catch(function (err) {
+            alert((err && err.message) || 'Upload failed');
+            next();
+          });
+      }
+      next();
+    };
+
     var sendBtn = el(
       'button',
       {
@@ -450,6 +593,8 @@
     );
     form.appendChild(replyLabel);
     form.appendChild(replyInput);
+    form.appendChild(fileInput);
+    form.appendChild(clipBtn);
     form.appendChild(sendBtn);
     composer.appendChild(form);
 
@@ -490,9 +635,17 @@
       sending = true;
       sendBtn.disabled = true;
       sendBtn.textContent = '…';
-      api('/tickets/' + memToken + '/messages', { method: 'POST', body: { body: text } })
+      var payload = { body: text };
+      if (pendingFiles.length) {
+        payload.attachmentIds = pendingFiles.map(function (a) {
+          return a.id;
+        });
+      }
+      api('/tickets/' + memToken + '/messages', { method: 'POST', body: payload })
         .then(function () {
           replyInput.value = '';
+          pendingFiles = [];
+          redrawChips();
           return fetchThread();
         })
         .catch(function () {
@@ -558,6 +711,31 @@
         wordBreak: 'break-word',
       });
       bub.textContent = m.body; // textContent — never innerHTML for user data
+      // Attachments render as links (token-scoped download URLs).
+      if (m.attachments && m.attachments.length) {
+        var attWrap = el('div', { marginTop: '6px' });
+        m.attachments.forEach(function (a) {
+          var link = el(
+            'a',
+            {
+              display: 'block',
+              color: mine ? '#fff' : BLUE,
+              fontSize: '12px',
+              textDecoration: 'underline',
+              wordBreak: 'break-all',
+              marginTop: '2px',
+            },
+            {
+              href: attachmentUrl(a.id),
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            },
+          );
+          link.textContent = '📎 ' + a.filename + ' (' + formatSize(a.size) + ')';
+          attWrap.appendChild(link);
+        });
+        bub.appendChild(attWrap);
+      }
       var meta = el('div', {
         fontSize: '10px',
         color: '#8a94a6',
