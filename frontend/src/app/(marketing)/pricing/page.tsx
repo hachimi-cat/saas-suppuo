@@ -1,118 +1,89 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Check, Minus } from 'lucide-react';
-import { Price } from '@forjio/website-ui';
+import { Check } from 'lucide-react';
 
 /*
- * FORKERS: the tier names (Free / Pro / Business) and the IDR + USD
- * dual-pricing are the family standard. Replace the comparison rows
- * with the real per-tier limits of Suppuo. usdCents should
- * mirror backend/src/config/plans.ts once that exists.
+ * Suppuo pricing — early access. There is exactly one plan today:
+ * free, with everything included. Paid IDR tiers come later via
+ * Plugipay; do NOT invent tier names or prices before they exist
+ * in backend/src/config/plans.ts.
  */
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Transparent pricing for Suppuo. Start free, upgrade when you need to.',
+  description:
+    'Suppuo is free during early access — every feature included, no card required. Paid plans in IDR are coming later.',
 };
 
-const tiers = [
-  { name: 'Free',     idr: 0,       usdCents: 0,     description: 'For side projects and personal use.', cta: 'Start Free',   highlight: false },
-  { name: 'Pro',      idr: 79_000,  usdCents: 500,   description: 'For solo operators and small teams.', cta: 'Get Pro',      highlight: true  },
-  { name: 'Business', idr: 299_000, usdCents: 1_900, description: 'For teams that need scale.',          cta: 'Get Business', highlight: false },
+const included = [
+  'Shared ticket inbox — statuses open / pending / resolved / closed',
+  'Priorities + agent assignment',
+  'Internal notes the requester never sees',
+  'Canned replies for repeat questions',
+  'Hosted ticket form — customers submit without an account',
+  'Email updates + private tokenized status link for requesters',
+  'Multi-workspace via Huudis SSO',
+  'REST API (Bearer auth), webhooks via outbox, and the @forjio/suppuo-cli',
 ];
-
-const comparisonRows = [
-  { feature: 'Core capability / month', free: 'Limited', pro: 'Expanded', business: 'Unlimited' },
-  { feature: 'Workspace members', free: '1', pro: '1', business: '5' },
-  { feature: 'Owned workspaces', free: '1', pro: '3', business: 'Unlimited' },
-  { feature: 'Custom branding', free: false, pro: true, business: true },
-  { feature: 'Analytics retention', free: '30 days', pro: '1 year', business: 'Unlimited' },
-  { feature: 'CLI access', free: true, pro: true, business: true },
-  { feature: 'API rate limit', free: '60 req/min', pro: '600 req/min', business: '2,000 req/min' },
-  { feature: 'Data export (CSV / JSON)', free: 'CSV only', pro: 'CSV + JSON', business: 'CSV + JSON' },
-  { feature: 'Priority support', free: false, pro: false, business: true },
-  { feature: 'Payment methods (IDR)', free: '—', pro: 'QRIS · VA · e-wallet · card', business: 'QRIS · VA · e-wallet · card' },
-  { feature: 'Payment methods (USD intl)', free: '—', pro: 'PayPal', business: 'PayPal' },
-];
-
-function CellValue({ value }: { value: string | boolean }) {
-  if (value === true) return <Check className="mx-auto h-4 w-4 text-primary" />;
-  if (value === false) return <Minus className="mx-auto h-4 w-4 text-muted-foreground/40" />;
-  return <span className="text-sm">{value}</span>;
-}
 
 export default function PricingPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Transparent pricing</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          Free during early access
+        </h1>
         <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-          No hidden fees. No annual lock-in. Start free, pay only when you need more.
-        </p>
-        <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-          Indonesian customers pay in IDR. International customers pay in USD via PayPal —
-          Midtrans doesn&apos;t process USD.
+          One plan, everything included, no card required. We&apos;d rather you fix your
+          support workflow first and pay us later.
         </p>
       </div>
 
-      <div className="mt-16 grid gap-8 sm:grid-cols-3">
-        {tiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={`relative rounded-lg border p-8 ${
-              tier.highlight ? 'border-primary shadow-lg shadow-primary/10' : 'border-border/50'
-            }`}
+      <div className="mx-auto mt-16 max-w-lg">
+        <div className="relative rounded-xl border border-primary bg-card p-8 shadow-lg shadow-primary/10">
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-medium text-primary-foreground">
+            Early access
+          </span>
+          <h2 className="text-xl font-bold">Early access</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            For Indonesian SMEs moving support out of scattered WhatsApp threads and shared
+            email accounts.
+          </p>
+          <p className="mt-6 text-4xl font-bold">
+            Free
+            <span className="ml-2 text-base font-normal text-muted-foreground">
+              while in early access
+            </span>
+          </p>
+
+          <ul className="mt-8 space-y-3">
+            {included.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-sm text-foreground/90">
+                <Check className="mt-0.5 size-4 shrink-0 text-primary" strokeWidth={2.25} />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            href="/signup"
+            className="mt-8 block rounded-md bg-primary py-2.5 text-center text-sm font-medium text-primary-foreground hover:opacity-90"
           >
-            {tier.highlight && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-medium text-primary-foreground">
-                Most Popular
-              </span>
-            )}
-            <h2 className="text-xl font-bold">{tier.name}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{tier.description}</p>
-            <p className="mt-6 text-4xl font-bold">
-              <Price idr={tier.idr} usdCents={tier.usdCents} />
-              {tier.idr > 0 && (
-                <span className="text-base font-normal text-muted-foreground">/mo</span>
-              )}
-            </p>
-            <Link
-              href="/signup"
-              className={`mt-8 block rounded-md py-2.5 text-center text-sm font-medium ${
-                tier.highlight
-                  ? 'bg-primary text-primary-foreground hover:opacity-90'
-                  : 'border border-border hover:bg-accent'
-              }`}
-            >
-              {tier.cta}
-            </Link>
-          </div>
-        ))}
-      </div>
+            Start free
+          </Link>
+        </div>
 
-      <div className="mt-20">
-        <h2 className="text-center text-2xl font-bold">Feature comparison</h2>
-        <div className="mt-10 overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="pb-4 pr-6 text-sm font-medium text-muted-foreground">Feature</th>
-                <th className="pb-4 text-center text-sm font-medium">Free</th>
-                <th className="pb-4 text-center text-sm font-medium text-primary">Pro</th>
-                <th className="pb-4 text-center text-sm font-medium">Business</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comparisonRows.map((row) => (
-                <tr key={row.feature} className="border-b border-border/50">
-                  <td className="py-4 pr-6 text-sm">{row.feature}</td>
-                  <td className="py-4 text-center"><CellValue value={row.free} /></td>
-                  <td className="py-4 text-center"><CellValue value={row.pro} /></td>
-                  <td className="py-4 text-center"><CellValue value={row.business} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-8 rounded-lg border border-border bg-card/60 p-5 text-sm leading-relaxed text-muted-foreground">
+          <p className="font-medium text-foreground">Paid plans are coming.</p>
+          <p className="mt-2">
+            When early access ends, Suppuo will introduce paid plans billed in IDR through
+            Plugipay — the Forjio family&apos;s billing spine — with USD via PayPal for
+            international customers. Early-access workspaces will get clear notice before
+            anything changes, and your tickets stay yours either way.
+          </p>
+          <p className="mt-2">
+            Questions? <Link href="/contact" className="text-primary hover:underline">Talk to us</Link>.
+          </p>
         </div>
       </div>
     </div>

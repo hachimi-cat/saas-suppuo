@@ -1,14 +1,10 @@
 import type { Metadata } from 'next';
-import { Hexagon } from 'lucide-react';
-
-/*
- * FORKERS: replace the placeholder origin story + principles with the
- * real "why this product exists." Keep the structure.
- */
+import { LifeBuoy } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Suppuo is built by Forjio — replace this with your real about copy.',
+  description:
+    'Suppuo is a helpdesk and ticketing product for Indonesian SMEs, built by the Forjio team.',
 };
 
 export default function AboutPage() {
@@ -16,43 +12,54 @@ export default function AboutPage() {
     <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center gap-3">
-          <Hexagon className="h-8 w-8 text-primary" />
+          <LifeBuoy className="h-8 w-8 text-primary" />
           <h1 className="text-4xl font-bold tracking-tight">About Suppuo</h1>
         </div>
 
         <div className="mt-10 space-y-6 text-muted-foreground">
           <p className="text-lg">
-            One sentence on the problem Suppuo exists to solve.
+            Suppuo exists because most Indonesian SMEs still run customer support out of a
+            shared WhatsApp account — and good customers get lost in the scroll.
           </p>
 
           <p>
-            A paragraph on who built it and what gap they hit with the existing options —
-            too expensive, missing a CLI, built on an abandoned stack. Make it concrete.
+            When support lives in a chat thread, there is no status, no owner, and no record.
+            Whoever holds the phone answers what they happen to see; everything else quietly
+            expires. The enterprise helpdesks that solve this are priced in USD per agent and
+            built for support departments, not for a toko online with three people wearing
+            every hat.
           </p>
 
           <p>
-            A paragraph on what Suppuo is, in plain terms — the core capability, who
-            it&apos;s for, and the one thing it does better than the alternatives.
+            Suppuo is a helpdesk in plain terms: your customers submit tickets through a
+            hosted form, your team works them in a shared inbox — statuses, priorities,
+            assignment, internal notes, canned replies — and every requester gets email
+            updates plus a private status link to check progress without logging in. It does
+            the one thing chat apps can&apos;t: make sure every question has an owner and an
+            answer.
           </p>
 
           <h2 className="pt-4 text-2xl font-bold text-foreground">Our principles</h2>
 
           <ul className="space-y-4">
             <li>
-              <strong className="text-foreground">Principle one.</strong>{' '}
-              A belief that shapes the product — and the concrete way it shows up.
+              <strong className="text-foreground">Every ticket has an owner.</strong>{' '}
+              The whole product is organized around assignment and status — a question that
+              isn&apos;t resolved or closed is visibly someone&apos;s job.
             </li>
             <li>
-              <strong className="text-foreground">Principle two.</strong>{' '}
-              Another. Keep these honest; they should be falsifiable against the product.
+              <strong className="text-foreground">Zero friction for your customers.</strong>{' '}
+              No accounts, no passwords, no app to install. A form to submit, an email when
+              something happens, and a private link to check status.
             </li>
             <li>
               <strong className="text-foreground">No vendor lock-in.</strong>{' '}
-              Export everything as CSV or JSON. Your data is yours.
+              Your tickets are yours — fetch everything through the REST API anytime.
             </li>
             <li>
-              <strong className="text-foreground">Transparent pricing.</strong>{' '}
-              IDR pricing for our market. Monthly billing. No hidden fees. Cancel anytime.
+              <strong className="text-foreground">Honest pricing.</strong>{' '}
+              Suppuo is free during early access — no card, no trial countdown. When paid
+              plans arrive they&apos;ll be priced in IDR, with clear notice first.
             </li>
           </ul>
 

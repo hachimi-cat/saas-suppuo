@@ -1,35 +1,38 @@
 import Link from 'next/link';
 import {
-  Activity,
   ArrowRight,
   Boxes,
   Check,
   ChevronDown,
   CircleDollarSign,
+  ClipboardList,
   Code2,
-  Hexagon,
-  Layers,
+  Flag,
+  Inbox,
+  LifeBuoy,
+  Link2,
+  Mail,
   Megaphone,
+  MessageSquareText,
   MoreHorizontal,
-  Settings,
   ShieldCheck,
   Sparkles,
   Terminal,
-  Workflow,
+  Users,
   X as XIcon,
   Zap,
 } from 'lucide-react';
-import { HeroBadge, SectionEyebrow, Price } from '@forjio/website-ui';
+import { HeroBadge, SectionEyebrow } from '@forjio/website-ui';
 
 /*
- * Forjio family marketing home page.
+ * Suppuo marketing home page — the locked Forjio 9-section structure
+ * (Hero → How it works → Features → Pricing → Comparison → Developers →
+ * Family → FAQ → CTA). linksnap.com is the family reference build.
  *
- * FORKERS: the 9-section STRUCTURE below (Hero → How it works →
- * Features → Pricing → Comparison → Developers → Family → FAQ → CTA)
- * is the locked family standard — every Forjio product's home page
- * has exactly these. Keep the sections; replace the placeholder copy,
- * feature names, pricing, comparison rows, and FAQ with what's
- * actually true of your product. linksnap.com is the reference build.
+ * Copy is grounded in Suppuo v1: hosted ticket form, shared agent inbox
+ * (statuses open/pending/resolved/closed, priorities, assignment,
+ * internal notes, canned replies), requester email updates + tokenized
+ * status link, multi-workspace via Huudis SSO. FREE during early access.
  */
 
 export default function HomePage() {
@@ -39,8 +42,7 @@ export default function HomePage() {
           HERO
           ============================================================ */}
       <section className="relative overflow-hidden border-b border-border">
-        {/* Brand hero backdrop — off-axis radial + dot grid. Give each
-            product its own pattern (see project_forjio_landing_family). */}
+        {/* Suppuo hero backdrop — off-axis radial + dot grid. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_70%_20%,hsl(var(--primary)/0.18)_0%,transparent_50%)]"
@@ -52,28 +54,29 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 md:px-6 pt-14 md:pt-20 pb-12 md:pb-16">
           <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
             <HeroBadge
-              brandIcon={<Hexagon className="size-3 text-primary" strokeWidth={1.5} />}
-              primary="Forjio family"
-              secondary="One account across every product"
+              brandIcon={<LifeBuoy className="size-3 text-primary" strokeWidth={1.5} />}
+              primary="Helpdesk + ticketing"
+              secondary="Forjio family — free during early access"
             />
 
             <h1 className="mt-5 text-[36px] leading-[1.05] md:text-[56px] md:leading-[1.02] font-semibold tracking-[-0.025em]">
-              One line that says
+              Every customer question,
               <br />
-              what{' '}
+              answered from{' '}
               <span className="relative whitespace-nowrap">
-                <span className="relative z-10">Suppuo</span>
+                <span className="relative z-10">one inbox</span>
                 <span
                   aria-hidden
                   className="absolute inset-x-0 bottom-1 h-3 md:h-4 bg-primary/60 dark:bg-primary/30 -z-0 rounded-sm"
                 />
-              </span>{' '}
-              does.
+              </span>
+              .
             </h1>
 
             <p className="mt-5 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
-              A second line clarifying who Suppuo is for and why they&apos;d switch
-              from whatever they use today. Priced in IDR. Part of the Forjio family.
+              Helpdesk and ticketing for Indonesian SMEs — support inbox, agent workspace,
+              customer portal. Stop digging through WhatsApp threads to find who asked what.
+              Free during early access. Part of the Forjio family.
             </p>
 
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
@@ -81,19 +84,19 @@ export default function HomePage() {
                 href="/signup"
                 className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
               >
-                Get started
+                Start free
                 <ArrowRight className="size-4" strokeWidth={1.5} />
               </Link>
               <a
                 href="#hero-mockup"
                 className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-lg text-sm font-medium border border-border bg-card hover:bg-card/80 transition-colors backdrop-blur-sm"
               >
-                View live demo
+                See the inbox
               </a>
             </div>
           </div>
 
-          <HeroPreview />
+          <HeroInboxPreview />
         </div>
       </section>
 
@@ -105,10 +108,11 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <SectionEyebrow>How it works</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              Three steps, under a minute.
+              Form in. Ticket worked. Customer updated.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
-              Describe the fastest path from sign-up to first value. Free tier needs no card.
+              From sign-up to your first resolved ticket in minutes. No card — early access
+              is free.
             </p>
           </div>
 
@@ -116,21 +120,24 @@ export default function HomePage() {
             {[
               {
                 num: '01',
-                Icon: Settings,
-                title: 'Step one',
-                body: 'What the user does first. One or two sentences — concrete, not aspirational.',
+                Icon: ClipboardList,
+                title: 'Share your ticket form',
+                body:
+                  'Every workspace gets a hosted support form. Put the link on your website, your bio page, or your WhatsApp auto-reply. Customers submit a ticket in seconds — no account needed.',
               },
               {
                 num: '02',
-                Icon: Workflow,
-                title: 'Step two',
-                body: 'The middle step. Keep it to the single action that moves them forward.',
+                Icon: Users,
+                title: 'Work it as a team',
+                body:
+                  'Tickets land in one shared inbox. Assign an agent, set a priority, discuss in internal notes the customer never sees, and answer repeat questions with canned replies.',
               },
               {
                 num: '03',
-                Icon: Activity,
-                title: 'Step three',
-                body: 'The payoff — what the user gets at the end. This is the value proposition.',
+                Icon: Mail,
+                title: 'Customers stay in the loop',
+                body:
+                  'Requesters get an email on every reply and status change, plus a private status link to check progress anytime. No more “sudah dibalas belum?” follow-ups.',
               },
             ].map(({ num, Icon, title, body }) => (
               <div key={num} className="rounded-lg border border-border bg-card p-6">
@@ -156,21 +163,51 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <SectionEyebrow>Features</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              Everything Suppuo ships.
+              Everything a small support team needs.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
-              Six concrete capabilities. Only list what runs in production today — no roadmap fluff.
+              Six things Suppuo ships today — and during early access, all of them are free.
             </p>
           </div>
 
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { Icon: Boxes, title: 'Feature one', body: 'A concrete capability and what the user gets from it. 1–2 sentences.' },
-              { Icon: Layers, title: 'Feature two', body: 'Another shipped capability. Name it specifically; avoid marketing adjectives.' },
-              { Icon: Activity, title: 'Feature three', body: 'Something measurable or observable — analytics, a report, an export.' },
-              { Icon: ShieldCheck, title: 'Feature four', body: 'A trust or compliance capability if the product has one.' },
-              { Icon: Zap, title: 'Feature five', body: 'A speed or automation capability — what the product does for the user.' },
-              { Icon: Code2, title: 'API + CLI', body: 'REST API with idempotency keys, type-safe SDKs (Node, Python, Go), and a CLI.' },
+              {
+                Icon: Inbox,
+                title: 'Shared ticket inbox',
+                body:
+                  'One queue for the whole team. Every ticket moves through open → pending → resolved → closed, so you always know what still needs an answer.',
+              },
+              {
+                Icon: Flag,
+                title: 'Priorities + assignment',
+                body:
+                  'Set a priority and assign each ticket to an agent. Urgent complaints stop sitting behind routine questions, and nothing is “someone else’s problem”.',
+              },
+              {
+                Icon: MessageSquareText,
+                title: 'Internal notes + canned replies',
+                body:
+                  'Discuss a ticket privately in internal notes the requester never sees. Save your best answers as canned replies and reuse them in two clicks.',
+              },
+              {
+                Icon: ClipboardList,
+                title: 'Hosted ticket form',
+                body:
+                  'A ready-made support form at a link you can share anywhere. Customers submit without creating an account; the ticket appears in your inbox instantly.',
+              },
+              {
+                Icon: Link2,
+                title: 'Status link + email updates',
+                body:
+                  'Every requester gets a private, tokenized status link and an email on each reply or status change — they stay informed without logging in.',
+              },
+              {
+                Icon: Code2,
+                title: 'API + CLI',
+                body:
+                  'A REST API with Bearer-token auth, webhooks delivered via a transactional outbox, and a CLI: npm i -g @forjio/suppuo-cli.',
+              },
             ].map(({ Icon, title, body }) => (
               <div key={title} className="rounded-lg border border-border bg-card p-6">
                 <div className="size-10 rounded-md flex items-center justify-center bg-primary/10 text-primary mb-4">
@@ -192,87 +229,59 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto">
             <SectionEyebrow>Pricing</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              Honest tiers. IDR pricing.
+              Free during early access. Really.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[62ch] mx-auto">
-              Free is genuinely free, not a trial. International customers pay in USD via PayPal —
-              Midtrans doesn&apos;t process USD.
+              While Suppuo is in early access, every feature is free — no card, no trial
+              clock. Paid plans in IDR are coming later; early-access workspaces will get
+              clear notice before anything changes.
             </p>
           </div>
         </div>
         <div className="max-w-5xl mx-auto px-4 md:px-6 pt-12 pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                name: 'Free',
-                idr: 0,
-                usdCents: 0,
-                priceUnit: 'forever',
-                who: 'For testing the waters before you commit.',
-                features: ['Core capability, limited', '1 team seat', 'Community support', 'Read-only API access'],
-                cta: { label: 'Start free', href: '/signup' },
-              },
-              {
-                name: 'Pro',
-                idr: 79_000,
-                usdCents: 500,
-                priceUnit: '/ month',
-                who: 'For solo operators ready to go further.',
-                featured: true,
-                features: ['Core capability, expanded', 'Custom branding', 'Full API access', 'Email support'],
-                cta: { label: 'Start Pro', href: '/signup' },
-              },
-              {
-                name: 'Business',
-                idr: 299_000,
-                usdCents: 1_900,
-                priceUnit: '/ month',
-                who: 'For teams that need shared workspaces.',
-                features: ['Everything unlimited', '5 workspace members', 'Higher API rate limits', 'Priority support'],
-                cta: { label: 'Start Business', href: '/signup' },
-              },
-            ].map((tier) => (
-              <div
-                key={tier.name}
-                className={`relative rounded-xl border p-5 flex flex-col ${
-                  tier.featured ? 'border-primary bg-card shadow-lg shadow-primary/5' : 'border-border bg-card'
-                }`}
-              >
-                {tier.featured && (
-                  <span className="absolute -top-2.5 left-5 inline-flex items-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                    Most popular
-                  </span>
-                )}
-                <h3 className="text-[18px] font-semibold tracking-tight">{tier.name}</h3>
-                <p className="mt-1.5 text-[12.5px] text-muted-foreground leading-snug min-h-[40px]">
-                  {tier.who}
-                </p>
-                <div className="mt-4 flex items-baseline gap-1.5">
-                  <span className="text-[28px] font-bold tabular-nums tracking-tight">
-                    <Price idr={tier.idr} usdCents={tier.usdCents} />
-                  </span>
-                  <span className="text-xs text-muted-foreground">{tier.priceUnit}</span>
-                </div>
-                <ul className="mt-5 space-y-2 flex-1">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-[12.5px] text-foreground/90 leading-[1.4]">
-                      <Check className="size-3.5 mt-0.5 shrink-0 text-primary" strokeWidth={2.25} />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={tier.cta.href}
-                  className={`mt-6 inline-flex items-center justify-center w-full h-9 px-4 rounded-md text-sm font-medium transition-colors ${
-                    tier.featured
-                      ? 'bg-primary text-primary-foreground hover:opacity-90'
-                      : 'bg-card border border-border hover:bg-muted'
-                  }`}
-                >
-                  {tier.cta.label}
-                </Link>
+          <div className="max-w-md mx-auto">
+            <div className="relative rounded-xl border border-primary bg-card shadow-lg shadow-primary/5 p-6 flex flex-col">
+              <span className="absolute -top-2.5 left-5 inline-flex items-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                Early access
+              </span>
+              <h3 className="text-[18px] font-semibold tracking-tight">Early access</h3>
+              <p className="mt-1.5 text-[12.5px] text-muted-foreground leading-snug">
+                For Indonesian SMEs getting their support out of scattered chats.
+              </p>
+              <div className="mt-4 flex items-baseline gap-1.5">
+                <span className="text-[28px] font-bold tabular-nums tracking-tight">Free</span>
+                <span className="text-xs text-muted-foreground">while in early access</span>
               </div>
-            ))}
+              <ul className="mt-5 space-y-2 flex-1">
+                {[
+                  'Shared ticket inbox — statuses, priorities, assignment',
+                  'Hosted ticket form for your customers',
+                  'Internal notes + canned replies',
+                  'Email updates + private status link for requesters',
+                  'Multi-workspace via Huudis SSO',
+                  'REST API, webhooks, and the Suppuo CLI',
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-[12.5px] text-foreground/90 leading-[1.4]">
+                    <Check className="size-3.5 mt-0.5 shrink-0 text-primary" strokeWidth={2.25} />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup"
+                className="mt-6 inline-flex items-center justify-center w-full h-9 px-4 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-colors"
+              >
+                Start free
+              </Link>
+            </div>
+            <p className="mt-5 text-[12.5px] text-muted-foreground text-center leading-relaxed">
+              Paid plans are coming — billed in IDR through Plugipay, with USD via PayPal for
+              international customers. See{' '}
+              <Link href="/pricing" className="text-primary hover:underline">
+                pricing
+              </Link>{' '}
+              for details.
+            </p>
           </div>
         </div>
       </section>
@@ -285,11 +294,11 @@ export default function HomePage() {
           <div className="text-center max-w-2xl mx-auto">
             <SectionEyebrow>Compare</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              How Suppuo stacks up.
+              Versus the way you do support today.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
-              Name the two alternatives your buyers actually evaluate, and the capabilities that
-              genuinely differ. Don&apos;t invent advantages.
+              Most Indonesian SMEs run support out of a shared WhatsApp or email account — or
+              pay for an enterprise helpdesk priced in USD per agent.
             </p>
           </div>
 
@@ -301,17 +310,17 @@ export default function HomePage() {
                     Capability
                   </th>
                   <th className="px-4 py-3 font-semibold text-primary">Suppuo</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Alternative A</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Alternative B</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Shared WhatsApp / email</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Enterprise helpdesks</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { cap: 'Lowest paid tier', s: 'Rp 79k/mo', a: '~Rp 565k/mo', b: '~Rp 145k/mo' },
-                  { cap: 'IDR pricing', s: true, a: false, b: false },
-                  { cap: 'Capability one', s: true, a: true, b: false },
-                  { cap: 'Capability two', s: true, a: false, b: false },
-                  { cap: 'API + CLI + SDKs', s: true, a: false, b: false },
+                  { cap: 'Price today', s: 'Free (early access)', a: 'Free', b: 'USD, per agent / mo' },
+                  { cap: 'Ticket statuses + priorities', s: true, a: false, b: true },
+                  { cap: 'Assignment + internal notes', s: true, a: false, b: true },
+                  { cap: 'Customer status link, no login', s: true, a: false, b: 'Varies' },
+                  { cap: 'Canned replies', s: true, a: false, b: true },
                   { cap: 'One login for sister products', s: true, a: false, b: false },
                 ].map((row) => (
                   <tr key={row.cap} className="border-b border-border last:border-b-0">
@@ -336,18 +345,18 @@ export default function HomePage() {
             <div>
               <SectionEyebrow>For developers</SectionEyebrow>
               <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-                CLI-first. Type-safe SDKs. Idempotency keys.
+                A REST API, webhooks, and a real CLI.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
-                A real CLI, type-safe SDKs for Node.js, Python, and Go, and a REST API with
-                idempotency keys. Wire Suppuo into your stack without writing glue.
+                Suppuo is built API-first. Everything the dashboard does goes through the same
+                REST API you can call yourself — wire support into your own stack without glue.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
-                  'Every core action scriptable from the CLI',
-                  'OpenAPI spec + type-safe SDKs (Node, Python, Go)',
-                  'Bulk operations in a single request',
-                  'Per-workspace API keys with scoped permissions',
+                  'REST API with Bearer-token auth',
+                  'Consistent response envelope with request IDs on every call',
+                  'Webhooks delivered via a transactional outbox — state changes never skip an event',
+                  'CLI on npm: @forjio/suppuo-cli — log in with your Forjio account',
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2 text-sm text-foreground/90 leading-relaxed">
                     <Check className="size-4 mt-0.5 shrink-0 text-primary" strokeWidth={2.25} />
@@ -363,13 +372,6 @@ export default function HomePage() {
                   Read the docs
                   <ArrowRight className="size-4" strokeWidth={1.5} />
                 </Link>
-                <a
-                  href="https://github.com/hachimi-cat/suppuo"
-                  className="inline-flex items-center gap-1.5 h-10 px-5 rounded-lg text-sm font-medium border border-border bg-card hover:bg-muted transition-colors"
-                >
-                  <Code2 className="size-4" strokeWidth={1.5} />
-                  View SDK on GitHub
-                </a>
               </div>
             </div>
 
@@ -385,39 +387,36 @@ export default function HomePage() {
                 {'\n'}
                 <span className="text-green-300">✔ Authenticated as you@example.com via Huudis</span>
                 {'\n\n'}
-                <span className="text-white/40"># Run the core action</span>
+                <span className="text-white/90">$ suppuo auth whoami</span>
                 {'\n'}
-                <span className="text-white/90">$ suppuo create --name "demo"</span>
-                {'\n'}
-                <span className="text-green-300">✔ Created.</span>
+                <span className="text-green-300">✔ you@example.com</span>
               </TerminalCard>
 
-              <TerminalCard label="example.ts">
-                <span className="text-purple-300">import</span>
-                <span className="text-white/90">{' { ForjioBrand } '}</span>
-                <span className="text-purple-300">from</span>
-                <span className="text-green-300">{' "@forjio/suppuo"'}</span>
-                <span className="text-white/90">;</span>
-                {'\n\n'}
-                <span className="text-purple-300">const</span>
-                <span className="text-white/90">{' client = '}</span>
-                <span className="text-purple-300">new</span>
-                <span className="text-white/90">{' ForjioBrand({'}</span>
+              <TerminalCard label="response.json">
+                <span className="text-white/40">{'// Every endpoint, same envelope'}</span>
                 {'\n'}
-                <span className="text-white/90">{'  apiKey: process.env.SUPPUO_KEY!,'}</span>
+                <span className="text-white/90">{'{'}</span>
                 {'\n'}
-                <span className="text-white/90">{'});'}</span>
-                {'\n\n'}
-                <span className="text-purple-300">const</span>
-                <span className="text-white/90">{' result = '}</span>
-                <span className="text-purple-300">await</span>
-                <span className="text-white/90">{' client.things.create({'}</span>
+                <span className="text-white/90">{'  "data": { '}</span>
+                <span className="text-green-300">{'"status": "open"'}</span>
+                <span className="text-white/90">{', … },'}</span>
                 {'\n'}
-                <span className="text-white/90">{'  name: '}</span>
-                <span className="text-green-300">{'"demo"'}</span>
+                <span className="text-white/90">{'  "error": '}</span>
+                <span className="text-purple-300">null</span>
                 <span className="text-white/90">,</span>
                 {'\n'}
-                <span className="text-white/90">{'});'}</span>
+                <span className="text-white/90">{'  "meta": {'}</span>
+                {'\n'}
+                <span className="text-white/90">{'    "requestId": '}</span>
+                <span className="text-green-300">{'"req_…"'}</span>
+                <span className="text-white/90">,</span>
+                {'\n'}
+                <span className="text-white/90">{'    "timestamp": '}</span>
+                <span className="text-green-300">{'"2026-06-11T09:00:00Z"'}</span>
+                {'\n'}
+                <span className="text-white/90">{'  }'}</span>
+                {'\n'}
+                <span className="text-white/90">{'}'}</span>
               </TerminalCard>
             </div>
           </div>
@@ -453,7 +452,7 @@ export default function HomePage() {
 
               <div className="mt-8 grid grid-cols-3 gap-3">
                 {[
-                  { name: 'Suppuo', icon: Hexagon, current: true, label: 'this product' },
+                  { name: 'Suppuo', icon: LifeBuoy, current: true, label: 'helpdesk' },
                   { name: 'Storlaunch', icon: Zap, label: 'storefront' },
                   { name: 'Plugipay', icon: CircleDollarSign, label: 'payments' },
                   { name: 'Fulkruma', icon: Boxes, label: 'fulfillment' },
@@ -510,24 +509,28 @@ export default function HomePage() {
           <ul className="mt-10 divide-y divide-border rounded-lg border border-border bg-card overflow-hidden">
             {[
               {
-                q: 'Is the free tier really free?',
-                a: 'Yes — describe the free tier honestly. It is a tier, not a trial. State the real limit.',
+                q: 'Is early access really free?',
+                a: 'Yes. While Suppuo is in early access, every feature is free — no card, no trial countdown. Paid plans in IDR (billed through Plugipay, USD via PayPal for international customers) are coming later, and early-access workspaces will get clear notice before anything changes.',
               },
               {
-                q: 'Who owns my data?',
-                a: 'You do. Records belong to your workspace; export anytime as CSV or via the API. Forjio never sells or repackages merchant data.',
+                q: 'Do my customers need an account to submit or track a ticket?',
+                a: 'No. They submit through your hosted ticket form, then get an email on every reply and status change plus a private, tokenized status link to check progress — no login required.',
               },
               {
-                q: 'How does billing work?',
-                a: 'IDR pricing via the Indonesian rails (QRIS / VA / e-wallet / cards). International customers pay in USD via PayPal. Billing runs through Plugipay.',
+                q: 'Can customers email us a ticket instead of using the form?',
+                a: 'In v1, tickets come in through your hosted form. Email-to-ticket is next on the list — and requesters already receive every update by email today.',
               },
               {
-                q: 'Can my team share a workspace?',
-                a: 'Yes. Describe the seat model per tier — owner / admin / member roles, added or removed via the dashboard or CLI.',
+                q: 'How do agents work together on a ticket?',
+                a: 'Every ticket lives in a shared inbox with a status (open, pending, resolved, closed), a priority, and an assignee. Agents discuss privately in internal notes the requester never sees, and answer repeat questions with canned replies.',
               },
               {
-                q: 'What happens if I downgrade?',
-                a: 'Existing data stays. Explain exactly which limits apply going forward versus retroactively.',
+                q: 'Can I run support for more than one brand or team?',
+                a: 'Yes. Suppuo is multi-workspace via Huudis SSO — one Forjio login, separate workspaces with their own inboxes, forms, and members.',
+              },
+              {
+                q: 'Who owns my support data?',
+                a: 'You do. Tickets belong to your workspace, and you can fetch everything through the REST API. Forjio never sells or repackages your data.',
               },
             ].map((faq) => (
               <li key={faq.q}>
@@ -556,13 +559,13 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 md:py-20 text-center">
           <div className="flex flex-col items-center">
             <div className="inline-flex items-center justify-center size-12 rounded-xl bg-primary/10 text-primary mb-6">
-              <Hexagon className="size-6" strokeWidth={2} />
+              <LifeBuoy className="size-6" strokeWidth={2} />
             </div>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em] max-w-[24ch]">
-              Get started with Suppuo today.
+              Set up your support inbox today.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
-              Free forever on the starter tier. No card. Upgrade when you outgrow it.
+              Free during early access. No card — there&apos;s nothing to charge yet.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -614,19 +617,51 @@ function Cell({ value, highlight }: { value: boolean | string; highlight?: boole
   );
 }
 
-// Generic hero mockup — a resource card with a sparkline + stat row.
-// Replace with a screenshot or a product-specific mock once you have one.
-function HeroPreview() {
-  const sparkPoints = [12, 18, 14, 22, 28, 25, 38, 34, 45, 52, 48, 64];
-  const max = Math.max(...sparkPoints);
-  const sparkPath = sparkPoints
-    .map((v, i) => {
-      const x = (i / (sparkPoints.length - 1)) * 200;
-      const y = 36 - (v / max) * 32;
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    })
-    .join(' ');
+// Hero mockup — the Suppuo shared inbox, built from plain styled divs.
+// Sample tickets only; no real names, credentials, or tokens.
+const HERO_TICKETS = [
+  {
+    id: '#1042',
+    subject: 'Pesanan belum sampai, resi tidak update',
+    requester: 'Rina W.',
+    status: 'open',
+    priority: 'urgent',
+    assignee: 'DA',
+  },
+  {
+    id: '#1041',
+    subject: 'How do I change my delivery address?',
+    requester: 'Budi S.',
+    status: 'pending',
+    priority: 'normal',
+    assignee: 'AY',
+  },
+  {
+    id: '#1040',
+    subject: 'Refund for double payment',
+    requester: 'Sari L.',
+    status: 'open',
+    priority: 'high',
+    assignee: '—',
+  },
+  {
+    id: '#1038',
+    subject: 'Terima kasih, sudah diterima!',
+    requester: 'Andi P.',
+    status: 'resolved',
+    priority: 'low',
+    assignee: 'DA',
+  },
+] as const;
 
+const STATUS_STYLES: Record<string, string> = {
+  open: 'bg-primary/10 text-primary border-primary/30',
+  pending: 'bg-amber-400/10 text-amber-500 border-amber-400/30',
+  resolved: 'bg-emerald-400/10 text-emerald-500 border-emerald-400/30',
+  closed: 'bg-muted text-muted-foreground border-border',
+};
+
+function HeroInboxPreview() {
   return (
     <div id="hero-mockup" className="mt-12 md:mt-14 max-w-2xl mx-auto">
       <div className="rounded-xl border border-border bg-card shadow-lg shadow-primary/5 overflow-hidden">
@@ -635,55 +670,56 @@ function HeroPreview() {
             <span className="size-2.5 rounded-full bg-red-500/70" />
             <span className="size-2.5 rounded-full bg-amber-400/70" />
             <span className="size-2.5 rounded-full bg-primary/70" />
-            <Hexagon className="ml-2 size-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <LifeBuoy className="ml-2 size-3.5 text-muted-foreground" strokeWidth={1.5} />
             <span className="text-[11px] text-muted-foreground font-mono">
-              suppuo.com / dashboard
+              suppuo.com / dashboard / tickets
             </span>
           </div>
           <MoreHorizontal className="size-3.5 text-muted-foreground" strokeWidth={1.5} />
         </div>
 
-        <div className="p-5">
-          <p className="text-[13px] font-semibold text-foreground">This week</p>
-          <p className="mt-0.5 text-[12px] text-muted-foreground">A live look at your workspace.</p>
-
-          <div className="mt-4">
-            <svg
-              width="100%"
-              height="36"
-              viewBox="0 0 200 36"
-              preserveAspectRatio="none"
-              className="overflow-visible"
-            >
-              <defs>
-                <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path d={`${sparkPath} L 200 36 L 0 36 Z`} fill="url(#sparkFill)" />
-              <path d={sparkPath} stroke="hsl(var(--primary))" strokeWidth="1.5" fill="none" />
-            </svg>
+        <div className="px-4 py-3 flex items-center justify-between border-b border-border">
+          <div className="flex items-center gap-2">
+            <Inbox className="size-4 text-primary" strokeWidth={1.5} />
+            <p className="text-[13px] font-semibold text-foreground">Support inbox</p>
           </div>
-
-          <div className="mt-3 grid grid-cols-3 gap-3 text-[11px] font-mono">
-            <div>
-              <span className="text-muted-foreground uppercase">Total</span>
-              <div className="text-foreground text-[15px] font-semibold tabular-nums">1,247</div>
-            </div>
-            <div>
-              <span className="text-muted-foreground uppercase">Today</span>
-              <div className="text-foreground text-[15px] font-semibold tabular-nums">+82</div>
-            </div>
-            <div>
-              <span className="text-muted-foreground uppercase">Top region</span>
-              <div className="text-foreground text-[15px] font-semibold">Jakarta</div>
-            </div>
+          <div className="flex items-center gap-1.5 text-[10.5px] font-mono">
+            <span className="rounded-md border border-primary/30 bg-primary/10 text-primary px-2 py-0.5">
+              open 2
+            </span>
+            <span className="rounded-md border border-border text-muted-foreground px-2 py-0.5">
+              pending 1
+            </span>
+            <span className="rounded-md border border-border text-muted-foreground px-2 py-0.5">
+              resolved 1
+            </span>
           </div>
         </div>
+
+        <ul className="divide-y divide-border">
+          {HERO_TICKETS.map((t) => (
+            <li key={t.id} className="flex items-center gap-3 px-4 py-3">
+              <span className="text-[10.5px] font-mono text-muted-foreground shrink-0">{t.id}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12.5px] font-medium text-foreground truncate">{t.subject}</p>
+                <p className="text-[10.5px] text-muted-foreground truncate">
+                  {t.requester} · {t.priority} priority
+                </p>
+              </div>
+              <span
+                className={`hidden sm:inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[9.5px] font-mono ${STATUS_STYLES[t.status]}`}
+              >
+                {t.status}
+              </span>
+              <span className="shrink-0 inline-flex items-center justify-center size-6 rounded-full bg-muted text-[9.5px] font-semibold text-muted-foreground">
+                {t.assignee}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
       <p className="mt-3 text-xs text-muted-foreground text-center">
-        Swap this mockup for a real screenshot of your portal once seed-demo data is in.
+        The shared inbox — statuses, priorities, and assignment at a glance.
       </p>
     </div>
   );

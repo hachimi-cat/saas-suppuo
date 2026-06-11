@@ -11,7 +11,7 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mon
 
 export const metadata: Metadata = {
   title: { default: brand, template: `%s | ${brand}` },
-  description: `${brand} — part of the Forjio commerce suite.`,
+  description: `${brand} — helpdesk and ticketing for Indonesian SMEs: support inbox, agent workspace, customer portal. Part of the Forjio family.`,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
