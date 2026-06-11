@@ -28,9 +28,14 @@ interface ChannelsPayload {
 export default function ChannelsPage() {
   const [data, setData] = useState<ChannelsPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState<'whatsapp_twilio' | 'email_resend' | null>(null);
+  const [showForm, setShowForm] = useState<
+    'whatsapp_twilio' | 'whatsapp_cloud' | 'email_resend' | null
+  >(null);
   const [webhookNote, setWebhookNote] = useState<string | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [cloudSetup, setCloudSetup] = useState<{ webhookUrl: string; verifyToken: string } | null>(
+    null,
+  );
 
   const load = useCallback(() => {
     apiRequest<ChannelsPayload>('/channels')
@@ -77,6 +82,20 @@ export default function ChannelsPage() {
             Twilio Console → your WhatsApp number → Messaging → &quot;A message comes in&quot; →
             Webhook (POST).
           </p>
+        </div>
+      )}
+      {cloudSetup && (
+        <div className="mb-4 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
+          <p className="font-medium">Last step — subscribe your Meta app to this webhook:</p>
+          <p className="mt-2 text-xs text-muted-foreground">Callback URL</p>
+          <code className="block break-all rounded bg-muted/40 px-2 py-1 text-xs">{cloudSetup.webhookUrl}</code>
+          <p className="mt-2 text-xs text-muted-foreground">Verify token (save this — shown once)</p>
+          <code className="block break-all rounded bg-muted/40 px-2 py-1 text-xs">{cloudSetup.verifyToken}</code>
+          <ol className="mt-2 list-decimal space-y-0.5 pl-5 text-xs text-muted-foreground">
+            <li>Meta App dashboard → WhatsApp → Configuration → Webhook → Edit.</li>
+            <li>Paste the Callback URL and Verify token above, then Verify and save.</li>
+            <li>Under Webhook fields, subscribe to <code>messages</code>.</li>
+          </ol>
         </div>
       )}
 
@@ -144,9 +163,38 @@ export default function ChannelsPage() {
           <WidgetEmbed accountId={accountId} />
         </ChannelCard>
 
-        {/* Coming soon */}
-        <ChannelCard icon={<MessageCircle className="h-5 w-5" />} title="WhatsApp Cloud API (Meta direct)" status="soon" statusLabel="Coming soon" description="Connect a Meta WhatsApp Business account directly — no Twilio in between." />
-        <ChannelCard icon={<Mail className="h-5 w-5" />} title="Email-to-ticket (inbound)" status="soon" statusLabel="Coming soon" description="A support@ address that turns incoming email into tickets." />
+        {/* WhatsApp Cloud API (Meta direct) */}
+        <ChannelCard
+          icon={<MessageCircle className="h-5 w-5" />}
+          title="WhatsApp Cloud API (Meta direct)"
+          status={byo('whatsapp_cloud').length > 0 ? 'active' : 'pending'}
+          statusLabel={byo('whatsapp_cloud').length > 0 ? 'BYO Meta connected' : 'Not connected'}
+          description="Connect a Meta WhatsApp Business account directly — no Twilio in between. Inbound messages become tickets; agent replies go out via the Cloud API."
+          action={
+            <button onClick={() => setShowForm('whatsapp_cloud')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
+              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect Meta direct
+            </button>
+          }
+        >
+          {byo('whatsapp_cloud').map((i) => (
+            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+          ))}
+        </ChannelCard>
+
+        {/* Email-to-ticket (Resend inbound) */}
+        <ChannelCard
+          icon={<Mail className="h-5 w-5" />}
+          title="Email-to-ticket (inbound)"
+          status="active"
+          statusLabel="Always on"
+          description="Your workspace has a dedicated inbound address — forward your support@ to it and every email becomes a ticket. Replies from the inbox go back by email, and the customer's email replies thread right back in."
+        >
+          {accountId && (
+            <div className="mt-2 rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-xs">
+              {accountId}@in.suppuo.com
+            </div>
+          )}
+        </ChannelCard>
       </div>
 
       {showForm === 'whatsapp_twilio' && (
@@ -155,6 +203,16 @@ export default function ChannelsPage() {
           onDone={(note) => {
             setShowForm(null);
             setWebhookNote(note);
+            load();
+          }}
+        />
+      )}
+      {showForm === 'whatsapp_cloud' && (
+        <ConnectWhatsAppCloudDialog
+          onClose={() => setShowForm(null)}
+          onDone={(setup) => {
+            setShowForm(null);
+            setCloudSetup(setup);
             load();
           }}
         />
@@ -301,6 +359,63 @@ function ConnectTwilioDialog({ onClose, onDone }: { onClose: () => void; onDone:
         <input required value={accountSid} onChange={(e) => setAccountSid(e.target.value)} placeholder="Account SID (AC…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
         <input required type="password" value={authToken} onChange={(e) => setAuthToken(e.target.value)} placeholder="Auth token" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
         <input required value={number} onChange={(e) => setNumber(e.target.value)} placeholder="WhatsApp number (+62…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          {busy ? 'Verifying…' : 'Connect'}
+        </button>
+      </form>
+    </Dialog>
+  );
+}
+
+function ConnectWhatsAppCloudDialog({
+  onClose,
+  onDone,
+}: {
+  onClose: () => void;
+  onDone: (setup: { webhookUrl: string; verifyToken: string }) => void;
+}) {
+  const [accessToken, setAccessToken] = useState('');
+  const [phoneNumberId, setPhoneNumberId] = useState('');
+  const [displayNumber, setDisplayNumber] = useState('');
+  const [appSecret, setAppSecret] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const { data } = await apiRequest<{ webhookUrl: string; verifyToken: string }>('/channels', {
+        method: 'POST',
+        body: {
+          provider: 'whatsapp_cloud',
+          accessToken,
+          phoneNumberId,
+          displayNumber,
+          appSecret: appSecret || undefined,
+        },
+      });
+      onDone({ webhookUrl: data.webhookUrl, verifyToken: data.verifyToken });
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : 'Could not connect');
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog title="Connect WhatsApp Cloud API (Meta direct)" onClose={onClose}>
+      <p className="text-xs text-muted-foreground">
+        From your Meta App dashboard (WhatsApp → API Setup): a permanent access token and the
+        Phone number ID. Credentials are verified live against Meta, then stored encrypted.
+        You&apos;ll get a webhook URL + verify token to finish setup.
+      </p>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <form onSubmit={submit} className="space-y-2">
+        <input required type="password" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="Access token (EAA…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <input required value={phoneNumberId} onChange={(e) => setPhoneNumberId(e.target.value)} placeholder="Phone number ID (digits)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <input required value={displayNumber} onChange={(e) => setDisplayNumber(e.target.value)} placeholder="WhatsApp number (+62…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <input type="password" value={appSecret} onChange={(e) => setAppSecret(e.target.value)} placeholder="App secret (optional — enables signature checks)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
         <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
           {busy ? 'Verifying…' : 'Connect'}
         </button>

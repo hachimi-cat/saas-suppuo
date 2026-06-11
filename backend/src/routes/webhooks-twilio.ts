@@ -1,17 +1,14 @@
 import { Router } from 'express';
 import express from 'express';
-import { prisma } from '../lib/db.js';
-import { newId } from '../lib/ids.js';
 import { sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
-import { writeOutbox } from '../lib/outbox.js';
-import { nextStatusOnMessage, generateAccessToken } from '../lib/ticket-flow.js';
 import {
   normalizeWhatsAppFrom,
   webhookSecretMatches,
   validateTwilioSignature,
 } from '../lib/twilio.js';
 import { resolveWhatsAppByNumber } from '../lib/channels.js';
+import { ingestInboundPhoneMessage } from '../lib/ticket-ingest.js';
 
 /*
  * POST /api/v1/webhooks/twilio/whatsapp?secret=… — Twilio inbound
@@ -78,71 +75,9 @@ router.post(
       return sendErr(res, req, 400, 'VALIDATION_ERROR', 'From (whatsapp:) and Body required');
     }
 
-    const existing = await prisma.ticket.findFirst({
-      where: { accountId, requesterPhone: phone, status: { not: 'closed' } },
-      orderBy: { lastMessageAt: 'desc' },
-    });
-
-    if (existing) {
-      const nextStatus = nextStatusOnMessage(existing.status as never, 'requester', false);
-      await prisma.$transaction(async (tx) => {
-        const m = await tx.ticketMessage.create({
-          data: {
-            id: newId('tmsg'),
-            ticketId: existing.id,
-            authorType: 'requester',
-            authorName: name ?? phone,
-            body,
-          },
-        });
-        await tx.ticket.update({
-          where: { id: existing.id },
-          data: { status: nextStatus, lastMessageAt: new Date() },
-        });
-        await writeOutbox(tx, {
-          type: 'suppuo.ticket.replied.v1',
-          accountId,
-          aggregateId: existing.id,
-          data: { ticketId: existing.id, messageId: m.id, isInternal: false, by: 'requester' },
-        });
-      });
-    } else {
-      const subject = body.split('\n')[0].slice(0, 120) || 'WhatsApp inquiry';
-      await prisma.$transaction(async (tx) => {
-        const last = await tx.ticket.aggregate({
-          where: { accountId },
-          _max: { number: true },
-        });
-        const t = await tx.ticket.create({
-          data: {
-            id: newId('tkt'),
-            accountId,
-            number: (last._max.number ?? 0) + 1,
-            subject,
-            channel: 'whatsapp',
-            requesterEmail: null,
-            requesterName: name,
-            requesterPhone: phone,
-            accessToken: generateAccessToken(),
-          },
-        });
-        await tx.ticketMessage.create({
-          data: {
-            id: newId('tmsg'),
-            ticketId: t.id,
-            authorType: 'requester',
-            authorName: name ?? phone,
-            body,
-          },
-        });
-        await writeOutbox(tx, {
-          type: 'suppuo.ticket.created.v1',
-          accountId,
-          aggregateId: t.id,
-          data: { ticketId: t.id, number: t.number, subject: t.subject, channel: 'whatsapp' },
-        });
-      });
-    }
+    // Same find-or-create flow as the WhatsApp Cloud webhook — shared
+    // in lib/ticket-ingest.ts.
+    await ingestInboundPhoneMessage({ accountId, phone, name, body, channel: 'whatsapp' });
 
     // Empty TwiML — acknowledge without auto-reply.
     res.type('text/xml').send('<?xml version="1.0" encoding="UTF-8"?><Response/>');

@@ -14,6 +14,7 @@ import {
 } from '../lib/ticket-flow.js';
 import { sendAgentRepliedEmail, sendTicketReceivedEmail } from '../lib/email.js';
 import { sendWhatsApp } from '../lib/twilio.js';
+import { sendWhatsAppCloud } from '../lib/whatsapp-cloud.js';
 import { resolveWhatsAppForAccount } from '../lib/channels.js';
 
 /*
@@ -193,17 +194,25 @@ router.post(
       }
       if (ticket.channel === 'whatsapp' && ticket.requesterPhone) {
         void resolveWhatsAppForAccount(ticket.accountId)
-          .then((ch) =>
-            ch
-              ? sendWhatsApp({
+          .then((ch) => {
+            if (!ch) {
+              return console.warn('[tickets] no whatsapp channel for', ticket.accountId);
+            }
+            return ch.kind === 'cloud'
+              ? sendWhatsAppCloud({
+                  accessToken: ch.accessToken,
+                  phoneNumberId: ch.phoneNumberId,
+                  to: ticket.requesterPhone!,
+                  body: input.body,
+                })
+              : sendWhatsApp({
                   to: ticket.requesterPhone!,
                   body: input.body,
                   accountSid: ch.creds.accountSid,
                   authToken: ch.creds.authToken,
                   from: ch.from,
-                })
-              : console.warn('[tickets] no whatsapp channel for', ticket.accountId),
-          )
+                });
+          })
           .catch((e) => console.error('[tickets] whatsapp reply failed', e));
       }
     }
