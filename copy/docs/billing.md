@@ -14,14 +14,16 @@ no per-seat surprises. Manage your plan at
 | Tier | Price / month | For |
 |---|---|---|
 | **Gratis** | Rp 0 | Trying Suppuo out, or a one-person desk — 2 agents, 100 tickets/month, 10 canned replies, hosted form with Suppuo branding |
-| **Warung** | Rp 99.000 | Small teams — 3 agents, unlimited tickets & canned replies, unbranded form, WhatsApp (beta) 1 number · 500 msgs/bln |
-| **Toko** | Rp 299.000 | Growing teams building on the API — 10 agents, WhatsApp 1 number · 1.500 msgs/bln, REST API + CLI |
-| **Bisnis** | Rp 599.000 | Bigger teams — 25 agents, WhatsApp 3 numbers · 4.000 msgs/bln, priority WhatsApp support |
+| **Warung** | Rp 99.000 | Small teams — 3 agents, unlimited tickets & canned replies, unbranded form, WhatsApp with your own number (1 connected number) |
+| **Toko** | Rp 299.000 | Growing teams building on the API — 10 agents, up to 3 connected WhatsApp numbers, REST API + CLI |
+| **Bisnis** | Rp 599.000 | Bigger teams — 25 agents, unlimited connected WhatsApp numbers, priority support |
 
-WhatsApp overage on paid tiers is Rp 150/message — or skip metering
-entirely on Bisnis by [bringing your own Twilio
-number](/docs/channels#whatsapp-via-your-own-twilio)
-(unlimited messages). The full feature matrix lives on
+WhatsApp is bring-your-own on every paid tier — [connect your own
+Twilio account](/docs/channels#whatsapp-via-your-own-twilio) or
+[Meta's Cloud API](/docs/channels#whatsapp-cloud-api-meta-direct);
+messages are unlimited and billed by your provider, never metered by
+Suppuo. The tiers differ only in how many numbers you can connect
+(1 / 3 / unlimited). The full feature matrix lives on
 [/pricing](/pricing) and in the portal's billing page; both render
 from the same source of truth as the API
 (`GET /api/v1/billing` returns the tier table).
@@ -93,6 +95,7 @@ curl -H "Authorization: Bearer sk_live_…" \
 
 ## See also
 
-- [Channels](/docs/channels) — BYO Twilio = unlimited WhatsApp.
+- [Channels](/docs/channels) — connect your own Twilio or Meta Cloud
+  API number for WhatsApp.
 - [Webhooks](/docs/webhooks) — react to `suppuo.billing.subscribed.v1`.
 - [Getting started](/docs/getting-started) — workspace basics.

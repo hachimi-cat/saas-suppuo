@@ -39,11 +39,12 @@ Channels Suppuo provides on shared infrastructure:
   requesters are sent via Resend from a `suppuo.forjio.com` address by
   default. Want them from your own domain? Connect your own Resend
   account below. See [Email notifications](/docs/email-notifications).
-- **WhatsApp platform number** — **pending**. A shared Suppuo
-  WhatsApp number is awaiting WhatsApp approval. Until it's live, the
-  WhatsApp channel works today by bringing your own number — via
-  Twilio or via Meta's Cloud API directly (both below) — which is also
-  the better deal: unlimited messages, your own number.
+
+WhatsApp is deliberately **not** on this list: Suppuo never provides
+a WhatsApp number. The WhatsApp channel is bring-your-own — connect
+your own Twilio account or Meta's Cloud API directly (both below).
+That keeps the number and the Meta/Twilio relationship yours, with
+unlimited messages billed by your provider, never metered by Suppuo.
 
 ## Bring your own provider (BYO)
 
@@ -330,7 +331,7 @@ integration, outbound replies use the most recently connected one.
 
 ## See also
 
-- [WhatsApp (beta)](/docs/whatsapp) — how WA messages thread into
+- [WhatsApp](/docs/whatsapp) — how WA messages thread into
   tickets.
 - [Live chat widget](/docs/live-chat-widget) — the embeddable chat
   bubble.

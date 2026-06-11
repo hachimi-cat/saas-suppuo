@@ -96,5 +96,5 @@ nothing breaks in development.)
   auto-reply emails.
 - [Hosted support form](/docs/public-form) — where the status link
   leads.
-- [WhatsApp (beta)](/docs/whatsapp) — the channel for customers who
+- [WhatsApp](/docs/whatsapp) — the channel for customers who
   don't do email.

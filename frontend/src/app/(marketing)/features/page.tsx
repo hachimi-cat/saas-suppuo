@@ -27,7 +27,7 @@ const features = [
       'Hosted support form — share the link anywhere',
       'Live chat widget — one <script> tag on your own site',
       'Email-to-ticket — forward support@ to your workspace alias',
-      'WhatsApp (beta) — BYO Twilio or Meta Cloud API today',
+      'WhatsApp — connect your own number via your Twilio or Meta Cloud API account, unlimited messages',
       'Telegram — connect your own bot, replies flow both ways',
       'Manual logging for phone calls, DMs, and walk-ins',
     ],
@@ -121,7 +121,7 @@ export default function FeaturesPage() {
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
           Suppuo is a helpdesk for Indonesian SMEs: customers reach you through six channels —
-          hosted form, live chat, email, WhatsApp (beta), Telegram, or a manually logged call —
+          hosted form, live chat, email, WhatsApp (your own number), Telegram, or a manually logged call —
           agents work everything in one searchable inbox, and requesters stay updated by email
           and a private status link. During early access, all of it is free.
         </p>

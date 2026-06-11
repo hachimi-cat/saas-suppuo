@@ -101,7 +101,7 @@ Suppuo's core. Everything else builds on it.
   your website with one script tag.
 - [Email-to-ticket](/docs/email-to-ticket) — forward your `support@`
   and answer email from the inbox.
-- [Channels](/docs/channels) + [WhatsApp (beta)](/docs/whatsapp) —
+- [Channels](/docs/channels) + [WhatsApp](/docs/whatsapp) —
   receive and answer WhatsApp and Telegram messages from the same
   inbox, with your own number or bot.
 - [Automation & CSAT](/docs/automation-csat) — auto-replies on your

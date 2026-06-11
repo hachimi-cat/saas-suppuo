@@ -42,7 +42,7 @@ export const DOC_NAV: DocMeta[] = [
   { slug: 'public-form', title: 'Hosted support form', group: 'Channels', href: '/docs/public-form' },
   { slug: 'live-chat-widget', title: 'Live chat widget', group: 'Channels', href: '/docs/live-chat-widget' },
   { slug: 'email-to-ticket', title: 'Email-to-ticket', group: 'Channels', href: '/docs/email-to-ticket' },
-  { slug: 'whatsapp', title: 'WhatsApp (beta)', group: 'Channels', href: '/docs/whatsapp' },
+  { slug: 'whatsapp', title: 'WhatsApp', group: 'Channels', href: '/docs/whatsapp' },
   { slug: 'email-notifications', title: 'Email notifications', group: 'Channels', href: '/docs/email-notifications' },
   { slug: 'canned-replies', title: 'Canned replies', group: 'Workspace', href: '/docs/canned-replies' },
   { slug: 'automation-csat', title: 'Automation & CSAT', group: 'Workspace', href: '/docs/automation-csat' },

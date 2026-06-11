@@ -9,9 +9,10 @@ import { Check, Minus } from 'lucide-react';
  * 50% off for 12 months when billing starts, announced 30+ days ahead.
  *
  * The tier lists mirror backend/src/lib/billing.ts TIER_DEFS EXACTLY —
- * keep both in sync. The Suppuo platform WhatsApp number is awaiting
- * approval, so keep the "(beta)" badge on WA rows; BYO Twilio + BYO
- * Meta Cloud API work today. Do NOT invent features beyond this table
+ * keep both in sync. WhatsApp is BYO-ONLY: a workspace connects its own
+ * Twilio account or its own Meta WhatsApp Cloud API number. Suppuo
+ * never provides the number — do not resurrect platform-WA copy in any
+ * form. Do NOT invent features beyond this table
  * (no SLA, no reports page, no knowledge base, no white-label widget —
  * the widget's "Powered by Suppuo" is hardcoded).
  */
@@ -64,8 +65,7 @@ const TIERS: Tier[] = [
       '3 agents',
       'Unlimited tickets + canned replies',
       'Hosted form + status links — no Suppuo branding',
-      'WhatsApp channel (beta) — 1 number · 500 msgs/bln',
-      'WA overage Rp 150/msg',
+      'WhatsApp — your own number (via your Twilio or Meta Cloud API), unlimited messages',
       'Telegram bot channel',
       'Slack + Discord team notifications',
       'CSAT surveys after resolve',
@@ -82,8 +82,7 @@ const TIERS: Tier[] = [
     features: [
       '10 agents',
       'Everything in Warung',
-      'WhatsApp channel (beta) — 1 number · 1.500 msgs/bln',
-      'BYO WhatsApp Cloud API (Meta direct) = unlimited WA',
+      'Up to 3 connected WhatsApp numbers',
       'BYO email — your Resend account + domain',
       'REST API + CLI + webhooks',
       'Email support',
@@ -93,14 +92,13 @@ const TIERS: Tier[] = [
     name: 'Bisnis',
     price: 'Rp 599.000',
     period: '/bln',
-    blurb: 'For bigger teams and multi-number WhatsApp support.',
+    blurb: 'For bigger teams running support across many numbers.',
     earlyAccess: true,
     features: [
       '25 agents',
       'Everything in Toko',
-      'WhatsApp channel (beta) — 3 numbers · 4.000 msgs/bln',
-      'BYO Twilio = unlimited WA messages',
-      'Priority WhatsApp support',
+      'Unlimited connected WhatsApp numbers',
+      'Priority support',
     ],
   },
 ];
@@ -125,22 +123,16 @@ const COMPARISON_ROWS: Row[] = [
   { label: 'File attachments (8MB / file)', values: [true, true, true, true] },
   { label: 'Reports — volume, response times, CSAT', values: [true, true, true, true] },
   {
-    label: 'WhatsApp channel (beta)',
-    values: [false, '1 number · 500 msgs/bln', '1 number · 1.500 msgs/bln', '3 numbers · 4.000 msgs/bln'],
+    label: 'WhatsApp (bring your own Twilio / Meta Cloud API)',
+    values: [false, '1 number', '3 numbers', 'Unlimited'],
   },
-  { label: 'WA overage', values: [false, 'Rp 150/msg', 'Rp 150/msg', 'Rp 150/msg'] },
-  {
-    label: 'BYO WhatsApp Cloud API (Meta direct)',
-    values: [false, false, 'Unlimited WA', 'Unlimited WA'],
-  },
-  { label: 'BYO Twilio WhatsApp', values: [false, false, false, 'Unlimited WA'] },
   { label: 'Telegram bot channel', values: [false, true, true, true] },
   { label: 'Slack + Discord team notifications', values: [false, true, true, true] },
   { label: 'CSAT surveys after resolve', values: [false, true, true, true] },
   { label: 'Auto-response + business hours (WIB)', values: [false, true, true, true] },
   { label: 'BYO email (your Resend + domain)', values: [false, false, true, true] },
   { label: 'REST API + CLI + webhooks', values: [false, false, true, true] },
-  { label: 'Support', values: ['Community', 'Email', 'Email', 'Priority WhatsApp'] },
+  { label: 'Support', values: ['Community', 'Email', 'Email', 'Priority'] },
 ];
 
 export default function PricingPage() {
@@ -263,10 +255,10 @@ export default function PricingPage() {
           </table>
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          The shared Suppuo WhatsApp number is awaiting WhatsApp approval — until it&apos;s
-          live, WhatsApp works today by bringing your own number (Twilio on Bisnis, or
-          Meta&apos;s Cloud API direct on Toko+), with unlimited messages through your own
-          account. Email notifications are outbound updates to your requesters; connect
+          WhatsApp on Suppuo is bring-your-own-number: connect your own Twilio account or
+          Meta&apos;s WhatsApp Cloud API in minutes, and messages are unlimited — you pay
+          your provider directly, Suppuo never meters them and never provides the number.
+          Email notifications are outbound updates to your requesters; connect
           your own Resend on Toko+ to send them from your domain.
         </p>
       </div>

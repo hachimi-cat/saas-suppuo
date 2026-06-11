@@ -27,9 +27,9 @@ itself so you always know who's waiting on whom.
 - **Email-to-ticket** — forward your `support@` to your workspace's
   inbound address and every email becomes a ticket. See
   [Email-to-ticket](/docs/email-to-ticket).
-- **WhatsApp channel (beta)** — inbound WhatsApp messages become
+- **WhatsApp channel** — inbound WhatsApp messages become
   tickets and agent replies go back over WhatsApp, via your own
-  Twilio or Meta account. See [WhatsApp](/docs/whatsapp).
+  Twilio or Meta Cloud API account. See [WhatsApp](/docs/whatsapp).
 - **Telegram, Slack & Discord** — a Telegram bot as a customer
   channel; Slack/Discord webhooks for team notifications. See
   [Channels](/docs/channels).

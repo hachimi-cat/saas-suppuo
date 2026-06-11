@@ -1,8 +1,8 @@
 ---
-title: "WhatsApp (beta)"
+title: "WhatsApp"
 ---
 
-# WhatsApp channel (beta)
+# WhatsApp channel
 
 Pelanggan Indonesia hidup di WhatsApp — dengan channel ini, chat WA
 masuk ke inbox Suppuo sebagai tiket, dan balasan agen terkirim balik ke
@@ -10,24 +10,25 @@ WA pelanggan. With the WhatsApp channel, customers chat on the number
 they already know, and your team answers from the same Suppuo inbox as
 everything else.
 
-> **Beta.** Three ways to get a number on your workspace:
+> **Bring your own number.** Suppuo never provides the WhatsApp
+> number — the number, and the Twilio or Meta relationship behind it,
+> is yours. Two ways to connect, both self-serve and live today:
 >
-> - **Bring your own Twilio (self-serve, live today)** — connect your
->   own Twilio account + WhatsApp number at
->   [/dashboard/channels](/dashboard/channels) in a couple of minutes.
->   Unlimited messages — you pay Twilio directly, Suppuo doesn't meter
->   them. Setup steps in
+> - **Your own Twilio** — connect your own Twilio account + WhatsApp
+>   number at [/dashboard/channels](/dashboard/channels) in a couple
+>   of minutes. Unlimited messages — you pay Twilio directly, Suppuo
+>   doesn't meter them. Setup steps in
 >   [Channels](/docs/channels#whatsapp-via-your-own-twilio).
-> - **Bring your own Meta WhatsApp Business (self-serve, live today)**
->   — connect Meta's Cloud API directly, no Twilio in between. Setup
->   steps in
+> - **Your own Meta WhatsApp Cloud API** — connect Meta's Cloud API
+>   directly, no Twilio in between. Same deal: unlimited messages,
+>   billed by Meta, never metered by Suppuo. Setup steps in
 >   [Channels](/docs/channels#whatsapp-cloud-api-meta-direct).
-> - **Suppuo platform number (pending)** — a shared, metered Suppuo
->   number is awaiting WhatsApp approval and isn't live yet.
 >
-> One WhatsApp number per workspace in the beta (if you connect both
-> a Twilio and a Cloud API number, replies go out via the most
-> recently connected one).
+> How many numbers a workspace can connect depends on the plan —
+> 1 on Warung, up to 3 on Toko, unlimited on Bisnis (see
+> [/pricing](/pricing); limits are enforced at launch). With several
+> numbers connected, agent replies currently go out via the most
+> recently connected one.
 
 ## Which workspace gets the message?
 
@@ -105,22 +106,20 @@ text-only for now — media isn't stored yet. Outbound agent
 attachments aren't pushed over WhatsApp on either provider; customers
 view them on their status page.
 
-## Beta limitations, honestly
+## Limitations, honestly
 
-- **The shared platform number isn't live yet** — today the channel
-  requires bringing your own number, via Twilio or Meta's Cloud API
-  (both self-serve at [/dashboard/channels](/dashboard/channels)).
-  One provider-console step is manual either way: pointing the
+- **You bring the number** — Suppuo never provides one. Connecting is
+  self-serve at [/dashboard/channels](/dashboard/channels), but one
+  provider-console step is manual either way: pointing the
   incoming-message webhook at the URL Suppuo gives you — see
   [Channels](/docs/channels#bring-your-own-provider-byo).
-- **One number per workspace**, and one workspace per number.
+- **One workspace per number** — a number routes to exactly one
+  inbox. With several numbers connected on one workspace, outbound
+  replies go via the most recently connected one.
 - Cloud API inbound is **text-first** (no media yet); Twilio inbound
   media is stored.
 - No WhatsApp message templates / outbound-first messaging — the
   channel is for replying within conversations customers start.
-
-Multi-number workspaces are on the roadmap as the channel graduates
-from beta.
 
 ## See also
 

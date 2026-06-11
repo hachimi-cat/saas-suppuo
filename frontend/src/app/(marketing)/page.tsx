@@ -182,7 +182,7 @@ export default function HomePage() {
                 Icon: Inbox,
                 title: 'Six channels, one inbox',
                 body:
-                  'Hosted form, live chat widget, email-to-ticket, WhatsApp (beta), Telegram, and manual logging — every conversation lands in the same shared queue.',
+                  'Hosted form, live chat widget, email-to-ticket, WhatsApp (your own number via Twilio or Meta Cloud API), Telegram, and manual logging — every conversation lands in the same shared queue.',
               },
               {
                 Icon: ClipboardList,
@@ -360,7 +360,7 @@ export default function HomePage() {
                   { cap: 'Customer status link, no login', s: true, a: false, b: 'Varies' },
                   { cap: 'Canned replies + auto-response', s: true, a: false, b: true },
                   { cap: 'Live chat + email-to-ticket + Telegram', s: true, a: false, b: 'Often add-ons' },
-                  { cap: 'WhatsApp as a channel', s: 'Built in (beta)', a: 'It IS the channel — and the chaos', b: 'Often an add-on' },
+                  { cap: 'WhatsApp as a channel', s: 'Bring your own Twilio / Meta Cloud API', a: 'It IS the channel — and the chaos', b: 'Often an add-on' },
                   { cap: 'CSAT surveys', s: true, a: false, b: true },
                   { cap: 'One login for sister products', s: true, a: false, b: false },
                 ].map((row) => (
@@ -563,8 +563,8 @@ export default function HomePage() {
                 a: 'You keep your data and your workspace drops to the Gratis tier (2 agents, 100 tickets/month). Export is available on every tier, paid or not — no bait-and-switch, no data hostage.',
               },
               {
-                q: 'How does the WhatsApp channel work?',
-                a: 'Customer WhatsApp chats become tickets in your shared inbox, photos and media included, and agent replies go back to the chat. The shared Suppuo number is awaiting WhatsApp approval — until it’s live, connect your own number today: your own Twilio account (Bisnis) or Meta’s WhatsApp Cloud API direct (Toko and up), both with unlimited messages through your own account. Platform-number tiers include a monthly allowance; beyond it, messages are Rp 150 each.',
+                q: 'How does the WhatsApp channel work? Is there a Suppuo number?',
+                a: 'Customer WhatsApp chats become tickets in your shared inbox, photos and media included, and agent replies go back to the chat. There is no shared Suppuo number — you connect your own in minutes, via your own Twilio account or Meta’s WhatsApp Cloud API direct. Messages are unlimited: you pay your provider directly, and Suppuo never meters them. Your number, your Meta or Twilio relationship — Suppuo is the inbox on top.',
               },
               {
                 q: 'Do my customers need an account to submit or track a ticket?',
@@ -572,7 +572,7 @@ export default function HomePage() {
               },
               {
                 q: 'Can customers email us a ticket instead of using the form?',
-                a: 'Yes. Every workspace gets an inbound address — forward your support@ to it and every email becomes a ticket, with replies threading both ways. The form, live chat widget, WhatsApp (beta), Telegram, and manual logging all land in the same inbox.',
+                a: 'Yes. Every workspace gets an inbound address — forward your support@ to it and every email becomes a ticket, with replies threading both ways. The form, live chat widget, WhatsApp, Telegram, and manual logging all land in the same inbox.',
               },
               {
                 q: 'What about SLAs, reports, or a knowledge base?',
@@ -651,8 +651,8 @@ export default function HomePage() {
 
 // Per-WORKSPACE flat pricing — the whole team, one price. Source of
 // truth is backend/src/lib/billing.ts TIER_DEFS (condensed here);
-// /pricing has the full comparison table. WhatsApp rows stay "(beta)"
-// while the platform number awaits approval — BYO works today.
+// /pricing has the full comparison table. WhatsApp is BYO-ONLY (your
+// own Twilio or Meta Cloud API number) — Suppuo never provides one.
 const PRICING_TIERS = [
   {
     name: 'Gratis',
@@ -678,7 +678,7 @@ const PRICING_TIERS = [
     features: [
       '3 agents · unlimited tickets + canned replies',
       'No Suppuo branding on your form',
-      'WhatsApp (beta) — 1 number · 500 msgs/bln',
+      'WhatsApp — your own number (Twilio or Meta Cloud API), unlimited messages',
       'Telegram bot + Slack/Discord notifications',
       'CSAT surveys + auto-response with business hours',
       'Email support',
@@ -692,8 +692,7 @@ const PRICING_TIERS = [
     popular: false,
     features: [
       '10 agents · everything in Warung',
-      'WhatsApp (beta) — 1 number · 1.500 msgs/bln',
-      'BYO WhatsApp Cloud API = unlimited WA',
+      'Up to 3 connected WhatsApp numbers',
       'BYO email — your Resend + domain',
       'REST API + CLI + webhooks',
       'Email support',
@@ -707,9 +706,8 @@ const PRICING_TIERS = [
     popular: false,
     features: [
       '25 agents · everything in Toko',
-      'WhatsApp (beta) — 3 numbers · 4.000 msgs/bln',
-      'BYO Twilio = unlimited WA messages',
-      'Priority WhatsApp support',
+      'Unlimited connected WhatsApp numbers',
+      'Priority support',
     ],
   },
 ] as const;
