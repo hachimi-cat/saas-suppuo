@@ -125,6 +125,9 @@ jobs:
           # run `next start` on the droplet (pawpado/ripllo model), not
           # the template's static-export `serve out/`.
           name: frontend-out
+          # .next is a dotdir — upload-artifact skips hidden files by
+          # default, which silently ships an artifact with NO build.
+          include-hidden-files: true
           path: |
             frontend/.next/
             frontend/public/
