@@ -15,6 +15,7 @@ import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
 import webhooksTwilioRouter from './webhooks-twilio.js';
 import webhooksWhatsappCloudRouter from './webhooks-whatsapp-cloud.js';
+import webhooksTelegramRouter from './webhooks-telegram.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import webhooksResendRouter from './webhooks-resend.js';
 import adminCustomersRouter from './admin-customers.js';
@@ -92,10 +93,12 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Billing — Plugipay-powered plan subscriptions. */
   router.use('/billing', requireAuth, billingRouter);
-  /** Inbound channel webhooks (Twilio WhatsApp). */
+  /** Inbound channel webhooks (Twilio WhatsApp, Telegram bots). */
   router.use('/webhooks/twilio', webhooksTwilioRouter);
   /** WhatsApp Cloud API (Meta direct) — handshake GET + message POST. */
   router.use('/webhooks/whatsapp-cloud', webhooksWhatsappCloudRouter);
+  /** Telegram bot updates — per-integration path + secret. */
+  router.use('/webhooks/telegram', webhooksTelegramRouter);
   /** Plugipay billing webhooks (HMAC-signed, no session auth). */
   router.use('/webhooks/plugipay', webhooksPlugipayRouter);
   /** Resend inbound email → tickets (svix-signed, no session auth). */

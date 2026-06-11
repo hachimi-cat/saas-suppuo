@@ -1,5 +1,6 @@
 import { prisma } from '../lib/db.js';
 import { buildWebhookSignature, SIGNATURE_HEADER } from '../lib/webhook-signature.js';
+import { notifyTeamChannels } from '../lib/team-notify.js';
 
 /**
  * Outbox polling worker — ADR-0006.
@@ -82,6 +83,13 @@ async function deliver(ev: {
     } catch (e) {
       console.error('[outbox] webhook fan-out failed', ev.id, e);
     }
+
+    // Team notifications (Slack/Discord incoming webhooks) — same
+    // fire-and-forget semantics; lib/team-notify.ts filters event
+    // types (created + requester replies) and applies the 5s timeout.
+    void notifyTeamChannels(ev).catch((e) =>
+      console.error('[outbox] team notification fan-out failed', ev.id, e),
+    );
   }
 
   // TODO: cross-service fan-out via Huudis subscription CRUD (Huudis

@@ -15,7 +15,8 @@ import {
 import { sendAgentRepliedEmail, sendTicketReceivedEmail } from '../lib/email.js';
 import { sendWhatsApp } from '../lib/twilio.js';
 import { sendWhatsAppCloud } from '../lib/whatsapp-cloud.js';
-import { resolveWhatsAppForAccount } from '../lib/channels.js';
+import { sendTelegramMessage } from '../lib/telegram.js';
+import { resolveWhatsAppForAccount, resolveTelegramForAccount } from '../lib/channels.js';
 
 /*
  * /api/v1/tickets — the agent workspace surface (behind requireAuth;
@@ -214,6 +215,19 @@ router.post(
                 });
           })
           .catch((e) => console.error('[tickets] whatsapp reply failed', e));
+      }
+      if (ticket.channel === 'telegram' && ticket.requesterExternalId) {
+        void resolveTelegramForAccount(ticket.accountId)
+          .then((ch) =>
+            ch
+              ? sendTelegramMessage({
+                  botToken: ch.botToken,
+                  chatId: ticket.requesterExternalId!,
+                  text: input.body,
+                })
+              : console.warn('[tickets] no telegram channel for', ticket.accountId),
+          )
+          .catch((e) => console.error('[tickets] telegram reply failed', e));
       }
     }
 

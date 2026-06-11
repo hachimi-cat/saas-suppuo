@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Globe, Mail, MessageCircle, MessageSquare, PenLine, Plug, Trash2 } from 'lucide-react';
+import { Bell, Globe, Hash, Mail, MessageCircle, MessageSquare, PenLine, Plug, Send, Trash2 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
 
 interface Integration {
@@ -29,7 +29,13 @@ export default function ChannelsPage() {
   const [data, setData] = useState<ChannelsPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<
-    'whatsapp_twilio' | 'whatsapp_cloud' | 'email_resend' | null
+    | 'whatsapp_twilio'
+    | 'whatsapp_cloud'
+    | 'email_resend'
+    | 'telegram_bot'
+    | 'slack_webhook'
+    | 'discord_webhook'
+    | null
   >(null);
   const [webhookNote, setWebhookNote] = useState<string | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -163,6 +169,21 @@ export default function ChannelsPage() {
           <WidgetEmbed accountId={accountId} />
         </ChannelCard>
 
+        {/* Email-to-ticket (Resend inbound) */}
+        <ChannelCard
+          icon={<Mail className="h-5 w-5" />}
+          title="Email-to-ticket (inbound)"
+          status="active"
+          statusLabel="Always on"
+          description="Your workspace has a dedicated inbound address — forward your support@ to it and every email becomes a ticket. Replies from the inbox go back by email, and the customer's email replies thread right back in."
+        >
+          {accountId && (
+            <div className="mt-2 rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-xs">
+              {accountId}@in.suppuo.com
+            </div>
+          )}
+        </ChannelCard>
+
         {/* WhatsApp Cloud API (Meta direct) */}
         <ChannelCard
           icon={<MessageCircle className="h-5 w-5" />}
@@ -181,19 +202,58 @@ export default function ChannelsPage() {
           ))}
         </ChannelCard>
 
-        {/* Email-to-ticket (Resend inbound) */}
+        {/* Telegram */}
         <ChannelCard
-          icon={<Mail className="h-5 w-5" />}
-          title="Email-to-ticket (inbound)"
-          status="active"
-          statusLabel="Always on"
-          description="Your workspace has a dedicated inbound address — forward your support@ to it and every email becomes a ticket. Replies from the inbox go back by email, and the customer's email replies thread right back in."
+          icon={<Send className="h-5 w-5" />}
+          title="Telegram bot"
+          status={byo('telegram_bot').length > 0 ? 'active' : 'pending'}
+          statusLabel={byo('telegram_bot').length > 0 ? 'Bot connected' : 'Not connected'}
+          description="Messages to your Telegram bot become tickets; agent replies go back to the chat. Create a bot with @BotFather and paste its token — the webhook is registered automatically."
+          action={
+            <button onClick={() => setShowForm('telegram_bot')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
+              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect your bot
+            </button>
+          }
         >
-          {accountId && (
-            <div className="mt-2 rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-xs">
-              {accountId}@in.suppuo.com
-            </div>
-          )}
+          {byo('telegram_bot').map((i) => (
+            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+          ))}
+        </ChannelCard>
+
+        {/* Slack — team notifications */}
+        <ChannelCard
+          icon={<Hash className="h-5 w-5" />}
+          title="Slack notifications"
+          status={byo('slack_webhook').length > 0 ? 'active' : 'pending'}
+          statusLabel={byo('slack_webhook').length > 0 ? 'Connected' : 'Not connected'}
+          description="Get a Slack message when a ticket is opened or a customer replies. Paste an incoming-webhook URL — we post a test message to verify it."
+          action={
+            <button onClick={() => setShowForm('slack_webhook')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
+              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect Slack
+            </button>
+          }
+        >
+          {byo('slack_webhook').map((i) => (
+            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+          ))}
+        </ChannelCard>
+
+        {/* Discord — team notifications */}
+        <ChannelCard
+          icon={<Bell className="h-5 w-5" />}
+          title="Discord notifications"
+          status={byo('discord_webhook').length > 0 ? 'active' : 'pending'}
+          statusLabel={byo('discord_webhook').length > 0 ? 'Connected' : 'Not connected'}
+          description="Get a Discord message when a ticket is opened or a customer replies. Paste a channel webhook URL (Server Settings → Integrations → Webhooks)."
+          action={
+            <button onClick={() => setShowForm('discord_webhook')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
+              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect Discord
+            </button>
+          }
+        >
+          {byo('discord_webhook').map((i) => (
+            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+          ))}
         </ChannelCard>
       </div>
 
@@ -219,6 +279,25 @@ export default function ChannelsPage() {
       )}
       {showForm === 'email_resend' && (
         <ConnectResendDialog
+          onClose={() => setShowForm(null)}
+          onDone={() => {
+            setShowForm(null);
+            load();
+          }}
+        />
+      )}
+      {showForm === 'telegram_bot' && (
+        <ConnectTelegramDialog
+          onClose={() => setShowForm(null)}
+          onDone={() => {
+            setShowForm(null);
+            load();
+          }}
+        />
+      )}
+      {(showForm === 'slack_webhook' || showForm === 'discord_webhook') && (
+        <ConnectWebhookDialog
+          provider={showForm}
           onClose={() => setShowForm(null)}
           onDone={() => {
             setShowForm(null);
@@ -460,6 +539,92 @@ function ConnectResendDialog({ onClose, onDone }: { onClose: () => void; onDone:
         <input value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="From name (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
         <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
           {busy ? 'Verifying…' : 'Connect'}
+        </button>
+      </form>
+    </Dialog>
+  );
+}
+
+function ConnectTelegramDialog({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
+  const [botToken, setBotToken] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await apiRequest('/channels', {
+        method: 'POST',
+        body: { provider: 'telegram_bot', botToken },
+      });
+      onDone();
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : 'Could not connect');
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog title="Connect your Telegram bot" onClose={onClose}>
+      <p className="text-xs text-muted-foreground">
+        Create a bot with @BotFather and paste its token. We verify it live, store it
+        encrypted, and register the inbound webhook for you — no manual setup.
+      </p>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <form onSubmit={submit} className="space-y-2">
+        <input required type="password" value={botToken} onChange={(e) => setBotToken(e.target.value)} placeholder="Bot token (123456789:AA…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          {busy ? 'Verifying…' : 'Connect'}
+        </button>
+      </form>
+    </Dialog>
+  );
+}
+
+function ConnectWebhookDialog({
+  provider,
+  onClose,
+  onDone,
+}: {
+  provider: 'slack_webhook' | 'discord_webhook';
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const isSlack = provider === 'slack_webhook';
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await apiRequest('/channels', {
+        method: 'POST',
+        body: { provider, webhookUrl },
+      });
+      onDone();
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : 'Could not connect');
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog title={isSlack ? 'Connect Slack notifications' : 'Connect Discord notifications'} onClose={onClose}>
+      <p className="text-xs text-muted-foreground">
+        {isSlack
+          ? 'Slack → your channel → Add an app → Incoming Webhooks → copy the webhook URL. We post a "connected ✓" test message to verify it, then store it encrypted.'
+          : 'Discord → Server Settings → Integrations → Webhooks → copy the webhook URL. We post a "connected ✓" test message to verify it, then store it encrypted.'}
+      </p>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <form onSubmit={submit} className="space-y-2">
+        <input required type="url" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)} placeholder={isSlack ? 'https://hooks.slack.com/services/…' : 'https://discord.com/api/webhooks/…'} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          {busy ? 'Sending test message…' : 'Connect'}
         </button>
       </form>
     </Dialog>
