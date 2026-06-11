@@ -49,6 +49,7 @@ const TIERS: Tier[] = [
       'Email-to-ticket alias',
       'Email notifications',
       'File attachments up to 8MB',
+      'Reports — volume, response times, CSAT',
       'Community support',
     ],
   },
@@ -122,6 +123,7 @@ const COMPARISON_ROWS: Row[] = [
   { label: 'Email-to-ticket alias', values: [true, true, true, true] },
   { label: 'Email notifications', values: [true, true, true, true] },
   { label: 'File attachments (8MB / file)', values: [true, true, true, true] },
+  { label: 'Reports — volume, response times, CSAT', values: [true, true, true, true] },
   {
     label: 'WhatsApp channel (beta)',
     values: [false, '1 number · 500 msgs/bln', '1 number · 1.500 msgs/bln', '3 numbers · 4.000 msgs/bln'],

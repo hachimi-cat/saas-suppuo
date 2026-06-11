@@ -44,6 +44,7 @@ export const TIER_DEFS: readonly TierDef[] = [
       'Email-to-ticket alias',
       'Email notifications',
       'File attachments up to 8MB',
+      'Reports — volume, response times, CSAT',
       'Community support',
     ],
   },
