@@ -41,3 +41,16 @@ describe('guards + token', () => {
     expect(a).toMatch(/^[A-Za-z0-9_-]{32}$/);
   });
 });
+
+import { normalizeWhatsAppFrom } from '../lib/twilio.js';
+
+describe('normalizeWhatsAppFrom', () => {
+  it('extracts E.164 from whatsapp: addresses', () => {
+    expect(normalizeWhatsAppFrom('whatsapp:+6281234567890')).toBe('+6281234567890');
+  });
+  it('rejects non-whatsapp values', () => {
+    expect(normalizeWhatsAppFrom('+6281234567890')).toBe(null);
+    expect(normalizeWhatsAppFrom('whatsapp:invalid')).toBe(null);
+    expect(normalizeWhatsAppFrom(42)).toBe(null);
+  });
+});

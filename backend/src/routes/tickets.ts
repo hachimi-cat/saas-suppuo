@@ -13,6 +13,7 @@ import {
   TICKET_STATUSES,
 } from '../lib/ticket-flow.js';
 import { sendAgentRepliedEmail, sendTicketReceivedEmail } from '../lib/email.js';
+import { sendWhatsApp } from '../lib/twilio.js';
 
 /*
  * /api/v1/tickets — the agent workspace surface (behind requireAuth;
@@ -102,12 +103,14 @@ router.post(
       return t;
     });
 
-    void sendTicketReceivedEmail({
-      to: ticket.requesterEmail,
-      ticketNumber: ticket.number,
-      subject: ticket.subject,
-      accessToken: ticket.accessToken,
-    }).catch((e) => console.error('[tickets] received-email failed', e));
+    if (ticket.requesterEmail) {
+      void sendTicketReceivedEmail({
+        to: ticket.requesterEmail,
+        ticketNumber: ticket.number,
+        subject: ticket.subject,
+        accessToken: ticket.accessToken,
+      }).catch((e) => console.error('[tickets] received-email failed', e));
+    }
 
     sendCreated(res, req, ticket);
   }),
@@ -175,14 +178,21 @@ router.post(
     });
 
     if (!isInternal) {
-      void sendAgentRepliedEmail({
-        to: ticket.requesterEmail,
-        ticketNumber: ticket.number,
-        subject: ticket.subject,
-        accessToken: ticket.accessToken,
-        replyBody: input.body,
-        agentName: input.authorName ?? null,
-      }).catch((e) => console.error('[tickets] replied-email failed', e));
+      if (ticket.requesterEmail) {
+        void sendAgentRepliedEmail({
+          to: ticket.requesterEmail,
+          ticketNumber: ticket.number,
+          subject: ticket.subject,
+          accessToken: ticket.accessToken,
+          replyBody: input.body,
+          agentName: input.authorName ?? null,
+        }).catch((e) => console.error('[tickets] replied-email failed', e));
+      }
+      if (ticket.channel === 'whatsapp' && ticket.requesterPhone) {
+        void sendWhatsApp({ to: ticket.requesterPhone, body: input.body }).catch((e) =>
+          console.error('[tickets] whatsapp reply failed', e),
+        );
+      }
     }
 
     sendCreated(res, req, { message, status: nextStatus });

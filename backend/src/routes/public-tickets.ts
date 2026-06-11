@@ -72,7 +72,7 @@ router.post(
     });
 
     void sendTicketReceivedEmail({
-      to: ticket.requesterEmail,
+      to: ticket.requesterEmail!,
       ticketNumber: ticket.number,
       subject: ticket.subject,
       accessToken: ticket.accessToken,

@@ -11,6 +11,7 @@ import ticketsRouter from './tickets.js';
 import adminCrmRouter from './admin-crm.js';
 import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
+import webhooksTwilioRouter from './webhooks-twilio.js';
 import adminCustomersRouter from './admin-customers.js';
 
 /**
@@ -79,6 +80,8 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/canned-replies', requireAuth, cannedRepliesRouter);
   /** Requester-facing public surface — tokenized, rate-limited. */
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
+  /** Inbound channel webhooks (Twilio WhatsApp). */
+  router.use('/webhooks/twilio', webhooksTwilioRouter);
 
   // Products mount their own routers here, e.g.:
   //   router.use('/widgets', widgetsRouter);

@@ -25,7 +25,8 @@ interface Ticket {
   status: string;
   priority: string;
   channel: string;
-  requesterEmail: string;
+  requesterEmail: string | null;
+  requesterPhone: string | null;
   requesterName: string | null;
   createdAt: string;
   messages: Message[];
@@ -116,7 +117,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
           </h1>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {ticket.requesterName ?? ticket.requesterEmail} ({ticket.requesterEmail}) · via{' '}
+          {ticket.requesterName ?? ticket.requesterEmail ?? ticket.requesterPhone} ({ticket.requesterEmail ?? ticket.requesterPhone}) · via{' '}
           {ticket.channel} · {new Date(ticket.createdAt).toLocaleString('en-GB')}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">

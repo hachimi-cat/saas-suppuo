@@ -17,7 +17,8 @@ interface Ticket {
   status: string;
   priority: string;
   channel: string;
-  requesterEmail: string;
+  requesterEmail: string | null;
+  requesterPhone: string | null;
   requesterName: string | null;
   lastMessageAt: string;
   createdAt: string;
@@ -137,7 +138,7 @@ export default function InboxPage() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">{t.subject}</span>
                 <span className="block truncate text-xs text-muted-foreground">
-                  {t.requesterName ?? t.requesterEmail} · {t.channel}
+                  {t.requesterName ?? t.requesterEmail ?? t.requesterPhone} · {t.channel}
                 </span>
               </span>
               <span className={`hidden text-xs font-medium capitalize sm:block ${PRIORITY_TONES[t.priority] ?? ''}`}>

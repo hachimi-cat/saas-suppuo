@@ -18,17 +18,17 @@ datasource db {
 /// here inside the same transaction as the change itself. A polling
 /// worker reads unpublished rows and fans out to HTTP subscribers.
 model OutboxEvent {
-  id           String   @id // ULID, globally unique (evt_*)
-  type         String   // e.g. "suppuo.entity.verb.v1"
-  accountId    String?  // event scope; null for global events
-  aggregateId  String?  // top-level aggregate id (for indexed queries per entity)
-  occurredAt   DateTime
-  data         Json
-  metadata     Json     @default("{}")
-  createdAt    DateTime @default(now())
-  publishedAt  DateTime?
-  attempts     Int      @default(0)
-  lastError    String?
+  id          String    @id // ULID, globally unique (evt_*)
+  type        String // e.g. "suppuo.entity.verb.v1"
+  accountId   String? // event scope; null for global events
+  aggregateId String? // top-level aggregate id (for indexed queries per entity)
+  occurredAt  DateTime
+  data        Json
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  publishedAt DateTime?
+  attempts    Int       @default(0)
+  lastError   String?
 
   @@index([publishedAt, createdAt], name: "ix_outbox_unpublished")
   @@index([accountId, type])
@@ -63,8 +63,12 @@ model Ticket {
   priority       String   @default("normal")
   /// web | email | whatsapp — how the ticket arrived.
   channel        String   @default("web")
-  requesterEmail String
+  /// Email OR phone identifies the requester (web/email tickets have
+  /// email; WhatsApp tickets have phone — either may be absent).
+  requesterEmail String?
   requesterName  String?
+  /// E.164 phone for WhatsApp-channel tickets (e.g. +62812…).
+  requesterPhone String?
   /// Huudis sub of the assigned agent (workspace member), if any.
   assigneeSub    String?
   /// Opaque token for the requester's status link (/t/<token>).
@@ -77,6 +81,7 @@ model Ticket {
 
   @@unique([accountId, number])
   @@index([accountId, status, lastMessageAt])
+  @@index([accountId, requesterPhone])
   @@map("tickets")
 }
 
