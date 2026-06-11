@@ -4,6 +4,7 @@ import {
   verifySvixSignature,
   accountIdFromAddress,
   isLikelyAccountId,
+  parseFromAddress,
   trimQuotedReply,
 } from '../routes/webhooks-resend.js';
 
@@ -75,6 +76,31 @@ describe('accountIdFromAddress', () => {
   it('rejects foreign domains', () => {
     expect(accountIdFromAddress('acc_x@gmail.com')).toBeNull();
     expect(accountIdFromAddress('acc_x@in.suppuo.com.evil.com')).toBeNull();
+  });
+});
+
+describe('parseFromAddress', () => {
+  it('keeps the FULL local-part of a bare address (the prod regression)', () => {
+    expect(parseFromAddress('noreply@suppuo.forjio.com')).toEqual({
+      email: 'noreply@suppuo.forjio.com',
+      name: null,
+    });
+  });
+  it('parses Name <email>', () => {
+    expect(parseFromAddress('Gojo E2E <NoReply@Suppuo.forjio.com>')).toEqual({
+      email: 'noreply@suppuo.forjio.com',
+      name: 'Gojo E2E',
+    });
+  });
+  it('parses quoted "Name" <email>', () => {
+    expect(parseFromAddress('"Budi S." <budi@toko.id>')).toEqual({
+      email: 'budi@toko.id',
+      name: 'Budi S.',
+    });
+  });
+  it('returns nulls on garbage', () => {
+    expect(parseFromAddress('not an address')).toEqual({ email: null, name: null });
+    expect(parseFromAddress('')).toEqual({ email: null, name: null });
   });
 });
 

@@ -67,6 +67,20 @@ export function accountIdFromAddress(addr: string): string | null {
   return m[1] ?? null;
 }
 
+/** Parse a From value — Resend's email.received sends a BARE address
+ *  (verified on prod 2026-06-11: a greedy name-group regex here ate the
+ *  local-part of bare addresses, mangling noreply@… into y@…). Handle
+ *  the angle-bracket form too for robustness. */
+export function parseFromAddress(raw: string): { email: string | null; name: string | null } {
+  const s = raw.trim();
+  const angled = /^"?([^"<>]*?)"?\s*<([^<>\s]+@[^<>\s]+)>$/.exec(s);
+  if (angled) {
+    return { email: (angled[2] ?? '').toLowerCase() || null, name: angled[1]?.trim() || null };
+  }
+  if (/^[^\s@<>]+@[^\s@<>]+$/.test(s)) return { email: s.toLowerCase(), name: null };
+  return { email: null, name: null };
+}
+
 /** Light reply-trim: drop trailing quoted chains ("On … wrote:" / "> ") so
  *  forwarded-thread replies don't bloat tickets. Conservative — only
  *  strips from the first marker line onward, never the whole body. */
@@ -170,11 +184,9 @@ router.post(
       return sendOk(res, req, { dropped: 'no workspace inbound alias matched' });
     }
 
-    // From: may be "Name <a@b.c>" or bare.
-    const fromRaw = event.data.from ?? '';
-    const fromMatch = /^(?:"?([^"<]*)"?\s*)?<?([^<>\s]+@[^<>\s]+)>?$/.exec(fromRaw.trim());
-    const requesterEmail = fromMatch?.[2]?.toLowerCase() ?? null;
-    const requesterName = fromMatch?.[1]?.trim() || null;
+    const { email: requesterEmail, name: requesterName } = parseFromAddress(
+      event.data.from ?? '',
+    );
     if (!requesterEmail) {
       await prisma.processedEvent.create({ data: { eventId } });
       return sendOk(res, req, { dropped: 'unparseable from address' });
