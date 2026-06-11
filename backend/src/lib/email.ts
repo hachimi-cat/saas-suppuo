@@ -62,6 +62,26 @@ export async function sendTicketReceivedEmail(opts: {
   );
 }
 
+/** Post-resolve CSAT survey — three one-click emoji links onto the
+ *  tokenized /t/<token>/rate page. Sent at most once per ticket (the
+ *  outbox consumer guards on tickets.csatSentAt). */
+export async function sendCsatSurveyEmail(opts: {
+  accountId: string;
+  to: string;
+  ticketNumber: number;
+  subject: string;
+  accessToken: string;
+}): Promise<void> {
+  const rate = (score: number) => `${PORTAL}/t/${opts.accessToken}/rate?score=${score}`;
+  await send(
+    opts.accountId,
+    opts.to,
+    `[#${opts.ticketNumber}] How did we do? — ${opts.subject}`,
+    `<div style="font-family:sans-serif;max-width:520px"><p>Your ticket <strong>#${opts.ticketNumber}</strong> (${opts.subject}) was resolved.</p><p>How did we do? One click is all it takes:</p><p style="font-size:32px;text-align:center"><a href="${rate(1)}" style="text-decoration:none;margin:0 14px">&#128542;</a><a href="${rate(2)}" style="text-decoration:none;margin:0 14px">&#128528;</a><a href="${rate(3)}" style="text-decoration:none;margin:0 14px">&#128522;</a></p><p style="color:#888;font-size:12px">Powered by Suppuo — helpdesk for Indonesian SMEs.</p></div>`,
+    `Your ticket #${opts.ticketNumber} (${opts.subject}) was resolved.\nHow did we do?\n\nBad: ${rate(1)}\nOkay: ${rate(2)}\nGreat: ${rate(3)}`,
+  );
+}
+
 export async function sendAgentRepliedEmail(opts: {
   accountId: string;
   to: string;

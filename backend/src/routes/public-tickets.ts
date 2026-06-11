@@ -116,11 +116,18 @@ router.get(
       },
     });
     if (!ticket) return sendErr(res, req, 404, 'NOT_FOUND', 'ticket not found');
+    // Feature wave: CSAT — let the thread page know whether this
+    // (resolved) ticket was already rated.
+    const csat = await prisma.csatResponse.findUnique({
+      where: { ticketId: ticket.id },
+      select: { score: true, comment: true },
+    });
     sendOk(res, req, {
       number: ticket.number,
       subject: ticket.subject,
       status: ticket.status,
       createdAt: ticket.createdAt,
+      csat,
       messages: ticket.messages.map((m) => ({
         id: m.id,
         authorType: m.authorType,
@@ -167,6 +174,51 @@ router.post(
       return m;
     });
     sendCreated(res, req, { id: message.id, status: nextStatus });
+  }),
+);
+
+// ─── Feature wave: CSAT + automation ───
+// Tokenized rating submission — the email's one-click links and the
+// thread page's "How did we do?" block both land here. Upsert (the
+// requester may change their mind), but only once the ticket is
+// actually resolved/closed.
+const csatBody = z.object({
+  score: z.number().int().min(1).max(3),
+  comment: z.string().trim().max(2000).optional(),
+});
+
+router.post(
+  '/tickets/:accessToken/csat',
+  asyncHandler(async (req, res) => {
+    const input = csatBody.parse(req.body);
+    const ticket = await prisma.ticket.findUnique({
+      where: { accessToken: String(req.params.accessToken) },
+    });
+    if (!ticket) return sendErr(res, req, 404, 'NOT_FOUND', 'ticket not found');
+    if (ticket.status !== 'resolved' && ticket.status !== 'closed') {
+      return sendErr(
+        res,
+        req,
+        409,
+        'CONFLICT',
+        'ratings open once the ticket is resolved',
+      );
+    }
+    const saved = await prisma.csatResponse.upsert({
+      where: { ticketId: ticket.id },
+      create: {
+        id: newId('csat'),
+        accountId: ticket.accountId,
+        ticketId: ticket.id,
+        score: input.score,
+        comment: input.comment ?? null,
+      },
+      update: {
+        score: input.score,
+        ...(input.comment !== undefined ? { comment: input.comment } : {}),
+      },
+    });
+    sendOk(res, req, { score: saved.score, comment: saved.comment });
   }),
 );
 

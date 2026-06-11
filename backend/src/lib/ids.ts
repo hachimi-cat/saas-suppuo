@@ -17,6 +17,7 @@ export type IdPrefix =
   | 'bsub' // billing subscription
   | 'ak' // API key
   | 'whs' // webhook subscription
+  | 'csat' // CSAT response
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

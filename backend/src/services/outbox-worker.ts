@@ -1,6 +1,8 @@
 import { prisma } from '../lib/db.js';
 import { buildWebhookSignature, SIGNATURE_HEADER } from '../lib/webhook-signature.js';
 import { notifyTeamChannels } from '../lib/team-notify.js';
+import { maybeSendAutoResponse } from '../lib/auto-response.js';
+import { maybeSendCsatSurvey } from '../lib/csat.js';
 
 /**
  * Outbox polling worker — ADR-0006.
@@ -89,6 +91,17 @@ async function deliver(ev: {
     // types (created + requester replies) and applies the 5s timeout.
     void notifyTeamChannels(ev).catch((e) =>
       console.error('[outbox] team notification fan-out failed', ev.id, e),
+    );
+
+    // Feature wave: CSAT + automation. Both consumers filter their own
+    // event types and are idempotent (processed_events claim for the
+    // auto-ack; tickets.csatSentAt claim for the survey), so failures
+    // never block publishing and replays never double-send.
+    void maybeSendAutoResponse(ev).catch((e) =>
+      console.error('[outbox] auto-response failed', ev.id, e),
+    );
+    void maybeSendCsatSurvey(ev).catch((e) =>
+      console.error('[outbox] csat survey failed', ev.id, e),
     );
   }
 

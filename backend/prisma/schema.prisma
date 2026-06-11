@@ -80,6 +80,10 @@ model Ticket {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   lastMessageAt  DateTime @default(now())
+  // ─── Feature wave: CSAT + automation ───
+  /// When the post-resolve CSAT survey email went out (null = never).
+  /// The outbox consumer's send-once guard.
+  csatSentAt     DateTime?
 
   messages TicketMessage[]
 
@@ -121,6 +125,40 @@ model CannedReply {
 
   @@index([accountId])
   @@map("canned_replies")
+}
+
+// ─── Feature wave: CSAT + automation ───
+
+/// Post-resolve satisfaction rating — one per ticket (re-rating
+/// upserts). score: 1 = 😞, 2 = 😐, 3 = 😊.
+model CsatResponse {
+  id        String   @id // csat_<ulid>
+  accountId String
+  ticketId  String   @unique
+  score     Int // 1..3 — validated at the API edge
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([accountId, createdAt])
+  @@map("csat_responses")
+}
+
+/// Per-workspace automation settings (one row per accountId; absence =
+/// everything off). businessHours shape:
+///   { tz: 'Asia/Jakarta', days: [{dow:0-6, open:'09:00', close:'17:00'} | null × 7] }
+/// days is indexed by dow (0 = Sunday); null = closed that day.
+model AccountSettings {
+  accountId           String   @id
+  businessHours       Json?
+  autoResponseEnabled Boolean  @default(false)
+  /// Auto-ack template sent when a ticket arrives INSIDE business hours.
+  autoResponseInside  String?
+  /// Auto-ack template sent OUTSIDE business hours (or on closed days).
+  autoResponseOutside String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("account_settings")
 }
 
 // ─── Channels (BYO provider integrations — ripllo pattern) ──────────

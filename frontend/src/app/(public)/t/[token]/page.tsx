@@ -22,6 +22,8 @@ interface PublicTicket {
   status: string;
   createdAt: string;
   messages: PublicMessage[];
+  /** Feature wave: CSAT — the requester's rating, if already given. */
+  csat: { score: number; comment: string | null } | null;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -102,6 +104,10 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
         ))}
       </div>
 
+      {(ticket.status === 'resolved' || ticket.status === 'closed') && (
+        <CsatBlock token={token} ticket={ticket} onRated={load} />
+      )}
+
       <form onSubmit={send} className="mt-5 space-y-2">
         <textarea
           value={reply}
@@ -117,6 +123,66 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
           {busy ? 'Sending…' : 'Send'}
         </button>
       </form>
+    </div>
+  );
+}
+
+// Feature wave: CSAT + automation — subtle post-resolve rating block.
+const CSAT_EMOJI: Array<{ value: number; emoji: string; label: string }> = [
+  { value: 1, emoji: '😞', label: 'Bad' },
+  { value: 2, emoji: '😐', label: 'Okay' },
+  { value: 3, emoji: '😊', label: 'Great' },
+];
+
+function CsatBlock({
+  token,
+  ticket,
+  onRated,
+}: {
+  token: string;
+  ticket: PublicTicket;
+  onRated: () => Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  async function rate(score: number) {
+    setBusy(true);
+    setFailed(false);
+    try {
+      await apiRequest(`/public/tickets/${token}/csat`, { method: 'POST', body: { score } });
+      await onRated();
+    } catch {
+      setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-5 rounded-xl border border-border bg-muted/30 p-4 text-center">
+      <p className="text-sm font-medium">How did we do?</p>
+      <div className="mt-2 flex justify-center gap-3">
+        {CSAT_EMOJI.map((s) => (
+          <button
+            key={s.value}
+            disabled={busy}
+            onClick={() => rate(s.value)}
+            aria-label={s.label}
+            className={`rounded-lg border px-3 py-1.5 text-xl transition ${
+              ticket.csat?.score === s.value
+                ? 'border-primary bg-primary/10'
+                : 'border-border bg-card hover:border-primary'
+            }`}
+          >
+            {s.emoji}
+          </button>
+        ))}
+      </div>
+      {ticket.csat && (
+        <p className="mt-2 text-xs text-muted-foreground">Thanks for your feedback!</p>
+      )}
+      {failed && <p className="mt-2 text-xs text-destructive">Could not save — try again.</p>}
     </div>
   );
 }
