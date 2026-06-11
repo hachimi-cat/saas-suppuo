@@ -1,33 +1,53 @@
 import { prisma } from './db.js';
 import { decryptCredentials } from './channel-crypto.js';
+import type { CloudChannelCreds } from './whatsapp-cloud.js';
 
 // Channel resolution — BYO provider creds per workspace, with platform
 // fallbacks. Consumers: the Twilio webhook (inbound routing by WA
-// number), the ticket reply path (outbound WA), and the email sender.
+// number), the WhatsApp Cloud webhook (inbound routing by phone number
+// ID), the ticket reply path (outbound WA), and the email sender.
 
 export interface TwilioChannelCreds {
   accountSid: string;
   authToken: string;
 }
 
-export interface ResolvedWhatsApp {
+/** A workspace's WhatsApp send path — discriminated on the provider.
+ *  `twilio` = Twilio REST (BYO account or the platform number);
+ *  `cloud` = Meta's Cloud API direct (always BYO). */
+export type ResolvedWhatsApp = ResolvedWhatsAppTwilio | ResolvedWhatsAppCloud;
+
+export interface ResolvedWhatsAppTwilio {
+  kind: 'twilio';
   accountId: string; // suppuo workspace
   creds: TwilioChannelCreds;
   from: string; // whatsapp:+62…
   byo: boolean;
 }
 
-/** Inbound routing: which workspace owns this WA number? BYO
- *  integrations first (matched on the `To` number), then the platform
- *  number → SUPPUO_TWILIO_ACCOUNT_ID. */
-export async function resolveWhatsAppByNumber(to: string): Promise<ResolvedWhatsApp | null> {
+export interface ResolvedWhatsAppCloud {
+  kind: 'cloud';
+  accountId: string; // suppuo workspace
+  accessToken: string;
+  phoneNumberId: string;
+  /** Display number in E.164 (the integration's externalId). */
+  from: string;
+  byo: true;
+}
+
+/** Inbound routing (Twilio webhook): which workspace owns this WA
+ *  number? BYO Twilio integrations first (matched on the `To` number),
+ *  then the platform number → SUPPUO_TWILIO_ACCOUNT_ID. */
+export async function resolveWhatsAppByNumber(
+  to: string,
+): Promise<ResolvedWhatsAppTwilio | null> {
   const integ = await prisma.channelIntegration.findFirst({
     where: { provider: 'whatsapp_twilio', externalId: to, status: 'active' },
   });
   if (integ) {
     try {
       const creds = decryptCredentials<TwilioChannelCreds>(integ.credentials);
-      return { accountId: integ.accountId, creds, from: `whatsapp:${to}`, byo: true };
+      return { kind: 'twilio', accountId: integ.accountId, creds, from: `whatsapp:${to}`, byo: true };
     } catch (e) {
       console.error('[channels] credential decrypt failed', integ.id, e);
     }
@@ -41,6 +61,7 @@ export async function resolveWhatsAppByNumber(to: string): Promise<ResolvedWhats
     process.env.TWILIO_AUTH_TOKEN
   ) {
     return {
+      kind: 'twilio',
       accountId: platformAccount,
       creds: {
         accountSid: process.env.TWILIO_ACCOUNT_SID,
@@ -53,18 +74,64 @@ export async function resolveWhatsAppByNumber(to: string): Promise<ResolvedWhats
   return null;
 }
 
+/** Inbound routing (Meta Cloud webhook): which workspace owns this
+ *  phone number ID? Matched on config.phoneNumberId of active
+ *  whatsapp_cloud integrations. Returns the decrypted creds too so the
+ *  webhook can check X-Hub-Signature-256 when an appSecret is stored. */
+export async function resolveWhatsAppCloudByPhoneNumberId(
+  phoneNumberId: string,
+): Promise<{ accountId: string; creds: CloudChannelCreds } | null> {
+  const rows = await prisma.channelIntegration.findMany({
+    where: { provider: 'whatsapp_cloud', status: 'active' },
+  });
+  for (const integ of rows) {
+    const cfg = integ.config as { phoneNumberId?: string };
+    if (cfg?.phoneNumberId !== phoneNumberId) continue;
+    try {
+      return {
+        accountId: integ.accountId,
+        creds: decryptCredentials<CloudChannelCreds>(integ.credentials),
+      };
+    } catch (e) {
+      console.error('[channels] credential decrypt failed', integ.id, e);
+    }
+  }
+  return null;
+}
+
 /** Outbound: how does THIS workspace send WhatsApp? BYO integration
- *  first, else the platform number. */
+ *  first (whatsapp_cloud or whatsapp_twilio, newest wins), else the
+ *  platform Twilio number. */
 export async function resolveWhatsAppForAccount(
   accountId: string,
 ): Promise<ResolvedWhatsApp | null> {
   const integ = await prisma.channelIntegration.findFirst({
-    where: { accountId, provider: 'whatsapp_twilio', status: 'active' },
+    where: {
+      accountId,
+      provider: { in: ['whatsapp_twilio', 'whatsapp_cloud'] },
+      status: 'active',
+    },
+    orderBy: { createdAt: 'desc' },
   });
   if (integ?.externalId) {
     try {
-      const creds = decryptCredentials<TwilioChannelCreds>(integ.credentials);
-      return { accountId, creds, from: `whatsapp:${integ.externalId}`, byo: true };
+      if (integ.provider === 'whatsapp_cloud') {
+        const creds = decryptCredentials<CloudChannelCreds>(integ.credentials);
+        const cfg = integ.config as { phoneNumberId?: string };
+        if (creds.accessToken && cfg?.phoneNumberId) {
+          return {
+            kind: 'cloud',
+            accountId,
+            accessToken: creds.accessToken,
+            phoneNumberId: cfg.phoneNumberId,
+            from: integ.externalId,
+            byo: true,
+          };
+        }
+      } else {
+        const creds = decryptCredentials<TwilioChannelCreds>(integ.credentials);
+        return { kind: 'twilio', accountId, creds, from: `whatsapp:${integ.externalId}`, byo: true };
+      }
     } catch (e) {
       console.error('[channels] credential decrypt failed', integ.id, e);
     }
@@ -75,6 +142,7 @@ export async function resolveWhatsAppForAccount(
     process.env.TWILIO_WHATSAPP_FROM
   ) {
     return {
+      kind: 'twilio',
       accountId,
       creds: {
         accountSid: process.env.TWILIO_ACCOUNT_SID,

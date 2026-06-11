@@ -14,6 +14,7 @@ import adminCrmRouter from './admin-crm.js';
 import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
 import webhooksTwilioRouter from './webhooks-twilio.js';
+import webhooksWhatsappCloudRouter from './webhooks-whatsapp-cloud.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import adminCustomersRouter from './admin-customers.js';
 import billingRouter from './billing.js';
@@ -92,6 +93,8 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/billing', requireAuth, billingRouter);
   /** Inbound channel webhooks (Twilio WhatsApp). */
   router.use('/webhooks/twilio', webhooksTwilioRouter);
+  /** WhatsApp Cloud API (Meta direct) — handshake GET + message POST. */
+  router.use('/webhooks/whatsapp-cloud', webhooksWhatsappCloudRouter);
   /** Plugipay billing webhooks (HMAC-signed, no session auth). */
   router.use('/webhooks/plugipay', webhooksPlugipayRouter);
   /** Programmatic access keys (session callers manage; keys themselves

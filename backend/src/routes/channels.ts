@@ -5,6 +5,7 @@ import { newId } from '../lib/ids.js';
 import { sendOk, sendCreated, sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { encryptCredentials } from '../lib/channel-crypto.js';
+import { GRAPH_BASE, generateVerifyToken } from '../lib/whatsapp-cloud.js';
 
 /*
  * /api/v1/channels — per-workspace BYO channel integrations (ripllo's
@@ -14,6 +15,11 @@ import { encryptCredentials } from '../lib/channel-crypto.js';
  *                     inbound webhooks route by number, outbound replies
  *                     use their creds (= unlimited messages, the Bisnis
  *                     "BYO" promise).
+ *   whatsapp_cloud  — the workspace's OWN Meta WhatsApp Business account
+ *                     (Cloud API direct, no Twilio): access token +
+ *                     phone number ID. Inbound routes by phone_number_id
+ *                     via /webhooks/whatsapp-cloud; outbound goes to
+ *                     graph.facebook.com.
  *   email_resend    — the workspace's OWN Resend key + from address for
  *                     branded requester notifications.
  *
@@ -24,7 +30,7 @@ import { encryptCredentials } from '../lib/channel-crypto.js';
 
 const router = Router();
 
-const PROVIDERS = ['whatsapp_twilio', 'email_resend'] as const;
+const PROVIDERS = ['whatsapp_twilio', 'whatsapp_cloud', 'email_resend'] as const;
 
 function publicShape(row: {
   id: string;
@@ -72,6 +78,21 @@ const createBody = z.discriminatedUnion('provider', [
     accountSid: z.string().regex(/^AC[a-f0-9]{32}$/),
     authToken: z.string().min(16),
     whatsappNumber: z.string().regex(/^\+\d{6,16}$/),
+    displayName: z.string().trim().max(120).optional(),
+  }),
+  z.object({
+    provider: z.literal('whatsapp_cloud'),
+    accessToken: z.string().min(16),
+    phoneNumberId: z.string().regex(/^\d{5,20}$/),
+    wabaId: z.string().regex(/^\d{5,20}$/).optional(),
+    /** The number's human-facing E.164 (+62…) — becomes externalId so
+     *  the inbound router + reply path can match on it. */
+    displayNumber: z.string().regex(/^\+\d{6,16}$/),
+    /** Webhook handshake token — generated when absent. */
+    verifyToken: z.string().min(8).max(128).optional(),
+    /** Meta APP secret — optional; enables X-Hub-Signature-256
+     *  verification on inbound webhooks when provided. */
+    appSecret: z.string().min(8).max(128).optional(),
     displayName: z.string().trim().max(120).optional(),
   }),
   z.object({
@@ -137,6 +158,58 @@ router.post(
         ...publicShape(row),
         webhookUrl: `${process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com'}/api/v1/webhooks/twilio/whatsapp?secret=${process.env.SUPPUO_TWILIO_WEBHOOK_SECRET ?? ''}`,
         note: "Point your Twilio number's incoming-message webhook at webhookUrl (POST).",
+      });
+    }
+
+    if (input.provider === 'whatsapp_cloud') {
+      // Live validation: can this token read its own phone number?
+      const check = await fetch(
+        `${GRAPH_BASE}/${input.phoneNumberId}?fields=display_phone_number`,
+        { headers: { Authorization: `Bearer ${input.accessToken}` } },
+      );
+      if (!check.ok) {
+        return sendErr(res, req, 400, 'VALIDATION_ERROR', `Meta rejected the credentials (${check.status}) — check the access token + phone number ID.`);
+      }
+      const verifyToken = input.verifyToken ?? generateVerifyToken();
+      const config = {
+        phoneNumberId: input.phoneNumberId,
+        verifyToken,
+        ...(input.wabaId ? { wabaId: input.wabaId } : {}),
+      };
+      const credentials = encryptCredentials({
+        accessToken: input.accessToken,
+        ...(input.appSecret ? { appSecret: input.appSecret } : {}),
+      });
+      const row = await prisma.channelIntegration.upsert({
+        where: {
+          accountId_provider_externalId: {
+            accountId,
+            provider: 'whatsapp_cloud',
+            externalId: input.displayNumber,
+          },
+        },
+        create: {
+          id: newId('chn'),
+          accountId,
+          provider: 'whatsapp_cloud',
+          externalId: input.displayNumber,
+          displayName: input.displayName ?? `WhatsApp Cloud ${input.displayNumber}`,
+          status: 'active',
+          credentials,
+          config,
+        },
+        update: {
+          status: 'active',
+          lastError: null,
+          credentials,
+          config,
+        },
+      });
+      return sendCreated(res, req, {
+        ...publicShape(row),
+        webhookUrl: `${process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com'}/api/v1/webhooks/whatsapp-cloud`,
+        verifyToken,
+        note: 'Meta App dashboard → WhatsApp → Configuration → Webhook: set the Callback URL + Verify token above, then subscribe to the "messages" field.',
       });
     }
 
