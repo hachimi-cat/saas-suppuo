@@ -47,7 +47,15 @@ async function handle(
 ): Promise<Response> {
   const { path } = await ctx.params;
   const url = new URL(req.url);
-  const upstream = `${BACKEND}/api/v1/${backendPath(path)}${url.search}`;
+  // The auth kit's /me + /logout resolve the role from the QUERY param
+  // (?role=admin), not the role header — stamp it on auth passthroughs
+  // so only-admin sessions resolve and logout clears the ADMIN cookie
+  // (without it, /me decoded the merchant cookie and admin logout
+  // cleared the merchant session).
+  const search = new URLSearchParams(url.search);
+  if (path[0] === 'auth') search.set('role', 'admin');
+  const qs = search.toString();
+  const upstream = `${BACKEND}/api/v1/${backendPath(path)}${qs ? `?${qs}` : ''}`;
 
   const headers = new Headers();
   req.headers.forEach((value, key) => {

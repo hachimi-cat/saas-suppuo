@@ -39,7 +39,11 @@ const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170').
 
 async function fetchAdminUser(cookieHeader: string): Promise<SessionUser | null> {
   try {
-    const res = await fetch(`${API_ORIGIN}/api/v1/auth/me`, {
+    // NOTE: the auth kit's /me resolves the role from the QUERY param
+    // (?role=admin), not the role header — without it the gate decodes
+    // the MERCHANT cookie, so an admin-only session bounces to login
+    // (and a dual-session user silently passes on the WRONG session).
+    const res = await fetch(`${API_ORIGIN}/api/v1/auth/me?role=admin`, {
       headers: { cookie: cookieHeader, [ROLE_HEADER]: 'admin' },
       cache: 'no-store',
     });
