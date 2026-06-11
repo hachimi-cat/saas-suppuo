@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
-import { AuthForm } from '@forjio/auth-ui';
+import { AuthForm, fetchSocialProviders } from '@forjio/auth-ui';
 
 const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const providers = await fetchSocialProviders(
+    process.env.NEXT_PUBLIC_HUUDIS_ISSUER || 'https://huudis.com',
+  );
   return (
     <div className="flex items-center justify-center bg-muted/30 px-4 py-16 md:py-24">
       <div className="w-full max-w-sm">
@@ -15,7 +18,7 @@ export default function SignupPage() {
         </div>
         <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
           <Suspense fallback={null}>
-            <AuthForm mode="signup" brand={brand} />
+            <AuthForm mode="signup" brand={brand} providers={providers} />
           </Suspense>
         </div>
       </div>

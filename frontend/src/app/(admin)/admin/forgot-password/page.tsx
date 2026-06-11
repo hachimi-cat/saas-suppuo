@@ -1,5 +1,6 @@
+import { LogoMark } from '@/components/brand/logo';
 import Link from 'next/link';
-import { Hexagon } from 'lucide-react';
+
 import { ForgotPasswordForm } from '@forjio/auth-ui';
 
 /*
@@ -20,7 +21,7 @@ export default function AdminForgotPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <Link href="/admin/login" className="inline-flex" aria-label={`${brand} admin`}>
-            <Hexagon className="h-9 w-9 text-primary" strokeWidth={2} />
+            <LogoMark className="h-9 w-9 text-primary" />
           </Link>
           <h1 className="mt-5 text-2xl font-bold tracking-tight">Forgot your password?</h1>
           <p className="mt-1 text-sm text-muted-foreground">

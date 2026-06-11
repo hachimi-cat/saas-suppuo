@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Hexagon, LayoutDashboard, Menu, Users } from 'lucide-react';
+import { LogoMark } from '@/components/brand/logo';
+import { LayoutDashboard, Menu, Users } from 'lucide-react';
 import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
 
 /*
@@ -70,7 +71,7 @@ export function AdminShell({
         brandTag="Admin"
         brandHref="/admin/dashboard"
         brandColor={BRAND_COLOR}
-        brandIcon={<Hexagon size={20} strokeWidth={2} />}
+        brandIcon={<LogoMark size={20} />}
         sections={SECTIONS}
         user={user}
         onLogout={logout}

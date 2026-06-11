@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Hexagon, Inbox, Menu, Settings } from 'lucide-react';
+import { LogoMark } from '@/components/brand/logo';
+import { Inbox, Menu, Settings } from 'lucide-react';
 import {
   Sidebar,
   readActiveWorkspaceId,
@@ -92,7 +93,7 @@ export function DashboardShell({
         brandSlug={BRAND_SLUG}
         brandName={BRAND}
         brandColor={BRAND_COLOR}
-        brandIcon={<Hexagon size={20} strokeWidth={2} />}
+        brandIcon={<LogoMark size={20} />}
         workspacePersist="cookie"
         workspaces={workspaces}
         activeWorkspaceId={activeId}

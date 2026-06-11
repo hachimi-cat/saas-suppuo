@@ -1,4 +1,5 @@
-import { LifeBuoy } from 'lucide-react';
+import { LogoMark } from '@/components/brand/logo';
+
 import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-ui';
 
 /*
@@ -16,12 +17,12 @@ export default function MarketingLayout({
   return (
     <MarketingShell>
       <MarketingNav
-        brandIcon={<LifeBuoy className="h-6 w-6 text-primary" />}
+        brandIcon={<LogoMark className="h-6 w-6 text-primary" />}
         brandName={brand}
       />
       <main className="flex-1">{children}</main>
       <MarketingFooter
-        brandIcon={<LifeBuoy className="h-5 w-5 text-primary" />}
+        brandIcon={<LogoMark className="h-5 w-5 text-primary" />}
         brandName={brand}
         brandTagline={`${brand} — helpdesk and ticketing for Indonesian SMEs. Part of the Forjio family.`}
         copyrightSuffix="part of the Forjio family."
