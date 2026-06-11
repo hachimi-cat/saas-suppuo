@@ -252,6 +252,22 @@ model BillingSubscription {
   @@map("billing_subscriptions")
 }
 
+// ─── Agent profiles (avatar; name lives in Huudis) ───────────────────
+
+/// Thin suppuo-local profile record keyed by the Huudis sub. ONLY the
+/// avatar lives here — Huudis has no avatar field on its User model,
+/// and display name stays in Huudis (edited via the /api/v1/huudis
+/// proxy). The CLAUDE.md-sanctioned "reference a Huudis identity +
+/// your own thin record" pattern.
+model AgentProfile {
+  sub         String   @id
+  avatar      Bytes
+  contentType String
+  updatedAt   DateTime @updatedAt
+
+  @@map("agent_profiles")
+}
+
 // ─── API keys + webhooks ─────────────────────────────────────────────
 
 /// Programmatic access key for the Suppuo API. Format
