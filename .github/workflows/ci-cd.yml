@@ -210,12 +210,12 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
-      - name: Connect to Tailscale
-        # Optional: when TS_AUTHKEY is unset, staging is reached over its
-        # public IP (UFW :80 open on the staging box) instead of the
-        # tailnet. Set TS_AUTHKEY + flip STAGING_HOST to staging-suppuo
-        # to go private (the family-standard pattern).
-        if: ${{ secrets.TS_AUTHKEY != '' }}
+      - name: Connect to Tailscale (optional)
+        # When TS_AUTHKEY is unset this step fails harmlessly and staging
+        # is reached over its public IP (UFW :80 open on the staging box).
+        # Set TS_AUTHKEY + flip STAGING_HOST to staging-suppuo to go
+        # private (the family-standard pattern).
+        continue-on-error: true
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
@@ -294,12 +294,12 @@ jobs:
           # Need a writable checkout for the baseline-update branch.
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref || github.ref_name }}
-      - name: Connect to Tailscale
-        # Optional: when TS_AUTHKEY is unset, staging is reached over its
-        # public IP (UFW :80 open on the staging box) instead of the
-        # tailnet. Set TS_AUTHKEY + flip STAGING_HOST to staging-suppuo
-        # to go private (the family-standard pattern).
-        if: ${{ secrets.TS_AUTHKEY != '' }}
+      - name: Connect to Tailscale (optional)
+        # When TS_AUTHKEY is unset this step fails harmlessly and staging
+        # is reached over its public IP (UFW :80 open on the staging box).
+        # Set TS_AUTHKEY + flip STAGING_HOST to staging-suppuo to go
+        # private (the family-standard pattern).
+        continue-on-error: true
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
