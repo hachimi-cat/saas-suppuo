@@ -10,7 +10,6 @@ import {
   Flag,
   Inbox,
   LifeBuoy,
-  Link2,
   Mail,
   Megaphone,
   MessageSquareText,
@@ -29,10 +28,16 @@ import { HeroBadge, SectionEyebrow } from '@forjio/website-ui';
  * (Hero → How it works → Features → Pricing → Comparison → Developers →
  * Family → FAQ → CTA). linksnap.com is the family reference build.
  *
- * Copy is grounded in Suppuo v1: hosted ticket form, shared agent inbox
- * (statuses open/pending/resolved/closed, priorities, assignment,
- * internal notes, canned replies), requester email updates + tokenized
- * status link, multi-workspace via Huudis SSO. FREE during early access.
+ * Copy is grounded in shipped Suppuo: six channels (hosted form, live
+ * chat widget, email-to-ticket alias, WhatsApp via BYO Twilio/Meta
+ * Cloud API, Telegram bot, manual logging), shared inbox with tags +
+ * filters + full-text search, priorities + assignment, internal notes,
+ * canned replies, auto-response + business hours (WIB), CSAT surveys,
+ * file attachments (8MB), requester email updates + tokenized status
+ * link, Slack/Discord team notifications, REST API + API keys +
+ * webhooks + SDKs (Node/Python/Go) + CLI, multi-workspace via Huudis
+ * SSO. FREE during early access. Tier lists mirror
+ * backend/src/lib/billing.ts TIER_DEFS — keep in sync.
  */
 
 export default function HomePage() {
@@ -74,9 +79,10 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-5 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
-              Helpdesk and ticketing for Indonesian SMEs — support inbox, agent workspace,
-              customer portal. Stop digging through WhatsApp threads to find who asked what.
-              Free during early access. Part of the Forjio family.
+              Helpdesk and ticketing for Indonesian SMEs. Support form, live chat, email,
+              WhatsApp, and Telegram all land in one searchable inbox — stop digging through
+              chat threads to find who asked what. Free during early access. Part of the
+              Forjio family.
             </p>
 
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
@@ -108,7 +114,7 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <SectionEyebrow>How it works</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              Form in. Ticket worked. Customer updated.
+              Channels in. Ticket worked. Customer updated.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[52ch]">
               From sign-up to your first resolved ticket in minutes. No card — early access
@@ -121,23 +127,23 @@ export default function HomePage() {
               {
                 num: '01',
                 Icon: ClipboardList,
-                title: 'Share your ticket form',
+                title: 'Open your channels',
                 body:
-                  'Every workspace gets a hosted support form. Put the link on your website, your bio page, or your WhatsApp auto-reply. Customers submit a ticket in seconds — no account needed.',
+                  'Share your hosted support form, drop the live chat widget on your site with one script tag, forward support@ to your email-to-ticket alias, or connect WhatsApp and Telegram. Every channel lands in the same inbox.',
               },
               {
                 num: '02',
                 Icon: Users,
                 title: 'Work it as a team',
                 body:
-                  'Tickets land in one shared inbox. Assign an agent, set a priority, discuss in internal notes the customer never sees, and answer repeat questions with canned replies.',
+                  'Assign an agent, set a priority, tag and search every ticket, discuss in internal notes the customer never sees, and answer repeat questions with canned replies. Auto-response covers you outside business hours.',
               },
               {
                 num: '03',
                 Icon: Mail,
                 title: 'Customers stay in the loop',
                 body:
-                  'Requesters get an email on every reply and status change, plus a private status link to check progress anytime. No more “sudah dibalas belum?” follow-ups.',
+                  'Requesters get an email on every reply and status change, plus a private status link to check progress anytime. After resolve, a one-click CSAT survey tells you how you did.',
               },
             ].map(({ num, Icon, title, body }) => (
               <div key={num} className="rounded-lg border border-border bg-card p-6">
@@ -174,39 +180,39 @@ export default function HomePage() {
             {[
               {
                 Icon: Inbox,
-                title: 'Shared ticket inbox',
+                title: 'Six channels, one inbox',
                 body:
-                  'One queue for the whole team. Every ticket moves through open → pending → resolved → closed, so you always know what still needs an answer.',
+                  'Hosted form, live chat widget, email-to-ticket, WhatsApp (beta), Telegram, and manual logging — every conversation lands in the same shared queue.',
+              },
+              {
+                Icon: ClipboardList,
+                title: 'Tags, filters + search',
+                body:
+                  'Tag every ticket, filter by status, priority, assignee, channel, or tag, and full-text search across subjects, requesters, and replies.',
               },
               {
                 Icon: Flag,
                 title: 'Priorities + assignment',
                 body:
-                  'Set a priority and assign each ticket to an agent. Urgent complaints stop sitting behind routine questions, and nothing is “someone else’s problem”.',
+                  'Set a priority and assign each ticket to a teammate from the member picker. Urgent complaints stop sitting behind routine questions.',
               },
               {
                 Icon: MessageSquareText,
-                title: 'Internal notes + canned replies',
+                title: 'Notes, canned replies + attachments',
                 body:
-                  'Discuss a ticket privately in internal notes the requester never sees. Save your best answers as canned replies and reuse them in two clicks.',
+                  'Discuss privately in internal notes the requester never sees, reuse canned replies in two clicks, and attach files up to 8MB — WhatsApp photos included.',
               },
               {
-                Icon: ClipboardList,
-                title: 'Hosted ticket form',
+                Icon: Sparkles,
+                title: 'Automation + CSAT',
                 body:
-                  'A ready-made support form at a link you can share anywhere. Customers submit without creating an account; the ticket appears in your inbox instantly.',
-              },
-              {
-                Icon: Link2,
-                title: 'Status link + email updates',
-                body:
-                  'Every requester gets a private, tokenized status link and an email on each reply or status change — they stay informed without logging in.',
+                  'Auto-respond to every new ticket — with a different reply outside your business hours (WIB) — and send a one-click CSAT survey after resolve.',
               },
               {
                 Icon: Code2,
-                title: 'API + CLI',
+                title: 'API, webhooks, SDKs + CLI',
                 body:
-                  'A REST API with Bearer-token auth, webhooks delivered via a transactional outbox, and a CLI: npm i -g @forjio/suppuo-cli.',
+                  'A REST API with API keys, outbound webhooks via a transactional outbox, SDKs for Node.js, Python, and Go, and a CLI: npm i -g @forjio/suppuo-cli.',
               },
             ].map(({ Icon, title, body }) => (
               <div key={title} className="rounded-lg border border-border bg-card p-6">
@@ -350,9 +356,12 @@ export default function HomePage() {
                   { cap: 'Price today', s: 'Free (early access)', a: 'Free', b: 'Paid from agent #1' },
                   { cap: 'Ticket statuses + priorities', s: true, a: false, b: true },
                   { cap: 'Assignment + internal notes', s: true, a: false, b: true },
+                  { cap: 'Tags + full-text search', s: true, a: false, b: true },
                   { cap: 'Customer status link, no login', s: true, a: false, b: 'Varies' },
-                  { cap: 'Canned replies', s: true, a: false, b: true },
+                  { cap: 'Canned replies + auto-response', s: true, a: false, b: true },
+                  { cap: 'Live chat + email-to-ticket + Telegram', s: true, a: false, b: 'Often add-ons' },
                   { cap: 'WhatsApp as a channel', s: 'Built in (beta)', a: 'It IS the channel — and the chaos', b: 'Often an add-on' },
+                  { cap: 'CSAT surveys', s: true, a: false, b: true },
                   { cap: 'One login for sister products', s: true, a: false, b: false },
                 ].map((row) => (
                   <tr key={row.cap} className="border-b border-border last:border-b-0">
@@ -385,9 +394,10 @@ export default function HomePage() {
               </p>
               <ul className="mt-6 space-y-3">
                 {[
-                  'REST API with Bearer-token auth',
+                  'REST API with API keys (Bearer-token auth)',
                   'Consistent response envelope with request IDs on every call',
-                  'Webhooks delivered via a transactional outbox — state changes never skip an event',
+                  'Outbound webhooks delivered via a transactional outbox — state changes never skip an event',
+                  'SDKs for Node.js, Python, and Go',
                   'CLI on npm: @forjio/suppuo-cli — log in with your Forjio account',
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2 text-sm text-foreground/90 leading-relaxed">
@@ -554,23 +564,23 @@ export default function HomePage() {
               },
               {
                 q: 'How does the WhatsApp channel work?',
-                a: 'Paid tiers include a WhatsApp number (via Twilio) so customer chats become tickets in your shared inbox. It’s in beta and rolling out now. Each tier includes a monthly message allowance; beyond it, messages are Rp 150 each — or bring your own Twilio account on Bisnis for unlimited messages.',
+                a: 'Customer WhatsApp chats become tickets in your shared inbox, photos and media included, and agent replies go back to the chat. The shared Suppuo number is awaiting WhatsApp approval — until it’s live, connect your own number today: your own Twilio account (Bisnis) or Meta’s WhatsApp Cloud API direct (Toko and up), both with unlimited messages through your own account. Platform-number tiers include a monthly allowance; beyond it, messages are Rp 150 each.',
               },
               {
                 q: 'Do my customers need an account to submit or track a ticket?',
-                a: 'No. They submit through your hosted ticket form, then get an email on every reply and status change plus a private, tokenized status link to check progress — no login required.',
+                a: 'No. They reach you through your hosted form, the live chat widget on your site, email, WhatsApp, or Telegram — then get an email on every reply and status change plus a private, tokenized status link to check progress. No login required, ever.',
               },
               {
                 q: 'Can customers email us a ticket instead of using the form?',
-                a: 'Not yet. Today tickets come in through your hosted form, the WhatsApp channel (beta), or manual entry by an agent. Email-to-ticket is on the roadmap — and requesters already receive every update by email today.',
+                a: 'Yes. Every workspace gets an inbound address — forward your support@ to it and every email becomes a ticket, with replies threading both ways. The form, live chat widget, WhatsApp (beta), Telegram, and manual logging all land in the same inbox.',
               },
               {
-                q: 'What about SLAs, automations, CSAT, or a knowledge base?',
-                a: 'Not shipped yet, and we won’t pretend otherwise. They’re on the roadmap for the Toko tier and above. What ships today is exactly what’s on the pricing page.',
+                q: 'What about SLAs, reports, or a knowledge base?',
+                a: 'Not shipped yet, and we won’t pretend otherwise. What HAS shipped: auto-response with business hours (WIB), one-click CSAT surveys after resolve with a satisfaction average on your dashboard, tags, and full-text search. SLAs, deeper reporting, and a knowledge base are on the roadmap.',
               },
               {
                 q: 'How do agents work together on a ticket?',
-                a: 'Every ticket lives in a shared inbox with a status (open, pending, resolved, closed), a priority, and an assignee. Agents discuss privately in internal notes the requester never sees, and answer repeat questions with canned replies.',
+                a: 'Every ticket lives in a shared inbox with a status (open, pending, resolved, closed), a priority, tags, and an assignee picked from your workspace members. Agents discuss privately in internal notes the requester never sees, answer repeat questions with canned replies, attach files up to 8MB, and find anything with full-text search. New tickets and customer replies can also ping your team in Slack or Discord.',
               },
               {
                 q: 'Can I run support for more than one brand or team?',
@@ -640,8 +650,9 @@ export default function HomePage() {
 // ─── Helpers ─────────────────────────────────────────────────────────
 
 // Per-WORKSPACE flat pricing — the whole team, one price. Source of
-// truth for copy is the locked 4-tier model; /pricing has the full
-// comparison table. WhatsApp rows stay "(beta)" while in rollout.
+// truth is backend/src/lib/billing.ts TIER_DEFS (condensed here);
+// /pricing has the full comparison table. WhatsApp rows stay "(beta)"
+// while the platform number awaits approval — BYO works today.
 const PRICING_TIERS = [
   {
     name: 'Gratis',
@@ -650,10 +661,11 @@ const PRICING_TIERS = [
     earlyAccess: false,
     popular: false,
     features: [
-      '2 agents',
-      '100 tickets / month',
-      'Inbox, internal notes, 10 canned replies',
-      'Hosted form + status links (Suppuo branding)',
+      '2 agents · 100 tickets / month',
+      'Inbox — tags, filters, full-text search',
+      'Internal notes + 10 canned replies',
+      'Hosted form, live chat widget, email-to-ticket',
+      'File attachments up to 8MB',
       'Community support',
     ],
   },
@@ -664,10 +676,11 @@ const PRICING_TIERS = [
     earlyAccess: true,
     popular: true,
     features: [
-      '3 agents',
-      'Unlimited tickets + canned replies',
+      '3 agents · unlimited tickets + canned replies',
       'No Suppuo branding on your form',
       'WhatsApp (beta) — 1 number · 500 msgs/bln',
+      'Telegram bot + Slack/Discord notifications',
+      'CSAT surveys + auto-response with business hours',
       'Email support',
     ],
   },
@@ -678,10 +691,11 @@ const PRICING_TIERS = [
     earlyAccess: true,
     popular: false,
     features: [
-      '10 agents',
-      'Unlimited tickets + canned replies',
+      '10 agents · everything in Warung',
       'WhatsApp (beta) — 1 number · 1.500 msgs/bln',
-      'REST API + CLI',
+      'BYO WhatsApp Cloud API = unlimited WA',
+      'BYO email — your Resend + domain',
+      'REST API + CLI + webhooks',
       'Email support',
     ],
   },
@@ -692,11 +706,9 @@ const PRICING_TIERS = [
     earlyAccess: true,
     popular: false,
     features: [
-      '25 agents',
-      'Unlimited tickets + canned replies',
+      '25 agents · everything in Toko',
       'WhatsApp (beta) — 3 numbers · 4.000 msgs/bln',
       'BYO Twilio = unlimited WA messages',
-      'REST API + CLI',
       'Priority WhatsApp support',
     ],
   },
