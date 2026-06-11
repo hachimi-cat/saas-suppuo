@@ -225,64 +225,88 @@ export default function HomePage() {
           PRICING
           ============================================================ */}
       <section id="pricing" className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 pt-16 md:pt-24">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 pt-16 md:pt-24">
           <div className="text-center max-w-3xl mx-auto">
             <SectionEyebrow>Pricing</SectionEyebrow>
             <h2 className="text-[28px] md:text-[36px] leading-[1.1] font-semibold tracking-[-0.02em]">
-              Free during early access. Really.
+              One flat price for the whole team.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[62ch] mx-auto">
-              While Suppuo is in early access, every feature is free — no card, no trial
-              clock. Paid plans in IDR are coming later; early-access workspaces will get
-              clear notice before anything changes.
+              Per workspace, not per agent. Rp 99rb per bulan flat untuk seluruh tim — bukan
+              Rp 400rb per orang seperti tool lain. And during early access, every workspace
+              gets Toko-level features free.
             </p>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-4 md:px-6 pt-12 pb-16">
-          <div className="max-w-md mx-auto">
-            <div className="relative rounded-xl border border-primary bg-card shadow-lg shadow-primary/5 p-6 flex flex-col">
-              <span className="absolute -top-2.5 left-5 inline-flex items-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-                Early access
-              </span>
-              <h3 className="text-[18px] font-semibold tracking-tight">Early access</h3>
-              <p className="mt-1.5 text-[12.5px] text-muted-foreground leading-snug">
-                For Indonesian SMEs getting their support out of scattered chats.
-              </p>
-              <div className="mt-4 flex items-baseline gap-1.5">
-                <span className="text-[28px] font-bold tabular-nums tracking-tight">Free</span>
-                <span className="text-xs text-muted-foreground">while in early access</span>
-              </div>
-              <ul className="mt-5 space-y-2 flex-1">
-                {[
-                  'Shared ticket inbox — statuses, priorities, assignment',
-                  'Hosted ticket form for your customers',
-                  'Internal notes + canned replies',
-                  'Email updates + private status link for requesters',
-                  'Multi-workspace via Huudis SSO',
-                  'REST API, webhooks, and the Suppuo CLI',
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-[12.5px] text-foreground/90 leading-[1.4]">
-                    <Check className="size-3.5 mt-0.5 shrink-0 text-primary" strokeWidth={2.25} />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className="mt-6 inline-flex items-center justify-center w-full h-9 px-4 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-colors"
+        <div className="max-w-6xl mx-auto px-4 md:px-6 pt-12 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
+            {PRICING_TIERS.map((tier) => (
+              <div
+                key={tier.name}
+                className={`relative rounded-xl border bg-card p-6 flex flex-col ${
+                  tier.popular
+                    ? 'border-primary shadow-lg shadow-primary/5'
+                    : 'border-border shadow-sm'
+                }`}
               >
-                Start free
-              </Link>
-            </div>
-            <p className="mt-5 text-[12.5px] text-muted-foreground text-center leading-relaxed">
-              Paid plans are coming — billed in IDR through Plugipay, with USD via PayPal for
-              international customers. See{' '}
-              <Link href="/pricing" className="text-primary hover:underline">
-                pricing
-              </Link>{' '}
-              for details.
-            </p>
+                {tier.popular && (
+                  <span className="absolute -top-2.5 left-5 inline-flex items-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                    Most popular
+                  </span>
+                )}
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-[17px] font-semibold tracking-tight">{tier.name}</h3>
+                  {tier.earlyAccess && (
+                    <span className="inline-flex shrink-0 items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9.5px] font-semibold text-primary">
+                      Early Access — gratis
+                    </span>
+                  )}
+                </div>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-[24px] font-bold tabular-nums tracking-tight">
+                    {tier.price}
+                  </span>
+                  {tier.period && (
+                    <span className="text-xs text-muted-foreground">{tier.period}</span>
+                  )}
+                </div>
+                <ul className="mt-4 space-y-2 flex-1">
+                  {tier.features.map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-start gap-2 text-[12.5px] text-foreground/90 leading-[1.4]"
+                    >
+                      <Check className="size-3.5 mt-0.5 shrink-0 text-primary" strokeWidth={2.25} />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/signup"
+                  className={`mt-6 inline-flex items-center justify-center w-full h-9 px-4 rounded-md text-sm font-medium transition-colors ${
+                    tier.popular
+                      ? 'bg-primary text-primary-foreground hover:opacity-90'
+                      : 'border border-border bg-card text-foreground hover:bg-muted'
+                  }`}
+                >
+                  Start free
+                </Link>
+              </div>
+            ))}
           </div>
+          <p className="mt-6 text-[12.5px] text-muted-foreground text-center leading-relaxed max-w-3xl mx-auto">
+            Founding members get 50% off for 12 months when billing starts (Warung Rp 49rb ·
+            Toko Rp 149rb) — announced 30+ days in advance. If you don&apos;t pay later, you
+            keep your data and drop to Gratis; export available on every tier.
+          </p>
+          <p className="mt-2 text-[12.5px] text-muted-foreground text-center leading-relaxed">
+            Billed in IDR through Plugipay, USD via PayPal for international customers. See
+            the{' '}
+            <Link href="/pricing" className="text-primary hover:underline">
+              full plan comparison
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
@@ -297,8 +321,9 @@ export default function HomePage() {
               Versus the way you do support today.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[60ch] mx-auto">
-              Most Indonesian SMEs run support out of a shared WhatsApp or email account — or
-              pay for an enterprise helpdesk priced in USD per agent.
+              Most Indonesian SMEs run support from a shared WhatsApp on the team phone — or
+              pay for a per-agent helpdesk suite, where per-agent pricing multiplies with
+              every person you add. Suppuo is flat per workspace: the whole team, one price.
             </p>
           </div>
 
@@ -311,16 +336,23 @@ export default function HomePage() {
                   </th>
                   <th className="px-4 py-3 font-semibold text-primary">Suppuo</th>
                   <th className="px-4 py-3 font-medium text-muted-foreground">Shared WhatsApp / email</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Enterprise helpdesks</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Per-agent helpdesk suites</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { cap: 'Price today', s: 'Free (early access)', a: 'Free', b: 'USD, per agent / mo' },
+                  {
+                    cap: 'Pricing model',
+                    s: 'Flat per workspace — from Rp 99rb/bln for the whole team',
+                    a: 'Free',
+                    b: 'Per agent — multiplies with team size',
+                  },
+                  { cap: 'Price today', s: 'Free (early access)', a: 'Free', b: 'Paid from agent #1' },
                   { cap: 'Ticket statuses + priorities', s: true, a: false, b: true },
                   { cap: 'Assignment + internal notes', s: true, a: false, b: true },
                   { cap: 'Customer status link, no login', s: true, a: false, b: 'Varies' },
                   { cap: 'Canned replies', s: true, a: false, b: true },
+                  { cap: 'WhatsApp as a channel', s: 'Built in (beta)', a: 'It IS the channel — and the chaos', b: 'Often an add-on' },
                   { cap: 'One login for sister products', s: true, a: false, b: false },
                 ].map((row) => (
                   <tr key={row.cap} className="border-b border-border last:border-b-0">
@@ -510,7 +542,19 @@ export default function HomePage() {
             {[
               {
                 q: 'Is early access really free?',
-                a: 'Yes. While Suppuo is in early access, every feature is free — no card, no trial countdown. Paid plans in IDR (billed through Plugipay, USD via PayPal for international customers) are coming later, and early-access workspaces will get clear notice before anything changes.',
+                a: 'Yes. During early access, every workspace gets Toko-level features free — no card, no trial countdown. When billing starts (announced 30+ days in advance), founding members get 50% off for 12 months: Warung Rp 49rb, Toko Rp 149rb per bulan.',
+              },
+              {
+                q: 'Why per workspace instead of per agent?',
+                a: 'Because per-agent pricing punishes you for growing your team. Most helpdesk suites charge per agent per month, so the bill multiplies with every hire. Suppuo is flat per workspace: Warung is Rp 99rb per bulan for the whole team, whether one agent answers or three.',
+              },
+              {
+                q: 'What happens if I don’t pay when billing starts?',
+                a: 'You keep your data and your workspace drops to the Gratis tier (2 agents, 100 tickets/month). Export is available on every tier, paid or not — no bait-and-switch, no data hostage.',
+              },
+              {
+                q: 'How does the WhatsApp channel work?',
+                a: 'Paid tiers include a WhatsApp number (via Twilio) so customer chats become tickets in your shared inbox. It’s in beta and rolling out now. Each tier includes a monthly message allowance; beyond it, messages are Rp 150 each — or bring your own Twilio account on Bisnis for unlimited messages.',
               },
               {
                 q: 'Do my customers need an account to submit or track a ticket?',
@@ -518,7 +562,11 @@ export default function HomePage() {
               },
               {
                 q: 'Can customers email us a ticket instead of using the form?',
-                a: 'In v1, tickets come in through your hosted form. Email-to-ticket is next on the list — and requesters already receive every update by email today.',
+                a: 'Not yet. Today tickets come in through your hosted form, the WhatsApp channel (beta), or manual entry by an agent. Email-to-ticket is on the roadmap — and requesters already receive every update by email today.',
+              },
+              {
+                q: 'What about SLAs, automations, CSAT, or a knowledge base?',
+                a: 'Not shipped yet, and we won’t pretend otherwise. They’re on the roadmap for the Toko tier and above. What ships today is exactly what’s on the pricing page.',
               },
               {
                 q: 'How do agents work together on a ticket?',
@@ -590,6 +638,69 @@ export default function HomePage() {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────
+
+// Per-WORKSPACE flat pricing — the whole team, one price. Source of
+// truth for copy is the locked 4-tier model; /pricing has the full
+// comparison table. WhatsApp rows stay "(beta)" while in rollout.
+const PRICING_TIERS = [
+  {
+    name: 'Gratis',
+    price: 'Rp 0',
+    period: undefined,
+    earlyAccess: false,
+    popular: false,
+    features: [
+      '2 agents',
+      '100 tickets / month',
+      'Inbox, internal notes, 10 canned replies',
+      'Hosted form + status links (Suppuo branding)',
+      'Community support',
+    ],
+  },
+  {
+    name: 'Warung',
+    price: 'Rp 99.000',
+    period: '/bln',
+    earlyAccess: true,
+    popular: true,
+    features: [
+      '3 agents',
+      'Unlimited tickets + canned replies',
+      'No Suppuo branding on your form',
+      'WhatsApp (beta) — 1 number · 500 msgs/bln',
+      'Email support',
+    ],
+  },
+  {
+    name: 'Toko',
+    price: 'Rp 299.000',
+    period: '/bln',
+    earlyAccess: true,
+    popular: false,
+    features: [
+      '10 agents',
+      'Unlimited tickets + canned replies',
+      'WhatsApp (beta) — 1 number · 1.500 msgs/bln',
+      'REST API + CLI',
+      'Email support',
+    ],
+  },
+  {
+    name: 'Bisnis',
+    price: 'Rp 599.000',
+    period: '/bln',
+    earlyAccess: true,
+    popular: false,
+    features: [
+      '25 agents',
+      'Unlimited tickets + canned replies',
+      'WhatsApp (beta) — 3 numbers · 4.000 msgs/bln',
+      'BYO Twilio = unlimited WA messages',
+      'REST API + CLI',
+      'Priority WhatsApp support',
+    ],
+  },
+] as const;
 
 function Cell({ value, highlight }: { value: boolean | string; highlight?: boolean }) {
   if (typeof value === 'string') {
