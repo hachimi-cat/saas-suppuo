@@ -105,59 +105,11 @@ export default function ChannelsPage() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {/* Always-on */}
-        <ChannelCard
-          icon={<Globe className="h-5 w-5" />}
-          title="Hosted support form"
-          status="active"
-          statusLabel="Always on"
-          description="Customers submit tickets at your form URL (see Settings). Replies go out by email with a status link."
-        />
-        <ChannelCard
-          icon={<PenLine className="h-5 w-5" />}
-          title="Manual logging"
-          status="active"
-          statusLabel="Always on"
-          description="Log requests that arrive anywhere else (phone, DM, walk-in) with the New ticket button — the customer still gets the status link."
-        />
-
-        {/* Email */}
-        <ChannelCard
-          icon={<Mail className="h-5 w-5" />}
-          title="Email notifications"
-          status={data?.platform.email ? 'active' : 'pending'}
-          statusLabel={data?.platform.email ? 'Platform (suppuo.forjio.com)' : 'Not configured'}
-          description="Outbound ticket updates to requesters. Bring your own Resend account to send from your own domain."
-          action={
-            <button onClick={() => setShowForm('email_resend')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
-              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect your Resend
-            </button>
-          }
+      <div className="space-y-8">
+        <ChannelSection
+          title="Customer conversations"
+          blurb="Two-way channels: incoming messages open or update tickets, and replies from the inbox go back out on the same channel."
         >
-          {byo('email_resend').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
-          ))}
-        </ChannelCard>
-
-        {/* WhatsApp */}
-        <ChannelCard
-          icon={<MessageCircle className="h-5 w-5" />}
-          title="WhatsApp (beta)"
-          status={byo('whatsapp_twilio').length > 0 ? 'active' : 'pending'}
-          statusLabel={byo('whatsapp_twilio').length > 0 ? 'Connected' : 'Not connected'}
-          description="Bring your own Twilio account + WhatsApp number: inbound messages become tickets, agent replies go back over WhatsApp — your number, unlimited messages. (A shared platform number for paid tiers is coming.)"
-          action={
-            <button onClick={() => setShowForm('whatsapp_twilio')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
-              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect your Twilio
-            </button>
-          }
-        >
-          {byo('whatsapp_twilio').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
-          ))}
-        </ChannelCard>
-
         {/* Live chat widget */}
         <ChannelCard
           icon={<MessageSquare className="h-5 w-5" />}
@@ -182,6 +134,24 @@ export default function ChannelsPage() {
               {accountId}@in.suppuo.com
             </div>
           )}
+        </ChannelCard>
+
+        {/* WhatsApp via your Twilio */}
+        <ChannelCard
+          icon={<MessageCircle className="h-5 w-5" />}
+          title="WhatsApp (beta)"
+          status={byo('whatsapp_twilio').length > 0 ? 'active' : 'pending'}
+          statusLabel={byo('whatsapp_twilio').length > 0 ? 'Connected' : 'Not connected'}
+          description="Bring your own Twilio account + WhatsApp number: inbound messages become tickets, agent replies go back over WhatsApp — your number, unlimited messages. (A shared platform number for paid tiers is coming.)"
+          action={
+            <button onClick={() => setShowForm('whatsapp_twilio')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
+              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect your Twilio
+            </button>
+          }
+        >
+          {byo('whatsapp_twilio').map((i) => (
+            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+          ))}
         </ChannelCard>
 
         {/* WhatsApp Cloud API (Meta direct) */}
@@ -219,7 +189,34 @@ export default function ChannelsPage() {
             <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
           ))}
         </ChannelCard>
+        </ChannelSection>
 
+        <ChannelSection
+          title="Outbound email"
+          blurb="How requesters receive ticket updates — the platform sender, or your own domain."
+        >
+        <ChannelCard
+          icon={<Mail className="h-5 w-5" />}
+          title="Email notifications"
+          status={data?.platform.email ? 'active' : 'pending'}
+          statusLabel={data?.platform.email ? 'Platform (suppuo.forjio.com)' : 'Not configured'}
+          description="Outbound ticket updates to requesters. Bring your own Resend account to send from your own domain."
+          action={
+            <button onClick={() => setShowForm('email_resend')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
+              <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect your Resend
+            </button>
+          }
+        >
+          {byo('email_resend').map((i) => (
+            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+          ))}
+        </ChannelCard>
+        </ChannelSection>
+
+        <ChannelSection
+          title="Team notifications"
+          blurb="Pings for your own team when tickets arrive or customers reply — these never message customers."
+        >
         {/* Slack — team notifications */}
         <ChannelCard
           icon={<Hash className="h-5 w-5" />}
@@ -255,6 +252,24 @@ export default function ChannelsPage() {
             <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
           ))}
         </ChannelCard>
+        </ChannelSection>
+
+        <ChannelSection title="Built-in" blurb="Always available — nothing to configure.">
+        <ChannelCard
+          icon={<Globe className="h-5 w-5" />}
+          title="Hosted support form"
+          status="active"
+          statusLabel="Always on"
+          description="Customers submit tickets at your form URL (see Settings). Replies go out by email with a status link."
+        />
+        <ChannelCard
+          icon={<PenLine className="h-5 w-5" />}
+          title="Manual logging"
+          status="active"
+          statusLabel="Always on"
+          description="Log requests that arrive anywhere else (phone, DM, walk-in) with the New ticket button — the customer still gets the status link."
+        />
+        </ChannelSection>
       </div>
 
       {showForm === 'whatsapp_twilio' && (
@@ -345,6 +360,26 @@ function WidgetEmbed({ accountId }: { accountId: string | null }) {
         Preview the widget →
       </a>
     </div>
+  );
+}
+
+function ChannelSection({
+  title,
+  blurb,
+  children,
+}: {
+  title: string;
+  blurb: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h2>
+      <p className="mt-0.5 text-xs text-muted-foreground/80">{blurb}</p>
+      <div className="mt-3 space-y-4">{children}</div>
+    </section>
   );
 }
 
