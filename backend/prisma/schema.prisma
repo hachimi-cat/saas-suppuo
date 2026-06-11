@@ -117,3 +117,27 @@ model CannedReply {
   @@index([accountId])
   @@map("canned_replies")
 }
+
+// ─── Billing ─────────────────────────────────────────────────────────
+
+/// Plugipay-backed plan subscription — one row per workspace
+/// (accountId). Absence of a row = the gratis default. Early access:
+/// the tier is recorded truthfully but nothing is enforced yet — every
+/// workspace gets Toko-level features free until launch.
+model BillingSubscription {
+  id                        String    @id // bsub_<ulid>
+  accountId                 String    @unique
+  /// gratis | warung | toko | bisnis
+  tier                      String    @default("gratis")
+  /// active | past_due | canceled
+  status                    String    @default("active")
+  /// Last Plugipay checkout session that (re)activated this
+  /// subscription — the webhook's idempotency guard keys on it.
+  plugipayCheckoutSessionId String?
+  currentPeriodEnd          DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@index([plugipayCheckoutSessionId])
+  @@map("billing_subscriptions")
+}

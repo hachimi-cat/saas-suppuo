@@ -12,7 +12,9 @@ import adminCrmRouter from './admin-crm.js';
 import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
 import webhooksTwilioRouter from './webhooks-twilio.js';
+import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import adminCustomersRouter from './admin-customers.js';
+import billingRouter from './billing.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -80,8 +82,12 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/canned-replies', requireAuth, cannedRepliesRouter);
   /** Requester-facing public surface — tokenized, rate-limited. */
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
+  /** Billing — Plugipay-powered plan subscriptions. */
+  router.use('/billing', requireAuth, billingRouter);
   /** Inbound channel webhooks (Twilio WhatsApp). */
   router.use('/webhooks/twilio', webhooksTwilioRouter);
+  /** Plugipay billing webhooks (HMAC-signed, no session auth). */
+  router.use('/webhooks/plugipay', webhooksPlugipayRouter);
 
   // Products mount their own routers here, e.g.:
   //   router.use('/widgets', widgetsRouter);
