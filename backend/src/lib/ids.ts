@@ -14,6 +14,7 @@ export type IdPrefix =
   | 'tmsg' // ticket message
   | 'cnr' // canned reply
   | 'chn' // channel integration
+  | 'bsub' // billing subscription
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {
