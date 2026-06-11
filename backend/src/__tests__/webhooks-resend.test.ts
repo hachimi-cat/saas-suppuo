@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import {
   verifySvixSignature,
   accountIdFromAddress,
+  isLikelyAccountId,
   trimQuotedReply,
 } from '../routes/webhooks-resend.js';
 
@@ -74,6 +75,17 @@ describe('accountIdFromAddress', () => {
   it('rejects foreign domains', () => {
     expect(accountIdFromAddress('acc_x@gmail.com')).toBeNull();
     expect(accountIdFromAddress('acc_x@in.suppuo.com.evil.com')).toBeNull();
+  });
+});
+
+describe('isLikelyAccountId', () => {
+  it('accepts the real Huudis shape (acc_ + 24 hex)', () => {
+    expect(isLikelyAccountId('acc_4593c748ccb0164d7ce64baa')).toBe(true);
+  });
+  it('rejects junk', () => {
+    expect(isLikelyAccountId('acc_short')).toBe(false);
+    expect(isLikelyAccountId('usr_4593c748ccb0164d7ce64baa')).toBe(false);
+    expect(isLikelyAccountId('acc_zzzzzzzzzzzzzzzzzzzzzzzz')).toBe(false); // non-hex
   });
 });
 

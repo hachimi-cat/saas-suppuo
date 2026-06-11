@@ -53,7 +53,14 @@ export function verifySvixSignature(
   });
 }
 
-/** `acc_01ABC…@in.suppuo.com` (any +tag tolerated) → the accountId. */
+/** Huudis account id shape: `acc_` + 24 hex chars (observed range
+ *  tolerated: 20–32). The unguessable id IS the gate — no local
+ *  account table exists to check against. */
+export function isLikelyAccountId(x: string): boolean {
+  return /^acc_[a-f0-9]{20,32}$/i.test(x);
+}
+
+/** `acc_4593…@in.suppuo.com` (any +tag tolerated) → the accountId. */
 export function accountIdFromAddress(addr: string): string | null {
   const m = /^([a-z0-9_]+?)(\+[^@]*)?@(.+)$/i.exec(addr.trim());
   if (!m || (m[3] ?? '').toLowerCase() !== INBOUND_DOMAIN) return null;
@@ -150,12 +157,12 @@ router.post(
         ? [event.data.to]
         : [];
     // Alias → workspace. Accounts live in Huudis (no local table), so the
-    // gate is the alias format itself: `acc_` + 26-char ULID local-parts
-    // are unguessable in practice. Junk to a malformed alias is dropped.
+    // gate is the alias format itself: Huudis account ids are `acc_` +
+    // 24 hex chars (e.g. acc_4593c748ccb0164d7ce64baa) — unguessable in
+    // practice. Junk to a malformed alias is dropped.
     const accountId =
-      toList
-        .map(accountIdFromAddress)
-        .find((x): x is string => Boolean(x && /^acc_[0-9a-hjkmnp-tv-z]{26}$/i.test(x))) ?? null;
+      toList.map(accountIdFromAddress).find((x): x is string => Boolean(x && isLikelyAccountId(x))) ??
+      null;
     if (!accountId) {
       // ACK 200 — Resend retries aggressively and an unknown alias will
       // never become deliverable; record + drop.
