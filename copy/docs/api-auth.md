@@ -17,7 +17,7 @@ https://suppuo.com/api/v1
 
 (`https://suppuo.forjio.com/api/v1` serves the same API.)
 
-## Two ways in
+## Three ways in
 
 ### Portal session (browser)
 
@@ -26,10 +26,27 @@ sign-in flow (Huudis SSO). If you're building on top of the portal in
 the browser, you're already authenticated — fetches to `/api/v1/*`
 ride the cookie. Nothing to configure.
 
-### Bearer token (API callers)
+### API key (recommended for automation)
 
-Scripts, servers, and integrations authenticate with a **Huudis JWT**
-as a bearer token:
+Create an `sk_live_…` key at
+[/dashboard/api-keys](/dashboard/api-keys) and send it as a Bearer
+token:
+
+```bash
+curl -H "Authorization: Bearer sk_live_…" \
+  "https://suppuo.com/api/v1/tickets?status=open"
+```
+
+Keys are long-lived (no expiry — revoke to kill), scoped to the
+workspace they were created in, and shown only once at creation.
+Full details on [API keys](/docs/api-keys). This is the simplest
+credential for scripts, cron jobs, and integrations — no token
+refresh dance.
+
+### Huudis JWT (Bearer)
+
+Callers that already hold a **Huudis access token** can use it
+directly as a bearer token:
 
 ```
 Authorization: Bearer <access-token>
@@ -40,7 +57,8 @@ a Huudis account ([huudis.com](https://huudis.com)). Access tokens are
 issued by Huudis for the `suppuo` audience and carry your identity
 (`sub`) and workspace (`accountId`); every API call is scoped to that
 workspace. Tokens are short-lived — refresh and retry on
-`AUTH_REQUIRED` rather than caching one forever.
+`AUTH_REQUIRED` rather than caching one forever. (If that dance is
+annoying, that's what API keys are for.)
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
@@ -135,5 +153,8 @@ diff cheaply.
 
 ## See also
 
+- [API keys](/docs/api-keys) — minting, storage, and revoking
+  `sk_live_…` keys.
 - [Tickets API](/docs/tickets) — the main authenticated surface.
+- [Webhooks](/docs/webhooks) — push notifications instead of polling.
 - [CLI](/docs/cli) — `suppuo` on your terminal.
