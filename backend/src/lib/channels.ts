@@ -121,3 +121,27 @@ export async function resolveEmailForAccount(accountId: string): Promise<Resolve
   }
   return null;
 }
+
+export interface ResolvedTelegram {
+  accountId: string;
+  botToken: string;
+  byo: true;
+}
+
+/** Outbound Telegram: the workspace's own bot (no platform fallback —
+ *  Telegram is BYO-only). */
+export async function resolveTelegramForAccount(
+  accountId: string,
+): Promise<ResolvedTelegram | null> {
+  const integ = await prisma.channelIntegration.findFirst({
+    where: { accountId, provider: 'telegram_bot', status: 'active' },
+  });
+  if (!integ) return null;
+  try {
+    const creds = decryptCredentials<{ botToken?: string }>(integ.credentials);
+    if (creds.botToken) return { accountId, botToken: creds.botToken, byo: true };
+  } catch (e) {
+    console.error('[channels] credential decrypt failed', integ.id, e);
+  }
+  return null;
+}

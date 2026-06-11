@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/db.js';
@@ -5,10 +6,20 @@ import { newId } from '../lib/ids.js';
 import { sendOk, sendCreated, sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { encryptCredentials } from '../lib/channel-crypto.js';
+import {
+  telegramGetMe,
+  telegramSetWebhook,
+  generateTelegramWebhookSecret,
+} from '../lib/telegram.js';
+import {
+  isSlackWebhookUrl,
+  isDiscordWebhookUrl,
+  sendTeamConnectedTest,
+} from '../lib/team-notify.js';
 
 /*
  * /api/v1/channels — per-workspace BYO channel integrations (ripllo's
- * ChannelIntegration pattern). v1 providers:
+ * ChannelIntegration pattern). Providers:
  *
  *   whatsapp_twilio — the workspace's OWN Twilio account + WA number;
  *                     inbound webhooks route by number, outbound replies
@@ -16,6 +27,14 @@ import { encryptCredentials } from '../lib/channel-crypto.js';
  *                     "BYO" promise).
  *   email_resend    — the workspace's OWN Resend key + from address for
  *                     branded requester notifications.
+ *   telegram_bot    — the workspace's OWN Telegram bot (@BotFather
+ *                     token); two-way: inbound chats become tickets via
+ *                     a per-integration webhook (registered automatically
+ *                     with setWebhook), agent replies go back over
+ *                     sendMessage.
+ *   slack_webhook   — Slack incoming webhook; outbound-only team
+ *                     notifications on new tickets + customer replies.
+ *   discord_webhook — Discord webhook; same team notifications.
  *
  * Credentials are validated LIVE against the provider before the
  * integration activates, then stored AES-256-GCM-encrypted. List
@@ -24,7 +43,13 @@ import { encryptCredentials } from '../lib/channel-crypto.js';
 
 const router = Router();
 
-const PROVIDERS = ['whatsapp_twilio', 'email_resend'] as const;
+const PROVIDERS = [
+  'whatsapp_twilio',
+  'email_resend',
+  'telegram_bot',
+  'slack_webhook',
+  'discord_webhook',
+] as const;
 
 function publicShape(row: {
   id: string;
@@ -79,6 +104,21 @@ const createBody = z.discriminatedUnion('provider', [
     apiKey: z.string().min(8),
     fromEmail: z.string().email(),
     fromName: z.string().trim().max(120).optional(),
+  }),
+  z.object({
+    provider: z.literal('telegram_bot'),
+    botToken: z.string().regex(/^\d+:[A-Za-z0-9_-]{20,}$/, 'must look like 123456789:AA…'),
+    displayName: z.string().trim().max(120).optional(),
+  }),
+  z.object({
+    provider: z.literal('slack_webhook'),
+    webhookUrl: z.string().url().max(500),
+    displayName: z.string().trim().max(120).optional(),
+  }),
+  z.object({
+    provider: z.literal('discord_webhook'),
+    webhookUrl: z.string().url().max(500),
+    displayName: z.string().trim().max(120).optional(),
   }),
 ]);
 
@@ -138,6 +178,104 @@ router.post(
         webhookUrl: `${process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com'}/api/v1/webhooks/twilio/whatsapp?secret=${process.env.SUPPUO_TWILIO_WEBHOOK_SECRET ?? ''}`,
         note: "Point your Twilio number's incoming-message webhook at webhookUrl (POST).",
       });
+    }
+
+    if (input.provider === 'telegram_bot') {
+      // Live validation: who is this bot? (also proves the token works)
+      const me = await telegramGetMe(input.botToken);
+      if (!me) {
+        return sendErr(res, req, 400, 'VALIDATION_ERROR', 'Telegram rejected the bot token — check the token from @BotFather.');
+      }
+      const handle = me.username ? `@${me.username}` : (me.firstName ?? `bot ${me.id}`);
+      const webhookSecret = generateTelegramWebhookSecret();
+      const row = await prisma.channelIntegration.upsert({
+        where: {
+          accountId_provider_externalId: {
+            accountId,
+            provider: 'telegram_bot',
+            externalId: String(me.id),
+          },
+        },
+        create: {
+          id: newId('chn'),
+          accountId,
+          provider: 'telegram_bot',
+          externalId: String(me.id),
+          displayName: input.displayName ?? handle,
+          status: 'active',
+          credentials: encryptCredentials({ botToken: input.botToken }),
+          config: { botUsername: me.username, webhookSecret },
+        },
+        update: {
+          status: 'active',
+          lastError: null,
+          displayName: input.displayName ?? handle,
+          credentials: encryptCredentials({ botToken: input.botToken }),
+          config: { botUsername: me.username, webhookSecret },
+        },
+      });
+      // Register the per-integration inbound webhook with Telegram.
+      const webhookUrl = `${process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com'}/api/v1/webhooks/telegram/${row.id}?secret=${webhookSecret}`;
+      const hooked = await telegramSetWebhook(input.botToken, webhookUrl);
+      if (!hooked) {
+        await prisma.channelIntegration.update({
+          where: { id: row.id },
+          data: { status: 'error', lastError: 'telegram setWebhook failed' },
+        });
+        return sendErr(res, req, 400, 'VALIDATION_ERROR', 'Telegram accepted the token but setWebhook failed — try again in a minute.');
+      }
+      return sendCreated(res, req, {
+        ...publicShape(row),
+        note: `Webhook registered with Telegram automatically — messages to ${handle} will open tickets here.`,
+      });
+    }
+
+    if (input.provider === 'slack_webhook' || input.provider === 'discord_webhook') {
+      const isSlack = input.provider === 'slack_webhook';
+      const shapeOk = isSlack
+        ? isSlackWebhookUrl(input.webhookUrl)
+        : isDiscordWebhookUrl(input.webhookUrl);
+      if (!shapeOk) {
+        return sendErr(res, req, 400, 'VALIDATION_ERROR', isSlack ? 'That does not look like a Slack incoming-webhook URL (https://hooks.slack.com/services/…).' : 'That does not look like a Discord webhook URL (https://discord.com/api/webhooks/…).');
+      }
+      // Live validation IS the test message: post "connected ✓".
+      const delivered = await sendTeamConnectedTest(input.provider, input.webhookUrl);
+      if (!delivered) {
+        return sendErr(res, req, 400, 'VALIDATION_ERROR', `${isSlack ? 'Slack' : 'Discord'} rejected the test message — check the webhook URL.`);
+      }
+      // Stable per-URL identity without persisting the URL in plaintext.
+      const externalId = crypto
+        .createHash('sha256')
+        .update(input.webhookUrl)
+        .digest('hex')
+        .slice(0, 16);
+      const row = await prisma.channelIntegration.upsert({
+        where: {
+          accountId_provider_externalId: {
+            accountId,
+            provider: input.provider,
+            externalId,
+          },
+        },
+        create: {
+          id: newId('chn'),
+          accountId,
+          provider: input.provider,
+          externalId,
+          displayName:
+            input.displayName ?? (isSlack ? 'Slack notifications' : 'Discord notifications'),
+          status: 'active',
+          credentials: encryptCredentials({ webhookUrl: input.webhookUrl }),
+          config: {},
+        },
+        update: {
+          status: 'active',
+          lastError: null,
+          ...(input.displayName ? { displayName: input.displayName } : {}),
+          credentials: encryptCredentials({ webhookUrl: input.webhookUrl }),
+        },
+      });
+      return sendCreated(res, req, publicShape(row));
     }
 
     // email_resend

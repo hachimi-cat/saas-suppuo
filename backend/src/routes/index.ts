@@ -14,6 +14,7 @@ import adminCrmRouter from './admin-crm.js';
 import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
 import webhooksTwilioRouter from './webhooks-twilio.js';
+import webhooksTelegramRouter from './webhooks-telegram.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import adminCustomersRouter from './admin-customers.js';
 import billingRouter from './billing.js';
@@ -90,8 +91,9 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Billing — Plugipay-powered plan subscriptions. */
   router.use('/billing', requireAuth, billingRouter);
-  /** Inbound channel webhooks (Twilio WhatsApp). */
+  /** Inbound channel webhooks (Twilio WhatsApp, Telegram bots). */
   router.use('/webhooks/twilio', webhooksTwilioRouter);
+  router.use('/webhooks/telegram', webhooksTelegramRouter);
   /** Plugipay billing webhooks (HMAC-signed, no session auth). */
   router.use('/webhooks/plugipay', webhooksPlugipayRouter);
   /** Programmatic access keys (session callers manage; keys themselves
