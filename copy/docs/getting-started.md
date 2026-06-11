@@ -37,8 +37,11 @@ customer inquiry is a **ticket** with:
 - a **status** — `open` (needs an agent), `pending` (waiting on the
   customer), `resolved`, or `closed`,
 - a **priority** — `low`, `normal`, `high`, or `urgent`,
-- a **channel** — `web` (your hosted form), `whatsapp`, or `email`
-  (logged by an agent),
+- a **channel** — `web` (your hosted form or
+  [chat widget](/docs/live-chat-widget)), `email`
+  ([forwarded in](/docs/email-to-ticket) or logged by an agent),
+  `whatsapp`, or `telegram`,
+- optional **tags** — free-form labels you can filter the inbox by,
 - the conversation thread: customer messages, agent replies, and
   agent-only internal notes.
 
@@ -94,9 +97,15 @@ Suppuo's core. Everything else builds on it.
 
 - [Canned replies](/docs/canned-replies) — save your common answers
   and insert them with one click.
+- [Live chat widget](/docs/live-chat-widget) — put the chat bubble on
+  your website with one script tag.
+- [Email-to-ticket](/docs/email-to-ticket) — forward your `support@`
+  and answer email from the inbox.
 - [Channels](/docs/channels) + [WhatsApp (beta)](/docs/whatsapp) —
-  receive and answer WhatsApp messages from the same inbox, with your
-  own Twilio number.
+  receive and answer WhatsApp and Telegram messages from the same
+  inbox, with your own number or bot.
+- [Automation & CSAT](/docs/automation-csat) — auto-replies on your
+  business hours, and post-resolve satisfaction surveys.
 - [API keys](/docs/api-keys) + the [Tickets API](/docs/tickets) —
   automate ticket logging and replies.
 - [Webhooks](/docs/webhooks) — push ticket events to your own systems.

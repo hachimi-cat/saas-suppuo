@@ -11,6 +11,11 @@ a status change.
 
 Manage endpoints at [/dashboard/webhooks](/dashboard/webhooks).
 
+(Just want your *team* pinged on new tickets, no code? That's the
+[Slack / Discord notification channels](/docs/channels#slack-notifications)
+— paste a webhook URL and you're done. This page is the developer
+surface for your own systems.)
+
 ## Create a subscription
 
 In the portal, or via the API:

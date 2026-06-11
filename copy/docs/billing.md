@@ -20,7 +20,7 @@ no per-seat surprises. Manage your plan at
 
 WhatsApp overage on paid tiers is Rp 150/message — or skip metering
 entirely on Bisnis by [bringing your own Twilio
-number](/docs/channels#whatsapp-via-your-own-twilio-whatsapp_twilio)
+number](/docs/channels#whatsapp-via-your-own-twilio)
 (unlimited messages). The full feature matrix lives on
 [/pricing](/pricing) and in the portal's billing page; both render
 from the same source of truth as the API
