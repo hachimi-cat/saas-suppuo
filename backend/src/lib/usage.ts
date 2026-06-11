@@ -2,11 +2,13 @@ import { prisma } from './db.js';
 import { newId } from './ids.js';
 
 /*
- * Usage metering — v1 counts outbound platform-WhatsApp messages so
- * the tier quotas (Warung 500 / Toko 1.500 / Bisnis 4.000 per month)
- * are countable before the shared number goes live. BYO traffic
- * (customer's own Twilio / Meta Cloud) is never metered — it's their
- * provider bill. Counting only; enforcement comes at launch.
+ * Usage metering — DORMANT. Counts outbound shared-platform-number
+ * WhatsApp sends, but there is no platform number and none is planned
+ * (Meta account permanently blocked 2026-06-11; WhatsApp is BYO-only,
+ * and BYO traffic is never metered — it's the customer's provider
+ * bill). Kept because the hooks are in place and harmless: with
+ * TWILIO_WHATSAPP_FROM unset, no platform send can resolve, so the
+ * counters stay at zero.
  */
 
 export const WA_PLATFORM_OUT = 'wa_platform_out';

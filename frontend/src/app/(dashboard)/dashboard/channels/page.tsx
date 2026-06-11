@@ -142,7 +142,7 @@ export default function ChannelsPage() {
           title="WhatsApp (beta)"
           status={byo('whatsapp_twilio').length > 0 ? 'active' : 'pending'}
           statusLabel={byo('whatsapp_twilio').length > 0 ? 'Connected' : 'Not connected'}
-          description="Bring your own Twilio account + WhatsApp number: inbound messages become tickets, agent replies go back over WhatsApp — your number, unlimited messages. (A shared platform number for paid tiers is coming.)"
+          description="Bring your own Twilio account + WhatsApp number: inbound messages become tickets, agent replies go back over WhatsApp — your number, unlimited messages on your own Twilio bill."
           action={
             <button onClick={() => setShowForm('whatsapp_twilio')} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:border-primary">
               <Plug className="mr-1 inline h-3.5 w-3.5" /> Connect your Twilio

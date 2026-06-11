@@ -25,10 +25,14 @@ export interface TierDef {
   priceIdr: number;
   blurb: string;
   features: string[];
-  /** Monthly platform-WhatsApp outbound quota (shared number). 0 = no
-   *  platform WA on this tier. BYO traffic is never metered. Counting
-   *  is live (lib/usage.ts); enforcement comes at launch. */
-  waQuotaMonthly: number;
+  /** Agent-seat limit (Huudis workspace members). Displayed against
+   *  the live member count; enforcement comes at launch. */
+  agentLimit: number;
+  /** Connected WhatsApp numbers (BYO integrations) allowed. WhatsApp
+   *  is BYO-ONLY — there is no shared platform number (Meta account
+   *  permanently blocked 2026-06-11; do not resurrect platform-WA
+   *  copy). Enforcement comes at launch. */
+  waNumberLimit: number;
 }
 
 export const TIER_DEFS: readonly TierDef[] = [
@@ -36,7 +40,8 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'gratis',
     name: 'Gratis',
     priceIdr: 0,
-    waQuotaMonthly: 0,
+    agentLimit: 2,
+    waNumberLimit: 0,
     blurb: 'For trying Suppuo out, or a one-person support desk.',
     features: [
       '2 agents',
@@ -57,14 +62,14 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'warung',
     name: 'Warung',
     priceIdr: 99_000,
-    waQuotaMonthly: 500,
+    agentLimit: 3,
+    waNumberLimit: 1,
     blurb: 'For small teams running real support every day.',
     features: [
       '3 agents',
       'Unlimited tickets + canned replies',
       'Hosted form + status links — no Suppuo branding',
-      'WhatsApp channel (beta) — 1 number · 500 msgs/bln',
-      'WA overage Rp 150/msg',
+      'WhatsApp — your own number (via your Twilio or Meta Cloud API), unlimited messages',
       'Telegram bot channel',
       'Slack + Discord team notifications',
       'CSAT surveys after resolve',
@@ -76,13 +81,13 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'toko',
     name: 'Toko',
     priceIdr: 299_000,
-    waQuotaMonthly: 1_500,
+    agentLimit: 10,
+    waNumberLimit: 3,
     blurb: 'For growing teams that want to build on the API.',
     features: [
       '10 agents',
       'Everything in Warung',
-      'WhatsApp channel (beta) — 1 number · 1.500 msgs/bln',
-      'BYO WhatsApp Cloud API (Meta direct) = unlimited WA',
+      'Up to 3 connected WhatsApp numbers',
       'BYO email — your Resend account + domain',
       'REST API + CLI + webhooks',
       'Email support',
@@ -92,14 +97,14 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'bisnis',
     name: 'Bisnis',
     priceIdr: 599_000,
-    waQuotaMonthly: 4_000,
-    blurb: 'For bigger teams and multi-number WhatsApp support.',
+    agentLimit: 25,
+    waNumberLimit: 99,
+    blurb: 'For bigger teams running support across many numbers.',
     features: [
       '25 agents',
       'Everything in Toko',
-      'WhatsApp channel (beta) — 3 numbers · 4.000 msgs/bln',
-      'BYO Twilio = unlimited WA messages',
-      'Priority WhatsApp support',
+      'Unlimited connected WhatsApp numbers',
+      'Priority support',
     ],
   },
 ];

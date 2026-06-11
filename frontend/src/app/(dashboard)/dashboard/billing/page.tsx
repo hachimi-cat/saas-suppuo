@@ -16,6 +16,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { fetchMembers } from '@/lib/members';
 
 interface Subscription {
   id: string | null;
@@ -32,14 +33,15 @@ interface TierDef {
   priceIdr: number;
   blurb: string;
   features: string[];
+  /** Machine-readable plan terms (display now, enforcement at launch). */
+  agentLimit: number;
+  waNumberLimit: number;
 }
 
 interface BillingData {
   subscription: Subscription;
   earlyAccess: boolean;
   tiers: TierDef[];
-  /** Platform-WhatsApp metering (shared number; BYO never counted). */
-  waUsage: { period: string; used: number; quota: number };
 }
 
 const STATUS_TONES: Record<string, string> = {
@@ -50,6 +52,51 @@ const STATUS_TONES: Record<string, string> = {
 
 function rupiah(amount: number): string {
   return `Rp ${amount.toLocaleString('id-ID')}`;
+}
+
+/** Live agent-seat usage: Huudis workspace members vs the tier's seat
+ *  limit. Display only during early access — nothing is blocked. */
+function SeatUsage({ limit, tierName }: { limit: number; tierName: string }) {
+  const [used, setUsed] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchMembers()
+      .then((m) => setUsed(m.length))
+      .catch(() => setUsed(null));
+  }, []);
+
+  if (used === null) return null;
+  const over = used > limit;
+  return (
+    <div className="mt-4 border-t border-border pt-4">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Agent seats
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className="font-semibold">
+          {used} of {limit}
+        </span>
+        <span className="text-muted-foreground">on {tierName}</span>
+        {over && (
+          <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600">
+            over the {tierName} limit
+          </span>
+        )}
+      </div>
+      <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full ${over ? 'bg-amber-500' : 'bg-primary'}`}
+          style={{ width: `${Math.min(100, Math.round((used / Math.max(1, limit)) * 100))}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Agents = members of this workspace (manage them in Workspaces).
+        {over
+          ? ' Nothing is blocked during early access — pick a bigger plan before launch.'
+          : ''}
+      </p>
+    </div>
+  );
 }
 
 function BillingContent() {
@@ -167,39 +214,9 @@ function BillingContent() {
           </div>
         )}
 
-        {/* Platform-WhatsApp usage (shared number; BYO traffic is the
-            workspace's own provider bill and never counted). */}
-        {data && (
-          <div className="mt-4 border-t border-border pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Platform WhatsApp usage — {data.waUsage.period}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-              <span className="font-semibold">
-                {data.waUsage.used.toLocaleString('id-ID')} msgs
-              </span>
-              <span className="text-muted-foreground">
-                {data.waUsage.quota > 0
-                  ? `of ${data.waUsage.quota.toLocaleString('id-ID')} on ${currentDef?.name ?? currentTier}`
-                  : 'no platform-WA quota on Gratis — BYO WhatsApp is unlimited'}
-              </span>
-            </div>
-            {data.waUsage.quota > 0 && (
-              <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{
-                    width: `${Math.min(100, Math.round((data.waUsage.used / data.waUsage.quota) * 100))}%`,
-                  }}
-                />
-              </div>
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              Counts outbound messages over the shared Suppuo number only (launching soon).
-              Your own Twilio or Meta Cloud API traffic is never metered.
-            </p>
-          </div>
-        )}
+        {/* Agent seats — live Huudis member count vs the tier's seat
+            limit. Display only; enforcement comes at launch. */}
+        {currentDef && <SeatUsage limit={currentDef.agentLimit} tierName={currentDef.name} />}
       </section>
 
       {/* ── Tier cards ───────────────────────────────────────────── */}

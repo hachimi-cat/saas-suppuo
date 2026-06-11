@@ -5,7 +5,6 @@ import { sendOk, sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { getPlugipayClient, hostedCheckoutUrl, plugipayConfigured } from '../lib/plugipay.js';
 import { TIER_DEFS, isPaidTier, tierDef, type BillingTier } from '../lib/billing.js';
-import { getUsage, WA_PLATFORM_OUT } from '../lib/usage.js';
 
 /*
  * /api/v1/billing — workspace plan + Plugipay checkout (behind
@@ -28,8 +27,6 @@ router.get(
   asyncHandler(async (req, res) => {
     const accountId = req.auth!.accountId as string;
     const sub = await prisma.billingSubscription.findUnique({ where: { accountId } });
-    const tier = (sub?.tier as BillingTier | undefined) ?? 'gratis';
-    const wa = await getUsage(accountId, WA_PLATFORM_OUT);
     sendOk(res, req, {
       subscription: sub ?? {
         id: null,
@@ -41,13 +38,6 @@ router.get(
       },
       earlyAccess: true,
       tiers: TIER_DEFS,
-      /** Platform-WhatsApp metering (shared number; BYO never counted).
-       *  Counting is live; quota enforcement comes at launch. */
-      waUsage: {
-        period: wa.period,
-        used: wa.count,
-        quota: tierDef(tier).waQuotaMonthly,
-      },
     });
   }),
 );

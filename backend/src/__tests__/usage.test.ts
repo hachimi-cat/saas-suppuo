@@ -26,11 +26,19 @@ describe('brandingFooter', () => {
   });
 });
 
-describe('tier waQuotaMonthly', () => {
-  it('matches the marketing numbers', () => {
-    expect(tierDef('gratis').waQuotaMonthly).toBe(0);
-    expect(tierDef('warung').waQuotaMonthly).toBe(500);
-    expect(tierDef('toko').waQuotaMonthly).toBe(1500);
-    expect(tierDef('bisnis').waQuotaMonthly).toBe(4000);
+describe('tier limits (machine-readable plan terms)', () => {
+  it('agent seats match the marketing numbers', () => {
+    expect(tierDef('gratis').agentLimit).toBe(2);
+    expect(tierDef('warung').agentLimit).toBe(3);
+    expect(tierDef('toko').agentLimit).toBe(10);
+    expect(tierDef('bisnis').agentLimit).toBe(25);
+  });
+  it('WhatsApp is BYO-only — connected-number limits, no message quotas', () => {
+    expect(tierDef('gratis').waNumberLimit).toBe(0);
+    expect(tierDef('warung').waNumberLimit).toBe(1);
+    expect(tierDef('toko').waNumberLimit).toBe(3);
+    expect(tierDef('bisnis').waNumberLimit).toBeGreaterThan(3);
+    // No platform-WA quota field — the shared number is dead (Meta).
+    expect('waQuotaMonthly' in tierDef('warung')).toBe(false);
   });
 });
