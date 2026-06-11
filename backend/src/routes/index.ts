@@ -15,6 +15,7 @@ import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
 import webhooksTwilioRouter from './webhooks-twilio.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
+import webhooksResendRouter from './webhooks-resend.js';
 import adminCustomersRouter from './admin-customers.js';
 import billingRouter from './billing.js';
 import apiKeysRouter from './api-keys.js';
@@ -94,6 +95,8 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/webhooks/twilio', webhooksTwilioRouter);
   /** Plugipay billing webhooks (HMAC-signed, no session auth). */
   router.use('/webhooks/plugipay', webhooksPlugipayRouter);
+  /** Resend inbound email → tickets (svix-signed, no session auth). */
+  router.use('/webhooks/resend', webhooksResendRouter);
   /** Programmatic access keys (session callers manage; keys themselves
    *  authenticate via the sk_live_ Bearer path in middleware/auth.ts). */
   router.use('/api-keys', requireAuth, apiKeysRouter);

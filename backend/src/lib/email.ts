@@ -21,10 +21,20 @@ async function send(
     console.log(`[email:dev] to=${to} subj="${subject}"`);
     return;
   }
+  // Reply-To = the workspace's inbound alias, so a plain email reply
+  // threads straight back into the ticket (email-to-ticket webhook).
+  const inboundDomain = process.env.SUPPUO_INBOUND_EMAIL_DOMAIN ?? 'in.suppuo.com';
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${resolved.apiKey}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: resolved.from, to, subject, html, text }),
+    body: JSON.stringify({
+      from: resolved.from,
+      to,
+      subject,
+      html,
+      text,
+      reply_to: `${accountId}@${inboundDomain}`,
+    }),
   });
   if (!res.ok) {
     throw new Error(`resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
