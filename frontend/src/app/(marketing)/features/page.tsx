@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Inbox,
+  MessagesSquare,
   Flag,
   MessageSquareText,
-  ClipboardList,
+  Sparkles,
   Link2,
+  Paperclip,
   Code2,
   ArrowRight,
 } from 'lucide-react';
@@ -13,18 +15,32 @@ import {
 export const metadata: Metadata = {
   title: 'Features',
   description:
-    'Everything Suppuo ships — shared ticket inbox, priorities and assignment, internal notes, canned replies, a hosted ticket form, requester status links, and an API + CLI.',
+    'Everything Suppuo ships — an omnichannel inbox (hosted form, live chat widget, email-to-ticket, WhatsApp, Telegram), tags and full-text search, CSAT surveys, auto-response with business hours, file attachments, and an API + CLI + SDKs.',
 };
 
 const features = [
   {
+    Icon: MessagesSquare,
+    title: 'Six channels, one inbox',
+    body: 'Every way a customer reaches you lands in the same shared queue — no more digging through apps to find who asked what.',
+    details: [
+      'Hosted support form — share the link anywhere',
+      'Live chat widget — one <script> tag on your own site',
+      'Email-to-ticket — forward support@ to your workspace alias',
+      'WhatsApp (beta) — BYO Twilio or Meta Cloud API today',
+      'Telegram — connect your own bot, replies flow both ways',
+      'Manual logging for phone calls, DMs, and walk-ins',
+    ],
+  },
+  {
     Icon: Inbox,
-    title: 'Shared ticket inbox',
-    body: 'One queue for the whole team, so support stops living in someone’s personal chat history.',
+    title: 'An inbox you can actually search',
+    body: 'One queue for the whole team, organized the way support actually works.',
     details: [
       'Statuses: open → pending → resolved → closed',
-      'Filter by status, priority, and assignee',
-      'Full ticket thread — every reply in one place',
+      'Tags on every ticket, with tag filters',
+      'Full-text search across subjects, requesters, and replies',
+      'Filter by status, priority, assignee, channel, and tag',
       'Multi-workspace: separate inboxes per brand or team',
     ],
   },
@@ -33,7 +49,7 @@ const features = [
     title: 'Priorities + assignment',
     body: 'Route each ticket to the right agent and make urgency visible, so complaints don’t sit behind routine questions.',
     details: [
-      'Assign tickets to a specific agent',
+      'Assign tickets from a picker of your workspace members',
       'Per-ticket priority levels',
       'Unassigned tickets are visible to everyone — nothing falls through',
       'Reassign anytime as the ticket evolves',
@@ -51,14 +67,14 @@ const features = [
     ],
   },
   {
-    Icon: ClipboardList,
-    title: 'Hosted ticket form',
-    body: 'A ready-made support form at a link you can share anywhere — your site, bio page, or WhatsApp auto-reply.',
+    Icon: Sparkles,
+    title: 'Automation + CSAT',
+    body: 'Acknowledge every customer instantly — even at 2 AM — and measure how support is actually going.',
     details: [
-      'No customer account required to submit',
-      'Tickets appear in your inbox instantly',
-      'One form per workspace, ready on day one',
-      'Email-to-ticket is next on the roadmap',
+      'Auto-response on every new ticket',
+      'Business hours (WIB) — a different reply outside hours',
+      'One-click CSAT survey when a ticket is resolved',
+      'Satisfaction average + response count on your dashboard',
     ],
   },
   {
@@ -67,19 +83,30 @@ const features = [
     body: 'Requesters always know where their ticket stands — without logging in or asking again.',
     details: [
       'Private, tokenized status link per ticket',
-      'Email on every agent reply',
-      'Email on every status change',
-      'No login or password for your customers, ever',
+      'Email on every agent reply and status change',
+      'Slack or Discord notification to your team on new tickets and customer replies',
+      'BYO email: connect your own Resend account to send from your domain',
+    ],
+  },
+  {
+    Icon: Paperclip,
+    title: 'File attachments',
+    body: 'Screenshots, receipts, and photos travel with the conversation instead of getting lost in a chat app.',
+    details: [
+      'Attach files to any reply — up to 8MB per file',
+      'Works in agent replies, the chat widget, and the ticket status page',
+      'WhatsApp photos and media land on the ticket too',
+      'Download straight from the ticket thread',
     ],
   },
   {
     Icon: Code2,
-    title: 'API + CLI',
+    title: 'API, webhooks, SDKs + CLI',
     body: 'Suppuo is built API-first — the dashboard and your scripts use the same REST API.',
     details: [
-      'REST API with Bearer-token auth',
-      'Consistent response envelope + request IDs',
-      'Webhooks delivered via a transactional outbox',
+      'REST API with API keys (Bearer-token auth)',
+      'Outbound webhooks delivered via a transactional outbox',
+      'SDKs for Node.js, Python, and Go',
       'CLI on npm: @forjio/suppuo-cli',
     ],
   },
@@ -93,9 +120,10 @@ export default function FeaturesPage() {
           Everything a small support team needs.
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Suppuo is a helpdesk for Indonesian SMEs: customers submit tickets through a hosted
-          form, agents work them in a shared inbox, and requesters stay updated by email and a
-          private status link. During early access, all of it is free.
+          Suppuo is a helpdesk for Indonesian SMEs: customers reach you through six channels —
+          hosted form, live chat, email, WhatsApp (beta), Telegram, or a manually logged call —
+          agents work everything in one searchable inbox, and requesters stay updated by email
+          and a private status link. During early access, all of it is free.
         </p>
       </div>
 

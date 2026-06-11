@@ -7,9 +7,13 @@ import { Check, Minus } from 'lucide-react';
  * Gratis / Warung / Toko / Bisnis. During early access every paid tier
  * is free (all workspaces get Toko-level features); founding members get
  * 50% off for 12 months when billing starts, announced 30+ days ahead.
- * WhatsApp channel is in rollout — keep the "(beta)" badge on WA rows.
- * Do NOT invent features beyond this table (no SLA/automations/CSAT/KB
- * claims; no email-to-ticket).
+ *
+ * The tier lists mirror backend/src/lib/billing.ts TIER_DEFS EXACTLY —
+ * keep both in sync. The Suppuo platform WhatsApp number is awaiting
+ * approval, so keep the "(beta)" badge on WA rows; BYO Twilio + BYO
+ * Meta Cloud API work today. Do NOT invent features beyond this table
+ * (no SLA, no reports page, no knowledge base, no white-label widget —
+ * the widget's "Powered by Suppuo" is hardcoded).
  */
 
 export const metadata: Metadata = {
@@ -37,11 +41,14 @@ const TIERS: Tier[] = [
     features: [
       '2 agents',
       '100 tickets / month',
-      'Inbox — statuses, priorities, assignment',
+      'Inbox — tags, filters, full-text search',
       'Internal notes',
       '10 canned replies',
       'Hosted support form + status links (Suppuo branding)',
+      'Live chat widget',
+      'Email-to-ticket alias',
       'Email notifications',
+      'File attachments up to 8MB',
       'Community support',
     ],
   },
@@ -54,11 +61,14 @@ const TIERS: Tier[] = [
     popular: true,
     features: [
       '3 agents',
-      'Unlimited tickets',
-      'Unlimited canned replies',
+      'Unlimited tickets + canned replies',
       'Hosted form + status links — no Suppuo branding',
       'WhatsApp channel (beta) — 1 number · 500 msgs/bln',
       'WA overage Rp 150/msg',
+      'Telegram bot channel',
+      'Slack + Discord team notifications',
+      'CSAT surveys after resolve',
+      'Auto-response + business hours (WIB)',
       'Email support',
     ],
   },
@@ -70,11 +80,11 @@ const TIERS: Tier[] = [
     earlyAccess: true,
     features: [
       '10 agents',
-      'Unlimited tickets',
       'Everything in Warung',
       'WhatsApp channel (beta) — 1 number · 1.500 msgs/bln',
-      'WA overage Rp 150/msg',
-      'REST API + CLI',
+      'BYO WhatsApp Cloud API (Meta direct) = unlimited WA',
+      'BYO email — your Resend account + domain',
+      'REST API + CLI + webhooks',
       'Email support',
     ],
   },
@@ -86,11 +96,9 @@ const TIERS: Tier[] = [
     earlyAccess: true,
     features: [
       '25 agents',
-      'Unlimited tickets',
       'Everything in Toko',
       'WhatsApp channel (beta) — 3 numbers · 4.000 msgs/bln',
-      'WA overage Rp 150/msg — or BYO Twilio = unlimited',
-      'REST API + CLI',
+      'BYO Twilio = unlimited WA messages',
       'Priority WhatsApp support',
     ],
   },
@@ -102,23 +110,34 @@ type Row = { label: string; values: [string | boolean, string | boolean, string 
 const COMPARISON_ROWS: Row[] = [
   { label: 'Agents', values: ['2', '3', '10', '25'] },
   { label: 'Tickets / month', values: ['100', 'Unlimited', 'Unlimited', 'Unlimited'] },
-  { label: 'Inbox — statuses, priorities, assignment', values: [true, true, true, true] },
+  { label: 'Inbox — tags, filters, full-text search', values: [true, true, true, true] },
+  { label: 'Priorities + assignment', values: [true, true, true, true] },
   { label: 'Internal notes', values: [true, true, true, true] },
   { label: 'Canned replies', values: ['10', 'Unlimited', 'Unlimited', 'Unlimited'] },
   {
     label: 'Hosted support form + status links',
     values: ['✓ Suppuo branding', '✓ No branding', true, true],
   },
+  { label: 'Live chat widget', values: [true, true, true, true] },
+  { label: 'Email-to-ticket alias', values: [true, true, true, true] },
   { label: 'Email notifications', values: [true, true, true, true] },
+  { label: 'File attachments (8MB / file)', values: [true, true, true, true] },
   {
     label: 'WhatsApp channel (beta)',
     values: [false, '1 number · 500 msgs/bln', '1 number · 1.500 msgs/bln', '3 numbers · 4.000 msgs/bln'],
   },
+  { label: 'WA overage', values: [false, 'Rp 150/msg', 'Rp 150/msg', 'Rp 150/msg'] },
   {
-    label: 'WA overage',
-    values: [false, 'Rp 150/msg', 'Rp 150/msg', 'Rp 150/msg or BYO Twilio = unlimited'],
+    label: 'BYO WhatsApp Cloud API (Meta direct)',
+    values: [false, false, 'Unlimited WA', 'Unlimited WA'],
   },
-  { label: 'REST API + CLI', values: [false, false, true, true] },
+  { label: 'BYO Twilio WhatsApp', values: [false, false, false, 'Unlimited WA'] },
+  { label: 'Telegram bot channel', values: [false, true, true, true] },
+  { label: 'Slack + Discord team notifications', values: [false, true, true, true] },
+  { label: 'CSAT surveys after resolve', values: [false, true, true, true] },
+  { label: 'Auto-response + business hours (WIB)', values: [false, true, true, true] },
+  { label: 'BYO email (your Resend + domain)', values: [false, false, true, true] },
+  { label: 'REST API + CLI + webhooks', values: [false, false, true, true] },
   { label: 'Support', values: ['Community', 'Email', 'Email', 'Priority WhatsApp'] },
 ];
 
@@ -131,7 +150,8 @@ export default function PricingPage() {
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
           Suppuo is priced per workspace, not per agent. Rp 99rb per bulan flat untuk
-          seluruh tim — bukan Rp 400rb per orang seperti tool lain.
+          seluruh tim — bukan Rp 400rb per orang seperti tool lain. Every plan includes
+          the omnichannel inbox: hosted form, live chat widget, email-to-ticket, and more.
         </p>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
           During early access, every workspace gets Toko-level features free — no card
@@ -241,8 +261,11 @@ export default function PricingPage() {
           </table>
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          WhatsApp channel (beta) is shipping via Twilio and rolling out to workspaces now.
-          Email notifications are outbound updates to your requesters.
+          The shared Suppuo WhatsApp number is awaiting WhatsApp approval — until it&apos;s
+          live, WhatsApp works today by bringing your own number (Twilio on Bisnis, or
+          Meta&apos;s Cloud API direct on Toko+), with unlimited messages through your own
+          account. Email notifications are outbound updates to your requesters; connect
+          your own Resend on Toko+ to send them from your domain.
         </p>
       </div>
 
