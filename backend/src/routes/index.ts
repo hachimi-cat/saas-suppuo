@@ -22,6 +22,8 @@ import adminCustomersRouter from './admin-customers.js';
 import billingRouter from './billing.js';
 import apiKeysRouter from './api-keys.js';
 import webhookSubscriptionsRouter from './webhook-subscriptions.js';
+import settingsRouter from './settings.js';
+import csatRouter from './csat.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -89,6 +91,10 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/channels', requireAuth, channelsRouter);
   router.use('/tickets', requireAuth, ticketsRouter);
   router.use('/canned-replies', requireAuth, cannedRepliesRouter);
+  /** Feature wave: CSAT + automation — workspace automation settings
+   *  (business hours + auto-response) and CSAT aggregates. */
+  router.use('/settings', requireAuth, settingsRouter);
+  router.use('/csat', requireAuth, csatRouter);
   /** Requester-facing public surface — tokenized, rate-limited. */
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Billing — Plugipay-powered plan subscriptions. */

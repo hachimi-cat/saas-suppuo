@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [recent, setRecent] = useState<Ticket[]>([]);
   const [accountId, setAccountId] = useState<string | null>(null);
+  // Feature wave: CSAT — average score (1..3) + response count.
+  const [csat, setCsat] = useState<{ average: number | null; count: number } | null>(null);
 
   useEffect(() => {
     apiRequest<{ tickets: Ticket[]; counts: Record<string, number> }>('/tickets?limit=5')
@@ -50,6 +52,9 @@ export default function DashboardPage() {
       .catch(() => undefined);
     apiRequest<{ accountId: string }>('/me')
       .then(({ data }) => setAccountId(data.accountId))
+      .catch(() => undefined);
+    apiRequest<{ average: number | null; count: number }>('/csat/stats')
+      .then(({ data }) => setCsat(data))
       .catch(() => undefined);
   }, []);
 
@@ -68,7 +73,7 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         {(['open', 'pending', 'resolved', 'closed'] as const).map((s) => (
           <Link
             key={s}
@@ -81,6 +86,16 @@ export default function DashboardPage() {
             </p>
           </Link>
         ))}
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">CSAT</p>
+          <p className="mt-1 text-3xl font-semibold tracking-tight text-emerald-600">
+            {csat?.average != null ? csat.average.toFixed(1) : '—'}
+            <span className="text-sm font-normal text-muted-foreground"> / 3</span>
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {csat ? `${csat.count} rating${csat.count === 1 ? '' : 's'}` : ' '}
+          </p>
+        </div>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
