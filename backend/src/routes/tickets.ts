@@ -12,6 +12,8 @@ import {
   isTicketPriority,
   TICKET_STATUSES,
 } from '../lib/ticket-flow.js';
+import { normalizeTags, buildTicketListWhere } from '../lib/ticket-query.js';
+import { encodeCursor, decodeCursor } from '../lib/cursor.js';
 import { sendAgentRepliedEmail, sendTicketReceivedEmail } from '../lib/email.js';
 import { sendWhatsApp } from '../lib/twilio.js';
 import { sendWhatsAppCloud } from '../lib/whatsapp-cloud.js';
@@ -27,28 +29,86 @@ const router = Router();
 
 const listQuery = z.object({
   status: z.enum([...TICKET_STATUSES, 'all'] as const).optional(),
+  /** Huudis sub, or 'me' (the caller), or 'unassigned'. */
+  assignee: z.string().trim().min(1).max(200).optional(),
+  tag: z.string().trim().min(1).max(40).optional(),
+  channel: z.enum(['web', 'email', 'whatsapp', 'telegram']).optional(),
+  priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
+  /** Free-text search: subject + requester email/name + message bodies. */
+  q: z.string().trim().max(200).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
+  cursor: z.string().optional(),
 });
 
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const { status = 'all', limit = 50 } = listQuery.parse(req.query);
+    const query = listQuery.parse(req.query);
+    const { status = 'all', limit = 50 } = query;
     const accountId = req.auth!.accountId as string;
-    const tickets = await prisma.ticket.findMany({
-      where: { accountId, ...(status !== 'all' ? { status } : {}) },
-      orderBy: { lastMessageAt: 'desc' },
-      take: limit,
+
+    const where = buildTicketListWhere({
+      accountId,
+      status,
+      assignee: query.assignee,
+      tag: query.tag,
+      channel: query.channel,
+      priority: query.priority,
+      q: query.q,
+      viewerSub: req.auth!.sub,
     });
+
+    // Cursor keyset on the list order (lastMessageAt desc, id desc) —
+    // the shared codec's `createdAt` slot carries lastMessageAt here.
+    const cursor = decodeCursor(query.cursor);
+    const cursorWhere = cursor
+      ? {
+          OR: [
+            { lastMessageAt: { lt: new Date(cursor.createdAt) } },
+            { lastMessageAt: new Date(cursor.createdAt), id: { lt: cursor.id } },
+          ],
+        }
+      : null;
+
+    const tickets = await prisma.ticket.findMany({
+      where: cursorWhere ? { AND: [where, cursorWhere] } : where,
+      orderBy: [{ lastMessageAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+    });
+    const hasMore = tickets.length > limit;
+    const page = hasMore ? tickets.slice(0, limit) : tickets;
+    const last = page[page.length - 1];
+    const nextCursor =
+      hasMore && last
+        ? encodeCursor({ createdAt: last.lastMessageAt.toISOString(), id: last.id })
+        : null;
+
     const counts = await prisma.ticket.groupBy({
       by: ['status'],
       where: { accountId },
       _count: { _all: true },
     });
     sendOk(res, req, {
-      tickets,
+      tickets: page,
       counts: Object.fromEntries(counts.map((c) => [c.status, c._count._all])),
+      cursor: nextCursor,
+      hasMore,
     });
+  }),
+);
+
+/** Distinct tags across the workspace's tickets — autocomplete feed.
+ *  (Must be mounted before /:id so 'tags' isn't read as a ticket id.) */
+router.get(
+  '/tags',
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const rows = await prisma.ticket.findMany({
+      where: { accountId, NOT: { tags: { isEmpty: true } } },
+      select: { tags: true },
+    });
+    const tags = [...new Set(rows.flatMap((r) => r.tags))].sort();
+    sendOk(res, req, { tags });
   }),
 );
 
@@ -239,6 +299,7 @@ const patchBody = z.object({
   status: z.string().optional(),
   priority: z.string().optional(),
   assigneeSub: z.string().nullable().optional(),
+  tags: z.array(z.string().max(200)).max(100).optional(),
 });
 
 router.patch(
@@ -265,6 +326,7 @@ router.patch(
       data.priority = input.priority;
     }
     if (input.assigneeSub !== undefined) data.assigneeSub = input.assigneeSub;
+    if (input.tags !== undefined) data.tags = normalizeTags(input.tags);
     if (Object.keys(data).length === 0) {
       return sendErr(res, req, 400, 'VALIDATION_ERROR', 'nothing to update');
     }
