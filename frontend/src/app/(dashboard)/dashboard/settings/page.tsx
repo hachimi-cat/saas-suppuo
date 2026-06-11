@@ -23,8 +23,8 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    apiRequest<{ accountId?: string; account?: { id?: string } }>('/auth/me')
-      .then(({ data }) => setAccountId((data.accountId ?? data.account?.id) || null))
+    apiRequest<{ user?: { id?: string } }>('/auth/me')
+      .then(({ data }) => setAccountId(data.user?.id ?? null))
       .catch(() => setAccountId(null));
     loadCanned();
   }, []);
