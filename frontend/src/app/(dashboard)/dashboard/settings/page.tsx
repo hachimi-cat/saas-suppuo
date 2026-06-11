@@ -59,8 +59,60 @@ export default function SettingsPage() {
         )}
       </section>
 
+      <BrandingSection />
+
       <AutomationSection />
     </div>
+  );
+}
+
+// ─── Branding (paid-tier perk; unenforced during early access) ───────
+
+function BrandingSection() {
+  const [hide, setHide] = useState<boolean | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    apiRequest<{ hideBranding: boolean }>('/settings/automation')
+      .then(({ data }) => setHide(data.hideBranding))
+      .catch(() => setHide(false));
+  }, []);
+
+  async function toggle(next: boolean) {
+    setSaving(true);
+    setHide(next);
+    try {
+      await apiRequest('/settings/automation', { method: 'PUT', body: { hideBranding: next } });
+    } catch {
+      setHide(!next); // revert on failure
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-border p-5">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Branding
+      </h2>
+      <label className="mt-3 flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={hide ?? false}
+          disabled={hide === null || saving}
+          onChange={(e) => toggle(e.target.checked)}
+          className="mt-0.5 h-4 w-4 accent-primary"
+        />
+        <span className="text-sm">
+          Hide “Powered by Suppuo”
+          <span className="block text-xs text-muted-foreground">
+            Removes the footer from requester emails, the live chat widget, and your hosted
+            form + ticket status pages. A paid-tier perk — free for everyone during early
+            access.
+          </span>
+        </span>
+      </label>
+    </section>
   );
 }
 

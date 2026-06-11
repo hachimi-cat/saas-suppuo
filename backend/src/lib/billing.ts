@@ -25,6 +25,10 @@ export interface TierDef {
   priceIdr: number;
   blurb: string;
   features: string[];
+  /** Monthly platform-WhatsApp outbound quota (shared number). 0 = no
+   *  platform WA on this tier. BYO traffic is never metered. Counting
+   *  is live (lib/usage.ts); enforcement comes at launch. */
+  waQuotaMonthly: number;
 }
 
 export const TIER_DEFS: readonly TierDef[] = [
@@ -32,6 +36,7 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'gratis',
     name: 'Gratis',
     priceIdr: 0,
+    waQuotaMonthly: 0,
     blurb: 'For trying Suppuo out, or a one-person support desk.',
     features: [
       '2 agents',
@@ -52,6 +57,7 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'warung',
     name: 'Warung',
     priceIdr: 99_000,
+    waQuotaMonthly: 500,
     blurb: 'For small teams running real support every day.',
     features: [
       '3 agents',
@@ -70,6 +76,7 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'toko',
     name: 'Toko',
     priceIdr: 299_000,
+    waQuotaMonthly: 1_500,
     blurb: 'For growing teams that want to build on the API.',
     features: [
       '10 agents',
@@ -85,6 +92,7 @@ export const TIER_DEFS: readonly TierDef[] = [
     id: 'bisnis',
     name: 'Bisnis',
     priceIdr: 599_000,
+    waQuotaMonthly: 4_000,
     blurb: 'For bigger teams and multi-number WhatsApp support.',
     features: [
       '25 agents',

@@ -5,8 +5,9 @@
  * shares with its customers (/support/<accountId>).
  */
 
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { useSetHideBranding } from '@/components/public-branding';
 
 export default function SupportFormPage({
   params,
@@ -21,6 +22,15 @@ export default function SupportFormPage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ number: number; accessToken: string } | null>(null);
+  const setHideBranding = useSetHideBranding();
+
+  useEffect(() => {
+    apiRequest<{ hideBranding: boolean }>(`/public/widget-config?account=${accountId}`)
+      .then(({ data }) => {
+        if (data.hideBranding) setHideBranding(true);
+      })
+      .catch(() => undefined);
+  }, [accountId, setHideBranding]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();

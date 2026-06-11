@@ -189,10 +189,32 @@ model AccountSettings {
   autoResponseInside  String?
   /// Auto-ack template sent OUTSIDE business hours (or on closed days).
   autoResponseOutside String?
+  /// Hide "Powered by Suppuo" in requester emails, the chat widget,
+  /// and the public form/status pages (a paid-tier perk; unenforced
+  /// during early access like everything else).
+  hideBranding        Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
   @@map("account_settings")
+}
+
+// ─── Usage metering (platform WhatsApp quotas) ───────────────────────
+
+/// Monthly usage counters, period = 'YYYY-MM' in WIB. v1 metric:
+/// `wa_platform_out` — outbound WhatsApp messages sent over the SHARED
+/// platform Twilio number (BYO traffic is the customer's own bill and
+/// is never metered). Counting only — enforcement comes at launch.
+model ChannelUsage {
+  id        String   @id // usg_<ulid>
+  accountId String
+  period    String // 'YYYY-MM' (Asia/Jakarta month)
+  metric    String // 'wa_platform_out'
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([accountId, period, metric])
+  @@map("channel_usage")
 }
 
 // ─── Channels (BYO provider integrations — ripllo pattern) ──────────

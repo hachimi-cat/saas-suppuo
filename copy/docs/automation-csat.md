@@ -85,6 +85,10 @@ curl -X PUT https://suppuo.com/api/v1/settings/automation \
 - `businessHours: null` clears the schedule entirely.
 - Fields you omit are left unchanged. `GET` returns the same shape
   (defaults: everything off / `null`).
+- `hideBranding: true` removes "Powered by Suppuo" from requester
+  emails, the live chat widget, and your hosted form + ticket status
+  pages (a paid-tier perk — free for everyone during early access).
+  Also togglable in the portal under **Settings → Branding**.
 
 ## CSAT surveys
 

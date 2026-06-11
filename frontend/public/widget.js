@@ -263,6 +263,15 @@
   footer.appendChild(composer);
   footer.appendChild(powered);
 
+  // Branding toggle (paid-tier perk): hide the powered-by row when the
+  // workspace's hideBranding setting is on. Fail-open to shown.
+  fetch(BASE + '/api/v1/public/widget-config?account=' + encodeURIComponent(ACCOUNT_ID))
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (b) {
+      if (b && b.data && b.data.hideBranding) powered.style.display = 'none';
+    })
+    .catch(function () {});
+
   panel.appendChild(header);
   panel.appendChild(body);
   panel.appendChild(footer);

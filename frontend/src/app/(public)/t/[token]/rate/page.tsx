@@ -11,6 +11,7 @@ import { Suspense, use, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { useSetHideBranding } from '@/components/public-branding';
 
 const SCORES = [
   { value: 1, emoji: '😞', label: 'Bad' },
@@ -38,6 +39,16 @@ function RateForm({ token }: { token: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const autoSubmitted = useRef(false);
+  const setHideBranding = useSetHideBranding();
+
+  // Branding flag rides on the public ticket payload.
+  useEffect(() => {
+    apiRequest<{ hideBranding?: boolean }>(`/public/tickets/${token}`)
+      .then(({ data }) => {
+        if (data.hideBranding) setHideBranding(true);
+      })
+      .catch(() => undefined);
+  }, [token, setHideBranding]);
 
   async function submit(s: number, c?: string) {
     setBusy(true);

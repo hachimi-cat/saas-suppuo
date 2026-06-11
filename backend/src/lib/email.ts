@@ -4,8 +4,19 @@
 // failure must never fail a ticket write.
 
 import { resolveEmailForAccount } from './channels.js';
+import { accountHidesBranding } from './branding.js';
 
 const PORTAL = process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.forjio.com';
+
+/** The "Powered by Suppuo" email footer — suppressed for workspaces
+ *  with the hideBranding setting (paid-tier perk). */
+export function brandingFooter(hide: boolean): { html: string; text: string } {
+  if (hide) return { html: '', text: '' };
+  return {
+    html: '<p style="color:#888;font-size:12px">Powered by Suppuo — helpdesk for Indonesian SMEs.</p>',
+    text: '\n\n—\nPowered by Suppuo — helpdesk for Indonesian SMEs.',
+  };
+}
 
 async function send(
   accountId: string,
@@ -53,12 +64,13 @@ export async function sendTicketReceivedEmail(opts: {
   accessToken: string;
 }): Promise<void> {
   const link = statusLink(opts.accessToken);
+  const brand = brandingFooter(await accountHidesBranding(opts.accountId));
   await send(
     opts.accountId,
     opts.to,
     `[#${opts.ticketNumber}] We received your request — ${opts.subject}`,
-    `<div style="font-family:sans-serif;max-width:520px"><p>Thanks for reaching out! Your request has been logged as ticket <strong>#${opts.ticketNumber}</strong>.</p><p><strong>${opts.subject}</strong></p><p>We'll reply by email. You can follow progress or add details any time:</p><p><a href="${link}">${link}</a></p><p style="color:#888;font-size:12px">Powered by Suppuo — helpdesk for Indonesian SMEs.</p></div>`,
-    `Thanks for reaching out! Your request is ticket #${opts.ticketNumber}: ${opts.subject}\nFollow progress: ${link}`,
+    `<div style="font-family:sans-serif;max-width:520px"><p>Thanks for reaching out! Your request has been logged as ticket <strong>#${opts.ticketNumber}</strong>.</p><p><strong>${opts.subject}</strong></p><p>We'll reply by email. You can follow progress or add details any time:</p><p><a href="${link}">${link}</a></p>${brand.html}</div>`,
+    `Thanks for reaching out! Your request is ticket #${opts.ticketNumber}: ${opts.subject}\nFollow progress: ${link}${brand.text}`,
   );
 }
 
@@ -73,12 +85,13 @@ export async function sendCsatSurveyEmail(opts: {
   accessToken: string;
 }): Promise<void> {
   const rate = (score: number) => `${PORTAL}/t/${opts.accessToken}/rate?score=${score}`;
+  const brand = brandingFooter(await accountHidesBranding(opts.accountId));
   await send(
     opts.accountId,
     opts.to,
     `[#${opts.ticketNumber}] How did we do? — ${opts.subject}`,
-    `<div style="font-family:sans-serif;max-width:520px"><p>Your ticket <strong>#${opts.ticketNumber}</strong> (${opts.subject}) was resolved.</p><p>How did we do? One click is all it takes:</p><p style="font-size:32px;text-align:center"><a href="${rate(1)}" style="text-decoration:none;margin:0 14px">&#128542;</a><a href="${rate(2)}" style="text-decoration:none;margin:0 14px">&#128528;</a><a href="${rate(3)}" style="text-decoration:none;margin:0 14px">&#128522;</a></p><p style="color:#888;font-size:12px">Powered by Suppuo — helpdesk for Indonesian SMEs.</p></div>`,
-    `Your ticket #${opts.ticketNumber} (${opts.subject}) was resolved.\nHow did we do?\n\nBad: ${rate(1)}\nOkay: ${rate(2)}\nGreat: ${rate(3)}`,
+    `<div style="font-family:sans-serif;max-width:520px"><p>Your ticket <strong>#${opts.ticketNumber}</strong> (${opts.subject}) was resolved.</p><p>How did we do? One click is all it takes:</p><p style="font-size:32px;text-align:center"><a href="${rate(1)}" style="text-decoration:none;margin:0 14px">&#128542;</a><a href="${rate(2)}" style="text-decoration:none;margin:0 14px">&#128528;</a><a href="${rate(3)}" style="text-decoration:none;margin:0 14px">&#128522;</a></p>${brand.html}</div>`,
+    `Your ticket #${opts.ticketNumber} (${opts.subject}) was resolved.\nHow did we do?\n\nBad: ${rate(1)}\nOkay: ${rate(2)}\nGreat: ${rate(3)}${brand.text}`,
   );
 }
 

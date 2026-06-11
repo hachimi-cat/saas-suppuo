@@ -19,6 +19,7 @@ import { sendWhatsApp } from '../lib/twilio.js';
 import { sendWhatsAppCloud } from '../lib/whatsapp-cloud.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
 import { resolveWhatsAppForAccount, resolveTelegramForAccount } from '../lib/channels.js';
+import { meterWhatsAppSend } from '../lib/usage.js';
 import {
   ATTACHMENT_META_SELECT,
   AttachmentValidationError,
@@ -288,20 +289,25 @@ router.post(
             if (!ch) {
               return console.warn('[tickets] no whatsapp channel for', ticket.accountId);
             }
-            return ch.kind === 'cloud'
-              ? sendWhatsAppCloud({
-                  accessToken: ch.accessToken,
-                  phoneNumberId: ch.phoneNumberId,
-                  to: ticket.requesterPhone!,
-                  body: input.body,
-                })
-              : sendWhatsApp({
-                  to: ticket.requesterPhone!,
-                  body: input.body,
-                  accountSid: ch.creds.accountSid,
-                  authToken: ch.creds.authToken,
-                  from: ch.from,
-                });
+            const sent =
+              ch.kind === 'cloud'
+                ? sendWhatsAppCloud({
+                    accessToken: ch.accessToken,
+                    phoneNumberId: ch.phoneNumberId,
+                    to: ticket.requesterPhone!,
+                    body: input.body,
+                  })
+                : sendWhatsApp({
+                    to: ticket.requesterPhone!,
+                    body: input.body,
+                    accountSid: ch.creds.accountSid,
+                    authToken: ch.creds.authToken,
+                    from: ch.from,
+                  });
+            return sent.then((r) => {
+              meterWhatsAppSend(ticket.accountId, ch);
+              return r;
+            });
           })
           .catch((e) => console.error('[tickets] whatsapp reply failed', e));
       }

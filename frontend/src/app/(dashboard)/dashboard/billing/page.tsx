@@ -38,6 +38,8 @@ interface BillingData {
   subscription: Subscription;
   earlyAccess: boolean;
   tiers: TierDef[];
+  /** Platform-WhatsApp metering (shared number; BYO never counted). */
+  waUsage: { period: string; used: number; quota: number };
 }
 
 const STATUS_TONES: Record<string, string> = {
@@ -162,6 +164,40 @@ function BillingContent() {
                 })}
               </span>
             )}
+          </div>
+        )}
+
+        {/* Platform-WhatsApp usage (shared number; BYO traffic is the
+            workspace's own provider bill and never counted). */}
+        {data && (
+          <div className="mt-4 border-t border-border pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Platform WhatsApp usage — {data.waUsage.period}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              <span className="font-semibold">
+                {data.waUsage.used.toLocaleString('id-ID')} msgs
+              </span>
+              <span className="text-muted-foreground">
+                {data.waUsage.quota > 0
+                  ? `of ${data.waUsage.quota.toLocaleString('id-ID')} on ${currentDef?.name ?? currentTier}`
+                  : 'no platform-WA quota on Gratis — BYO WhatsApp is unlimited'}
+              </span>
+            </div>
+            {data.waUsage.quota > 0 && (
+              <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{
+                    width: `${Math.min(100, Math.round((data.waUsage.used / data.waUsage.quota) * 100))}%`,
+                  }}
+                />
+              </div>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              Counts outbound messages over the shared Suppuo number only (launching soon).
+              Your own Twilio or Meta Cloud API traffic is never metered.
+            </p>
           </div>
         )}
       </section>

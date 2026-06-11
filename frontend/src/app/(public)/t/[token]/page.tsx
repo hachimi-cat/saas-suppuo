@@ -12,6 +12,7 @@ import {
   MessageAttachments,
   type AttachmentMeta,
 } from '@/components/ui/attachments';
+import { useSetHideBranding } from '@/components/public-branding';
 
 interface PublicMessage {
   id: string;
@@ -30,6 +31,8 @@ interface PublicTicket {
   messages: PublicMessage[];
   /** Feature wave: CSAT — the requester's rating, if already given. */
   csat: { score: number; comment: string | null } | null;
+  /** Branding toggle — suppresses the powered-by footer. */
+  hideBranding?: boolean;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -46,15 +49,17 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
   const [reply, setReply] = useState('');
   const [busy, setBusy] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<AttachmentMeta[]>([]);
+  const setHideBranding = useSetHideBranding();
 
   const load = useCallback(async () => {
     try {
       const { data } = await apiRequest<PublicTicket>(`/public/tickets/${token}`);
       setTicket(data);
+      if (data.hideBranding) setHideBranding(true);
     } catch (e) {
       setError(e instanceof ApiRequestError ? e.message : 'Ticket not found');
     }
-  }, [token]);
+  }, [token, setHideBranding]);
 
   useEffect(() => {
     load();

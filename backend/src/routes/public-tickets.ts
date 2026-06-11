@@ -7,6 +7,7 @@ import { h as asyncHandler } from '../lib/async-handler.js';
 import { writeOutbox } from '../lib/outbox.js';
 import { nextStatusOnMessage, generateAccessToken } from '../lib/ticket-flow.js';
 import { sendTicketReceivedEmail } from '../lib/email.js';
+import { accountHidesBranding } from '../lib/branding.js';
 import { publicAttachmentsRouter } from './attachments.js';
 import {
   ATTACHMENT_META_SELECT,
@@ -55,6 +56,19 @@ const submitBody = z.object({
   email: z.string().email(),
   name: z.string().trim().max(200).optional(),
 });
+
+/** Pre-ticket config for the embeddable widget + hosted form (the
+ *  branding footer renders before any ticket exists). No secrets. */
+router.get(
+  '/widget-config',
+  asyncHandler(async (req, res) => {
+    const account = typeof req.query.account === 'string' ? req.query.account : '';
+    if (!/^acc_[a-f0-9]{24}$/.test(account)) {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'account required (acc_…)');
+    }
+    sendOk(res, req, { hideBranding: await accountHidesBranding(account) });
+  }),
+);
 
 router.post(
   '/tickets',
@@ -139,6 +153,7 @@ router.get(
       status: ticket.status,
       createdAt: ticket.createdAt,
       csat,
+      hideBranding: await accountHidesBranding(ticket.accountId),
       messages: ticket.messages.map((m) => ({
         id: m.id,
         authorType: m.authorType,

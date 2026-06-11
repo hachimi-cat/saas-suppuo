@@ -21,6 +21,7 @@ const DEFAULTS = {
   autoResponseEnabled: false,
   autoResponseInside: null as string | null,
   autoResponseOutside: null as string | null,
+  hideBranding: false,
 };
 
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'expected HH:mm');
@@ -37,6 +38,10 @@ const putBody = z.object({
   autoResponseEnabled: z.boolean().optional(),
   autoResponseInside: z.string().trim().max(5000).nullable().optional(),
   autoResponseOutside: z.string().trim().max(5000).nullable().optional(),
+  /** Hide "Powered by Suppuo" in requester emails, the widget, and the
+   *  public form/status pages. Paid-tier perk; unenforced in early
+   *  access. */
+  hideBranding: z.boolean().optional(),
 });
 
 function view(s: {
@@ -44,12 +49,14 @@ function view(s: {
   autoResponseEnabled: boolean;
   autoResponseInside: string | null;
   autoResponseOutside: string | null;
+  hideBranding: boolean;
 }) {
   return {
     businessHours: s.businessHours ?? null,
     autoResponseEnabled: s.autoResponseEnabled,
     autoResponseInside: s.autoResponseInside,
     autoResponseOutside: s.autoResponseOutside,
+    hideBranding: s.hideBranding,
   };
 }
 
@@ -81,6 +88,7 @@ router.put(
     if (input.autoResponseOutside !== undefined) {
       data.autoResponseOutside = emptyToNull(input.autoResponseOutside);
     }
+    if (input.hideBranding !== undefined) data.hideBranding = input.hideBranding;
 
     const saved = await prisma.accountSettings.upsert({
       where: { accountId },
