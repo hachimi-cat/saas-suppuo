@@ -4,7 +4,7 @@ import { gellix } from '@forjio/website-ui/fonts';
 import '@forjio/website-ui/styles/marketing.css';
 import './globals.css';
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });

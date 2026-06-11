@@ -8,8 +8,8 @@ import { Mail, Phone, MapPin } from 'lucide-react';
  */
 
 export const metadata: Metadata = {
-  title: 'Contact — Forjio Brand',
-  description: 'Get in touch with the Forjio Brand team. Support, sales, partnerships, legal, privacy.',
+  title: 'Contact — Suppuo',
+  description: 'Get in touch with the Suppuo team. Support, sales, partnerships, legal, privacy.',
 };
 
 export default function ContactPage() {

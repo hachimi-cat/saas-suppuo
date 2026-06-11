@@ -20,12 +20,12 @@ export interface AccessKey {
 
 const KEYS: Record<string, AccessKey> = {
   // Populate with test keys per product. Example:
-  // AKIA_FORJIO_BRAND_TEST_A: {
-  //   keyId: 'AKIA_FORJIO_BRAND_TEST_A',
+  // AKIA_SUPPUO_TEST_A: {
+  //   keyId: 'AKIA_SUPPUO_TEST_A',
   //   secret: 'secret-a-do-not-ship-to-prod',
-  //   accountId: 'acc_test_forjio_brand_a',
+  //   accountId: 'acc_test_suppuo_a',
   //   mode: 'test',
-  //   scopes: ['forjio-brand:*:*'],
+  //   scopes: ['suppuo:*:*'],
   // },
 };
 

@@ -1,17 +1,17 @@
 # CLAUDE.md — Forjio Service Template
 
 This repo is the **template**. When a Forjio product is forked from it,
-copy this file into the forked repo and replace `FORJIO_BRAND` /
-`forjio-brand` / `Forjio Brand` with the actual product identity.
+copy this file into the forked repo and replace `SUPPUO` /
+`suppuo` / `Suppuo` with the actual product identity.
 
 ## For Claude working inside a product repo forked from this template
 
 ### Product identity
 
-- Brand: `FORJIO_BRAND` (e.g., "huudis")
+- Brand: `SUPPUO` (e.g., "huudis")
 - Domain: `brand.com` + `brand.forjio.com`
-- Repo: `hachimi-cat/FORJIO_BRAND`
-- CLI package: `@forjio/FORJIO_BRAND-cli`
+- Repo: `hachimi-cat/SUPPUO`
+- CLI package: `@forjio/SUPPUO-cli`
 
 ### Non-negotiable
 
@@ -35,18 +35,18 @@ copy this file into the forked repo and replace `FORJIO_BRAND` /
 | `backend/` | Express + Prisma. `app.ts` (`createApp` factory) + `index.ts` (listener) split. Auth: `routes/auth.ts` (cookie-first Huudis SSO — login/signup/OIDC) is a thin `createAuthRouter` over the shared `@forjio/sdk/auth-server` BFF kit; product-specific config (cookie name, client id, scope, accountId derivation, roles, sign-in gate) lives in `src/auth-config.ts` — which ships two roles: the open multi-tenant `merchant` and the workspace-gated `admin`. `routes/huudis-proxy.ts` (`createHuudisProxy`, mounted `/api/v1/huudis`) proxies account + workspace management to Huudis. JWT verify for API callers via `@forjio/sdk/auth`. Shared `src/lib/` (http envelope helpers, ids, cursor, async-handler, zod-error, test-keys) + `src/middleware/` (request-id, rate-limit, idempotency, zod-error, auth, **admin-guard** — guards `/api/v1/admin/*` on an admin session or `X-Forjio-Admin-Secret`). Add product routes under `backend/src/routes/`; mount admin routers under `/admin` behind `adminGuard`. |
 | `frontend/` | Next.js 15 App Router. Marketing at `/`, dashboard at `/dashboard`, OIDC at `/callback`. Built-in admin portal at `/admin/*` (the `(admin)` route group: login/forgot/reset + a gated `(portal)` dashboard via `@forjio/portal-ui` `brandTag="Admin"`; admin BFF proxy at `app/api/v1/console/[...path]`). `src/lib/api.ts` (client fetch) + `src/lib/api-server.ts` (RSC cookie forwarding). Error + loading boundaries at `src/app/(dashboard)/` and `src/app/(admin)/admin/(portal)/`. |
 | `deploy/` | `nginx/<brand>.conf` — reference vhost. `^~ /api/v1/console/` → frontend (admin BFF proxy), everything else under `/api/v1/` → backend, default → frontend. `scripts/install.sh` symlinks it into `sites-enabled`. |
-| `cli/` | Commander-based CLI. `auth login/whoami/logout` ship; session stored via `src/lib/session.ts` at `~/.FORJIO_BRAND/session.json`. |
+| `cli/` | Commander-based CLI. `auth login/whoami/logout` ship; session stored via `src/lib/session.ts` at `~/.SUPPUO/session.json`. |
 | `e2e/` | Playwright. `playwright.config.ts` (local dev) + `playwright.ci.config.ts` (CI against staging — see ci-cd.yml). Health smoke ships; add per-flow tests per milestone. |
 
 ### CI/CD — shared staging E2E pattern
 
 - `.github/workflows/ci-cd.yml` is parameterized via three env vars at
-  the top: `FORJIO_BRAND`, `BACKEND_PORT`, `FRONTEND_PORT`. Set these
+  the top: `SUPPUO`, `BACKEND_PORT`, `FRONTEND_PORT`. Set these
   when forking; the rest is mechanical.
 - Job sequence: `lint → test → build → deploy-staging → e2e-staging →
   deploy-production → release`.
 - **E2E reaches staging over Tailscale MagicDNS** at
-  `http://staging-FORJIO_BRAND/` (nginx :80 on `tailscale0`). Requires
+  `http://staging-SUPPUO/` (nginx :80 on `tailscale0`). Requires
   secrets `TS_AUTHKEY` + `E2E_BYPASS_SECRET` + `SSH_PRIVATE_KEY` +
   `STAGING_HOST` + `PRODUCTION_HOST`. Battle-tested in saas-linksnap;
   plugipay converged to this pattern on 2026-04-20 after hitting
@@ -99,7 +99,7 @@ copy this file into the forked repo and replace `FORJIO_BRAND` /
   runs with `--passWithNoTests` so scaffolding doesn't break CI
   before coverage ramps.
 - E2E in `e2e/tests/` (Playwright). Run locally against
-  `localhost:3000/4000`; CI hits `staging-FORJIO_BRAND` over Tailscale.
+  `localhost:3170/4000`; CI hits `staging-SUPPUO` over Tailscale.
 - CLI tests in `cli/src/__tests__/`.
 - `npm run type-check` at each dir = `tsc --noEmit`. CI's
   Lint & Type Check job invokes this explicitly.

@@ -7,7 +7,7 @@ import type { SessionUser } from '@forjio/portal-ui';
  * Admin portal route-group layout — the admin auth gate. Mirrors the
  * merchant `(dashboard)/layout.tsx`, with three differences:
  *
- *   1. It gates on the admin session cookie (`forjio-brand_admin_session`),
+ *   1. It gates on the admin session cookie (`suppuo_admin_session`),
  *      not the merchant one.
  *   2. It stamps the role header (`X-Forjio-Brand-Role: admin`) on the
  *      `/auth/me` call so the shared auth-server kit resolves the
@@ -26,12 +26,12 @@ import type { SessionUser } from '@forjio/portal-ui';
  * this layout would still be rejected by every `/api/v1/admin/*` route
  * (guarded by `adminGuard`).
  *
- * rename.sh rewrites the `forjio-brand` slug.
+ * rename.sh rewrites the `suppuo` slug.
  */
 
-const ADMIN_SESSION_COOKIE = 'forjio-brand_admin_session';
-const ROLE_HEADER = 'x-forjio-brand-role';
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const ADMIN_SESSION_COOKIE = 'suppuo_admin_session';
+const ROLE_HEADER = 'x-suppuo-role';
+const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170';
 
 async function fetchAdminUser(cookieHeader: string): Promise<SessionUser | null> {
   try {

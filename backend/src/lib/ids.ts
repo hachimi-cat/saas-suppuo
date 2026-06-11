@@ -27,6 +27,6 @@ export function region(): string {
  * Matches the ARN grammar in `@forjio/sdk` — see ADR-0002.
  */
 export function buildArn(accountId: string, resource: string, id: string): string {
-  const service = process.env.FORJIO_SERVICE ?? 'forjio-brand';
+  const service = process.env.FORJIO_SERVICE ?? 'suppuo';
   return `forjio:${service}:${region()}:${accountId}:${resource}/${id}`;
 }

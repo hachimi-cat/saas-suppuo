@@ -50,7 +50,7 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_PASSWORD: test
-          POSTGRES_DB: FORJIO_BRAND_test
+          POSTGRES_DB: SUPPUO_test
         ports: ['5432:5432']
         options: >-
           --health-cmd pg_isready
@@ -70,9 +70,9 @@ jobs:
       - name: Backend tests
         run: |
           cd backend && npm ci
-          DATABASE_URL=postgresql://postgres:test@localhost:5432/FORJIO_BRAND_test \
+          DATABASE_URL=postgresql://postgres:test@localhost:5432/SUPPUO_test \
             npx prisma migrate deploy
-          DATABASE_URL=postgresql://postgres:test@localhost:5432/FORJIO_BRAND_test \
+          DATABASE_URL=postgresql://postgres:test@localhost:5432/SUPPUO_test \
             REDIS_URL=redis://localhost:6379 \
             JWT_SECRET=test-secret JWT_REFRESH_SECRET=test-refresh-secret \
             npm test
@@ -87,7 +87,7 @@ jobs:
     # and prod deploys. Frontend uses Next.js `output: 'export'` → produces
     # a static `out/` dir (no `next start` runtime). NEXT_PUBLIC_API_URL is
     # left as the default `/api/v1` (relative) so the same `out/` works on
-    # both staging-FORJIO_BRAND and FORJIO_BRAND.forjio.com — nginx proxies /api/v1
+    # both staging-SUPPUO and SUPPUO.forjio.com — nginx proxies /api/v1
     # to the backend on both hosts. Server-side env vars (HUUDIS_*,
     # MIDTRANS_*, etc.) are read at runtime from droplet .env and don't
     # require a rebuild when they change.
@@ -153,7 +153,7 @@ jobs:
           # frontend node_modules ship at all.
           switches: -avz --delete --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache
           path: ./
-          remote_path: /opt/saas/FORJIO_BRAND/
+          remote_path: /opt/saas/SUPPUO/
           remote_host: ${{ secrets.STAGING_HOST }}
           remote_user: root
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -165,19 +165,19 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
           script: |
-            cd /opt/saas/FORJIO_BRAND/backend
+            cd /opt/saas/SUPPUO/backend
             # --omit=dev — runtime deps only. dist/ + prisma client are
             # already in the artifact from the Build job, so we just need
             # the production node_modules tree here.
             npm ci --omit=dev
             npx prisma migrate deploy
-            pm2 restart FORJIO_BRAND || pm2 start dist/index.js --name FORJIO_BRAND -i 1
-            cd /opt/saas/FORJIO_BRAND/frontend
+            pm2 restart SUPPUO || pm2 start dist/index.js --name SUPPUO -i 1
+            cd /opt/saas/SUPPUO/frontend
             # Static export — `out/` is pre-built in the artifact. No
             # `next build` here (this was the step that OOMed on the 1GB
             # box and added ~5min to every deploy). Frontend is served
             # via `serve out -l 3001` under pm2; just restart.
-            pm2 restart FORJIO_BRAND-frontend || true
+            pm2 restart SUPPUO-frontend || true
             pm2 save
             # Wait for backend to be healthy
             echo "Waiting for backend health..."
@@ -222,7 +222,7 @@ jobs:
         run: |
           echo "Waiting for backend..."
           for i in $(seq 1 30); do
-            if curl -sf http://staging-FORJIO_BRAND/api/v1/health > /dev/null 2>&1; then
+            if curl -sf http://staging-SUPPUO/api/v1/health > /dev/null 2>&1; then
               echo "Backend healthy"
               break
             fi
@@ -231,7 +231,7 @@ jobs:
           done
           echo "Waiting for frontend..."
           for i in $(seq 1 20); do
-            STATUS=$(curl -so /dev/null -w '%{http_code}' http://staging-FORJIO_BRAND/ 2>/dev/null || echo "000")
+            STATUS=$(curl -so /dev/null -w '%{http_code}' http://staging-SUPPUO/ 2>/dev/null || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Frontend serving (HTTP 200)"
               break
@@ -244,8 +244,8 @@ jobs:
       - name: Run E2E
         run: |
           cd e2e
-          BACKEND_URL=http://staging-FORJIO_BRAND/api/v1 \
-          FRONTEND_URL=http://staging-FORJIO_BRAND \
+          BACKEND_URL=http://staging-SUPPUO/api/v1 \
+          FRONTEND_URL=http://staging-SUPPUO \
           E2E_BYPASS_SECRET=${{ secrets.E2E_BYPASS_SECRET }} \
           PW_SKIP_WEBSERVER=1 \
           npx playwright test --reporter=list --config=playwright.ci.config.ts
@@ -301,7 +301,7 @@ jobs:
         run: |
           echo "Waiting for staging frontend..."
           for i in $(seq 1 30); do
-            STATUS=$(curl -so /dev/null -w '%{http_code}' http://staging-FORJIO_BRAND/ 2>/dev/null || echo "000")
+            STATUS=$(curl -so /dev/null -w '%{http_code}' http://staging-SUPPUO/ 2>/dev/null || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "Frontend serving (HTTP 200) after ${i}s"
               break
@@ -314,7 +314,7 @@ jobs:
         id: visual
         run: |
           cd e2e
-          FRONTEND_URL=http://staging-FORJIO_BRAND \
+          FRONTEND_URL=http://staging-SUPPUO \
             npx playwright test \
               --config=playwright.visual.config.ts \
               ${{ (github.event_name == 'workflow_dispatch' && inputs.update_baselines) && '--update-snapshots' || '' }}
@@ -370,7 +370,7 @@ jobs:
         with:
           switches: -avz --delete --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache
           path: ./
-          remote_path: /opt/saas/FORJIO_BRAND/
+          remote_path: /opt/saas/SUPPUO/
           remote_host: ${{ secrets.PRODUCTION_HOST }}
           remote_user: root
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -382,15 +382,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
           script: |
-            cd /opt/saas/FORJIO_BRAND/backend
+            cd /opt/saas/SUPPUO/backend
             npm ci --omit=dev
             npx prisma generate
             npx prisma migrate deploy
-            pm2 restart FORJIO_BRAND || pm2 start dist/index.js --name FORJIO_BRAND -i 1
-            cd /opt/saas/FORJIO_BRAND/frontend
+            pm2 restart SUPPUO || pm2 start dist/index.js --name SUPPUO -i 1
+            cd /opt/saas/SUPPUO/frontend
             # Static export — `out/` is pre-built in the artifact. No
             # `next build` here. Frontend served via `serve out -l 3001`.
-            pm2 restart FORJIO_BRAND-frontend || true
+            pm2 restart SUPPUO-frontend || true
             pm2 save
 
   release:

@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { AuthForm } from '@forjio/auth-ui';
 
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
 export default function SignupPage() {
   return (

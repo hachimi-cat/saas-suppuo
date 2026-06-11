@@ -8,9 +8,9 @@
  * fetched through the admin BFF proxy at `/api/v1/console/*`, which
  * stamps the admin role header — no secret in the browser.
  *
- * rename.sh rewrites the "Forjio Brand" display name.
+ * rename.sh rewrites the "Suppuo" display name.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
 export default function AdminDashboardPage() {
   return (

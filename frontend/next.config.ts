@@ -6,7 +6,7 @@ import type { NextConfig } from 'next';
  * and the api.ts client emit. In production nginx also proxies `/api`;
  * this rewrite makes local `next dev` behave the same way.
  */
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4170';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,

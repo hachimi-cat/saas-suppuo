@@ -9,7 +9,7 @@ declare module 'express-serve-static-core' {
 }
 
 const issuer = process.env.HUUDIS_ISSUER ?? 'https://huudis.com';
-const audience = process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'forjio-brand';
+const audience = process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'suppuo';
 
 /** Extracts `Authorization: Bearer <jwt>` and verifies via @forjio/sdk.
  *  Attaches claims to `req.auth`. Rejects with a standard envelope on

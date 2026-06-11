@@ -10,7 +10,7 @@ import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-u
  * the footer columns + legal entity come from @forjio/website-ui
  * defaults and should not be overridden.
  */
-const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Forjio Brand';
+const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
 export default function MarketingLayout({
   children,

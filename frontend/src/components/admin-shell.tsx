@@ -17,14 +17,14 @@ import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
  * merchant dashboard.
  *
  * FORKERS: add your admin pages as `SECTIONS` entries below — keep
- * "Overview → Dashboard" first. rename.sh rewrites "Forjio Brand" /
- * "forjio-brand" / "#1a1a2e".
+ * "Overview → Dashboard" first. rename.sh rewrites "Suppuo" /
+ * "suppuo" / "#F43F5E".
  */
 
 // rename.sh rewrites these placeholders.
-const BRAND = 'Forjio Brand';
-const BRAND_SLUG = 'forjio-brand';
-const BRAND_COLOR = '#1a1a2e';
+const BRAND = 'Suppuo';
+const BRAND_SLUG = 'suppuo';
+const BRAND_COLOR = '#F43F5E';
 
 const SECTIONS: NavSection[] = [
   {

@@ -33,14 +33,14 @@ for the generic template.
 
 - **Tailscale for E2E staging reach** via `tailscale/github-action@v4`
   + `${{ secrets.TS_AUTHKEY }}`
-- **MagicDNS hostnames**: `http://staging-FORJIO_BRAND` (nginx :80 on
+- **MagicDNS hostnames**: `http://staging-SUPPUO` (nginx :80 on
   tailscale0) — simpler than IP:port + bypass secret
 - **Dual wait-for-staging loop**: backend `/api/v1/health` (30 × 3s)
   then frontend `/` (20 × 3s) then 5s settle
 - **`E2E_BYPASS_SECRET` static secret** for test-mode auth bypass
   (Storlaunch's `github.run_id` rotation is nicer but secret-based is
   good enough and every product already has this secret set)
-- **PM2 rsync deploys** to `/opt/saas/FORJIO_BRAND/` with
+- **PM2 rsync deploys** to `/opt/saas/SUPPUO/` with
   `npx prisma migrate deploy` before restart
 
 ### What NOT to port
@@ -185,7 +185,7 @@ failure when frontend has no unit tests yet, per plugipay's
 
 Template's `auth login/whoami/logout` matches LinkSnap + Plugipay
 (all 4 products ship this shape). Only addition worth porting is
-Huudis's `src/lib/session.ts` — a portable `~/.FORJIO_BRAND/session.json`
+Huudis's `src/lib/session.ts` — a portable `~/.SUPPUO/session.json`
 token store with `0600` perms. Every product will need this once
 Huudis M1 ships.
 
@@ -236,11 +236,11 @@ LinkSnap hardcodes `linksnap` + `4514` + `3001` throughout
 
 | Placeholder | Example value |
 |---|---|
-| `FORJIO_BRAND` | `huudis` |
-| `staging-FORJIO_BRAND` | `staging-huudis` |
-| `FORJIO_BRAND.com` | `huudis.com` |
-| `FORJIO_BRAND.forjio.com` | `huudis.forjio.com` |
-| `forjio_brand` (DB name) | `huudis` |
+| `SUPPUO` | `huudis` |
+| `staging-SUPPUO` | `staging-huudis` |
+| `SUPPUO.com` | `huudis.com` |
+| `SUPPUO.forjio.com` | `huudis.forjio.com` |
+| `suppuo` (DB name) | `huudis` |
 | `BACKEND_PORT` | `4514`, `4054`, `4251`, etc. |
 | `FRONTEND_PORT` | `3000`, `3001`, etc. |
 
@@ -251,7 +251,7 @@ LinkSnap hardcodes `linksnap` + `4514` + `3001` throughout
 - Reference the shared staging E2E pattern (Tailscale + MagicDNS)
 - Note Tailwind + brand-tokens as optional (not baseline)
 - Point at `hachimi-cat/forjio-architecture` ADRs
-- Keep existing `FORJIO_BRAND` placeholder guidance intact
+- Keep existing `SUPPUO` placeholder guidance intact
 
 ---
 

@@ -8,12 +8,12 @@ import type { SessionUser } from '@forjio/portal-ui';
  * bounce to /login. With one, resolve the user via the backend's
  * /auth/me and hand it to the portal shell.
  *
- * Cookie name is `forjio-brand_session` (rename.sh rewrites the
- * `forjio-brand` slug).
+ * Cookie name is `suppuo_session` (rename.sh rewrites the
+ * `suppuo` slug).
  */
 
-const SESSION_COOKIE = 'forjio-brand_session';
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const SESSION_COOKIE = 'suppuo_session';
+const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170';
 
 type Resolved = { user: SessionUser; accountId: string };
 

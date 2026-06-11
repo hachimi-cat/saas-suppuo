@@ -22,12 +22,12 @@ import { NextRequest } from 'next/server';
  *   /api/v1/console/auth/logout  → /api/v1/auth/logout  (clear cookie)
  *   /api/v1/console/<anything>   → /api/v1/admin/<anything>
  *
- * FORKERS: `scripts/rename.sh` rewrites the `forjio-brand` slug and
- * `:4000`.
+ * FORKERS: `scripts/rename.sh` rewrites the `suppuo` slug and
+ * `:4170`.
  */
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-const ROLE_HEADER = 'x-forjio-brand-role';
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170';
+const ROLE_HEADER = 'x-suppuo-role';
 
 /** Map a `/console/*` browser path to the backend path. `auth/*` is a
  *  passthrough (the shared auth router lives at `/api/v1/auth`);

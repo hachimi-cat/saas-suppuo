@@ -21,10 +21,10 @@ import {
  * the family canon; do not switch to localStorage.
  */
 
-// rename.sh rewrites "Forjio Brand" / "forjio-brand" / "#1a1a2e".
-const BRAND = 'Forjio Brand';
-const BRAND_SLUG = 'forjio-brand';
-const BRAND_COLOR = '#1a1a2e';
+// rename.sh rewrites "Suppuo" / "suppuo" / "#F43F5E".
+const BRAND = 'Suppuo';
+const BRAND_SLUG = 'suppuo';
+const BRAND_COLOR = '#F43F5E';
 
 const SECTIONS: NavSection[] = [
   {

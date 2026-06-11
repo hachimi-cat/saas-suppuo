@@ -46,7 +46,7 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.get('/health', async (req, res) => {
     const [db, outbox] = await Promise.all([checkDb(), checkOutbox()]);
     sendOk(res, req, {
-      service: process.env.FORJIO_SERVICE ?? 'forjio-brand',
+      service: process.env.FORJIO_SERVICE ?? 'suppuo',
       status: 'ok',
       version: process.env.npm_package_version ?? '0.0.1',
       checks: { db, outbox },
