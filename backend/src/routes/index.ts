@@ -5,6 +5,12 @@ import { prisma } from '../lib/db.js';
 import authRouter from './auth.js';
 import huudisProxyRouter from './huudis-proxy.js';
 import { adminGuard } from '../middleware/admin-guard.js';
+import { requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rate-limit.js';
+import ticketsRouter from './tickets.js';
+import adminCrmRouter from './admin-crm.js';
+import cannedRepliesRouter from './canned-replies.js';
+import publicTicketsRouter from './public-tickets.js';
 import adminCustomersRouter from './admin-customers.js';
 
 /**
@@ -66,6 +72,13 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
    *  via the product's OIDC client creds. Proxied from the admin portal
    *  at /api/v1/console/customers. */
   router.use('/admin/customers', adminGuard, adminCustomersRouter);
+  router.use('/admin/crm', adminGuard, adminCrmRouter);
+
+  /** Suppuo domain — agent surfaces (BFF session or Bearer JWT). */
+  router.use('/tickets', requireAuth, ticketsRouter);
+  router.use('/canned-replies', requireAuth, cannedRepliesRouter);
+  /** Requester-facing public surface — tokenized, rate-limited. */
+  router.use('/public', rateLimit('ingress'), publicTicketsRouter);
 
   // Products mount their own routers here, e.g.:
   //   router.use('/widgets', widgetsRouter);

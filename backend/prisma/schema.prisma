@@ -46,3 +46,69 @@ model ProcessedEvent {
 
   @@map("processed_events")
 }
+
+// ─── Suppuo domain: helpdesk tickets ─────────────────────────────────
+
+/// A support ticket inside a workspace (accountId = the BFF-derived
+/// acc_* of the agent workspace that owns the inbox).
+model Ticket {
+  id             String   @id // tkt_<ulid>
+  accountId      String
+  /// Per-workspace human-friendly number (#1, #2, …).
+  number         Int
+  subject        String
+  /// open | pending | resolved | closed
+  status         String   @default("open")
+  /// low | normal | high | urgent
+  priority       String   @default("normal")
+  /// web | email | whatsapp — how the ticket arrived.
+  channel        String   @default("web")
+  requesterEmail String
+  requesterName  String?
+  /// Huudis sub of the assigned agent (workspace member), if any.
+  assigneeSub    String?
+  /// Opaque token for the requester's status link (/t/<token>).
+  accessToken    String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastMessageAt  DateTime @default(now())
+
+  messages TicketMessage[]
+
+  @@unique([accountId, number])
+  @@index([accountId, status, lastMessageAt])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id         String   @id // tmsg_<ulid>
+  ticketId   String
+  /// agent | requester
+  authorType String
+  /// Huudis sub when authorType=agent.
+  authorSub  String?
+  authorName String?
+  body       String
+  /// Internal notes are agent-only — never shown on the public
+  /// status page and never emailed to the requester.
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_messages")
+}
+
+/// Saved reply snippets, per workspace.
+model CannedReply {
+  id        String   @id // cnr_<ulid>
+  accountId String
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accountId])
+  @@map("canned_replies")
+}

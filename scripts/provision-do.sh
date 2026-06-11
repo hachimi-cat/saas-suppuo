@@ -44,7 +44,7 @@ STAGING_SIZE="s-1vcpu-1gb"   # $6/mo
 PROD_SIZE="s-2vcpu-2gb"      # $18/mo
 IMAGE="ubuntu-24-04-x64"
 
-log() { echo "[provision-do] $*"; }
+log() { echo >&2 "[provision-do] $*"; }
 err() { echo "[provision-do] ERROR: $*" >&2; exit 1; }
 
 # ─── Pre-flight ───────────────────────────────────────────────────────
@@ -54,7 +54,9 @@ doctl account get >/dev/null 2>&1 || err "doctl not authenticated — run 'doctl
 
 [[ -r "$DO_SSH_KEY" ]] || err "SSH key not readable at $DO_SSH_KEY (set DO_SSH_KEY=...)"
 
-DO_SSH_FINGERPRINT="$(ssh-keygen -lf "$DO_SSH_KEY" -E sha256 | awk '{print $2}' | sed 's|SHA256:||')"
+# doctl returns MD5-format fingerprints, so match on MD5 (the original
+# SHA256 comparison never matched — template bug found spawning suppuo).
+DO_SSH_FINGERPRINT="$(ssh-keygen -lf "$DO_SSH_KEY" -E md5 | awk '{print $2}' | sed 's|MD5:||')"
 DO_KEY_ID="$(doctl compute ssh-key list --format ID,FingerPrint --no-header | awk -v fp="$DO_SSH_FINGERPRINT" '$2==fp {print $1; exit}')"
 [[ -n "$DO_KEY_ID" ]] || err "$DO_SSH_KEY not registered with DigitalOcean. Run 'doctl compute ssh-key import'."
 

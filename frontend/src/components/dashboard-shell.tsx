@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Hexagon, LayoutDashboard, Menu } from 'lucide-react';
+import { Hexagon, Inbox, Menu, Settings } from 'lucide-react';
 import {
   Sidebar,
   readActiveWorkspaceId,
@@ -28,11 +28,12 @@ const BRAND_COLOR = '#F43F5E';
 
 const SECTIONS: NavSection[] = [
   {
-    label: 'Overview',
-    items: [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }],
+    label: 'Support',
+    items: [
+      { href: '/dashboard', label: 'Inbox', icon: Inbox },
+      { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+    ],
   },
-  // Products add their own sections here, e.g.:
-  // { label: 'Billing', items: [{ href: '/dashboard/billing', label: 'Billing', icon: CreditCard }] },
 ];
 
 async function logout() {

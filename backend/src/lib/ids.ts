@@ -10,6 +10,9 @@ import { ulid } from 'ulid';
 export type IdPrefix =
   | 'evt' // outbox event
   | 'req' // request id (prefer the request-id middleware)
+  | 'tkt' // support ticket
+  | 'tmsg' // ticket message
+  | 'cnr' // canned reply
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {
