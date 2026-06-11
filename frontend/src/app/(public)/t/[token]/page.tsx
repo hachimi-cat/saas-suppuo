@@ -6,7 +6,12 @@
  */
 
 import { use, useCallback, useEffect, useState } from 'react';
-import { apiRequest, ApiRequestError } from '@/lib/api';
+import { apiRequest, ApiRequestError, apiUrl, uploadFile } from '@/lib/api';
+import {
+  AttachmentComposer,
+  MessageAttachments,
+  type AttachmentMeta,
+} from '@/components/ui/attachments';
 
 interface PublicMessage {
   id: string;
@@ -14,6 +19,7 @@ interface PublicMessage {
   authorName: string | null;
   body: string;
   createdAt: string;
+  attachments?: AttachmentMeta[];
 }
 
 interface PublicTicket {
@@ -37,6 +43,7 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
   const [error, setError] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const [busy, setBusy] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<AttachmentMeta[]>([]);
 
   const load = useCallback(async () => {
     try {
@@ -58,9 +65,15 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
     try {
       await apiRequest(`/public/tickets/${token}/messages`, {
         method: 'POST',
-        body: { body: reply },
+        body: {
+          body: reply,
+          ...(pendingFiles.length > 0
+            ? { attachmentIds: pendingFiles.map((a) => a.id) }
+            : {}),
+        },
       });
       setReply('');
+      setPendingFiles([]);
       await load();
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Could not send');
@@ -98,6 +111,10 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
               <span>{new Date(m.createdAt).toLocaleString('en-GB')}</span>
             </div>
             <p className="whitespace-pre-wrap text-sm">{m.body}</p>
+            <MessageAttachments
+              attachments={m.attachments}
+              urlFor={(id) => apiUrl(`/public/tickets/${token}/attachments/${id}`)}
+            />
           </div>
         ))}
       </div>
@@ -109,6 +126,14 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
           placeholder="Add a reply…"
           rows={3}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        />
+        <AttachmentComposer
+          pending={pendingFiles}
+          onChange={setPendingFiles}
+          upload={(file) =>
+            uploadFile<AttachmentMeta>(`/public/tickets/${token}/attachments`, file)
+          }
+          disabled={busy}
         />
         <button
           disabled={busy || !reply.trim()}

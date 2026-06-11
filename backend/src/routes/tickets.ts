@@ -17,6 +17,12 @@ import { sendWhatsApp } from '../lib/twilio.js';
 import { sendWhatsAppCloud } from '../lib/whatsapp-cloud.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
 import { resolveWhatsAppForAccount, resolveTelegramForAccount } from '../lib/channels.js';
+import {
+  ATTACHMENT_META_SELECT,
+  AttachmentValidationError,
+  bindAttachments,
+  MAX_ATTACHMENTS_PER_MESSAGE,
+} from '../lib/attachments.js';
 
 /*
  * /api/v1/tickets — the agent workspace surface (behind requireAuth;
@@ -126,7 +132,12 @@ router.get(
     const accountId = req.auth!.accountId as string;
     const ticket = await prisma.ticket.findFirst({
       where: { id: String(req.params.id), accountId },
-      include: { messages: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          include: { attachments: { select: ATTACHMENT_META_SELECT } },
+        },
+      },
     });
     if (!ticket) return sendErr(res, req, 404, 'NOT_FOUND', 'ticket not found');
     sendOk(res, req, ticket);
@@ -137,6 +148,9 @@ const messageBody = z.object({
   body: z.string().trim().min(1).max(20_000),
   isInternal: z.boolean().optional(),
   authorName: z.string().trim().max(200).optional(),
+  /** Staged attachment ids (POST /api/v1/attachments first), bound to
+   *  this message in the same transaction. */
+  attachmentIds: z.array(z.string()).max(MAX_ATTACHMENTS_PER_MESSAGE).optional(),
 });
 
 router.post(
@@ -156,30 +170,45 @@ router.post(
       isInternal,
     );
 
-    const message = await prisma.$transaction(async (tx) => {
-      const m = await tx.ticketMessage.create({
-        data: {
-          id: newId('tmsg'),
-          ticketId: ticket.id,
-          authorType: 'agent',
-          authorSub: req.auth!.sub,
-          authorName: input.authorName ?? null,
-          body: input.body,
-          isInternal,
-        },
+    let message;
+    try {
+      message = await prisma.$transaction(async (tx) => {
+        const m = await tx.ticketMessage.create({
+          data: {
+            id: newId('tmsg'),
+            ticketId: ticket.id,
+            authorType: 'agent',
+            authorSub: req.auth!.sub,
+            authorName: input.authorName ?? null,
+            body: input.body,
+            isInternal,
+          },
+        });
+        if (input.attachmentIds?.length) {
+          await bindAttachments(tx, {
+            accountId,
+            messageId: m.id,
+            attachmentIds: input.attachmentIds,
+          });
+        }
+        await tx.ticket.update({
+          where: { id: ticket.id },
+          data: { status: nextStatus, lastMessageAt: new Date() },
+        });
+        await writeOutbox(tx, {
+          type: 'suppuo.ticket.replied.v1',
+          accountId,
+          aggregateId: ticket.id,
+          data: { ticketId: ticket.id, messageId: m.id, isInternal, by: 'agent' },
+        });
+        return m;
       });
-      await tx.ticket.update({
-        where: { id: ticket.id },
-        data: { status: nextStatus, lastMessageAt: new Date() },
-      });
-      await writeOutbox(tx, {
-        type: 'suppuo.ticket.replied.v1',
-        accountId,
-        aggregateId: ticket.id,
-        data: { ticketId: ticket.id, messageId: m.id, isInternal, by: 'agent' },
-      });
-      return m;
-    });
+    } catch (e) {
+      if (e instanceof AttachmentValidationError) {
+        return sendErr(res, req, 400, 'VALIDATION_ERROR', e.message);
+      }
+      throw e;
+    }
 
     if (!isInternal) {
       if (ticket.requesterEmail) {

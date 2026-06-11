@@ -7,7 +7,12 @@
 
 import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiRequest, ApiRequestError } from '@/lib/api';
+import { apiRequest, ApiRequestError, apiUrl, uploadFile } from '@/lib/api';
+import {
+  AttachmentComposer,
+  MessageAttachments,
+  type AttachmentMeta,
+} from '@/components/ui/attachments';
 
 interface Message {
   id: string;
@@ -16,6 +21,7 @@ interface Message {
   body: string;
   isInternal: boolean;
   createdAt: string;
+  attachments?: AttachmentMeta[];
 }
 
 interface Ticket {
@@ -49,6 +55,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
   const [reply, setReply] = useState('');
   const [internal, setInternal] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<AttachmentMeta[]>([]);
 
   const load = useCallback(async () => {
     try {
@@ -84,10 +91,17 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
     try {
       await apiRequest(`/tickets/${ticket.id}/messages`, {
         method: 'POST',
-        body: { body: reply, isInternal: internal },
+        body: {
+          body: reply,
+          isInternal: internal,
+          ...(pendingFiles.length > 0
+            ? { attachmentIds: pendingFiles.map((a) => a.id) }
+            : {}),
+        },
       });
       setReply('');
       setInternal(false);
+      setPendingFiles([]);
       await load();
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : 'Reply failed');
@@ -174,6 +188,10 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
               <span>{new Date(m.createdAt).toLocaleString('en-GB')}</span>
             </div>
             <p className="whitespace-pre-wrap text-sm">{m.body}</p>
+            <MessageAttachments
+              attachments={m.attachments}
+              urlFor={(id) => apiUrl(`/attachments/${id}`)}
+            />
           </div>
         ))}
       </div>
@@ -200,6 +218,12 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
           placeholder={internal ? 'Internal note — the customer never sees this' : 'Reply to the customer (sent by email)'}
           rows={4}
           className={`w-full rounded-lg border bg-background px-3 py-2 text-sm ${internal ? 'border-amber-500/50' : 'border-border'}`}
+        />
+        <AttachmentComposer
+          pending={pendingFiles}
+          onChange={setPendingFiles}
+          upload={(file) => uploadFile<AttachmentMeta>('/attachments', file)}
+          disabled={busy}
         />
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 text-xs text-muted-foreground">

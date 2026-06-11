@@ -78,6 +78,50 @@ export async function sendWhatsApp(opts: {
   }
 }
 
+/** Fetch one inbound-message media item from Twilio's media API.
+ *  Basic auth with the OWNING account's creds (BYO numbers are served
+ *  by the customer's Twilio account); Twilio 307-redirects to a signed
+ *  CDN URL — undici follows it and correctly drops the Authorization
+ *  header cross-origin. Returns null (never throws) on any failure so
+ *  a bad media item can't fail the whole inbound webhook. */
+export async function fetchTwilioMedia(opts: {
+  url: string;
+  accountSid: string;
+  authToken: string;
+  maxBytes: number;
+}): Promise<{ contentType: string; data: Buffer } | null> {
+  try {
+    const res = await fetch(opts.url, {
+      headers: {
+        Authorization:
+          'Basic ' + Buffer.from(`${opts.accountSid}:${opts.authToken}`).toString('base64'),
+      },
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) {
+      console.error(`[twilio] media fetch ${opts.url} → HTTP ${res.status}`);
+      return null;
+    }
+    const declared = Number(res.headers.get('content-length') ?? 0);
+    if (declared > opts.maxBytes) {
+      console.warn(`[twilio] media ${opts.url} oversize (${declared} bytes) — skipped`);
+      return null;
+    }
+    const data = Buffer.from(await res.arrayBuffer());
+    if (data.length === 0 || data.length > opts.maxBytes) {
+      console.warn(`[twilio] media ${opts.url} empty/oversize (${data.length} bytes) — skipped`);
+      return null;
+    }
+    const contentType =
+      res.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase() ||
+      'application/octet-stream';
+    return { contentType, data };
+  } catch (e) {
+    console.error(`[twilio] media fetch ${opts.url} failed`, e);
+    return null;
+  }
+}
+
 /** Classic Twilio webhook validation: base64(HMAC-SHA1(authToken,
  *  url + sorted(key+value))) compared to X-Twilio-Signature. Used IN
  *  ADDITION to the URL secret (defense in depth). Soft-passes when the

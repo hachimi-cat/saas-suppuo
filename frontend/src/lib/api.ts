@@ -115,6 +115,42 @@ export async function apiRequest<T = unknown>(
   return { data: (env.data as T) ?? (null as unknown as T), meta: env.meta };
 }
 
+/** Absolute URL for an API path — for <img src> / <a href> targets
+ *  (attachment downloads) that bypass apiRequest. */
+export function apiUrl(path: string): string {
+  return `${BASE_URL}${API_PREFIX}${path}`;
+}
+
+/** Raw-body file upload (attachment staging). Not JSON — sends the
+ *  file bytes with the filename in the `x-filename` header. */
+export async function uploadFile<T = unknown>(path: string, file: File): Promise<T> {
+  const res = await fetch(apiUrl(path), {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': file.type || 'application/octet-stream',
+      'x-filename': encodeURIComponent(file.name),
+    },
+    body: file,
+  });
+  let env: Envelope<T>;
+  try {
+    env = (await res.json()) as Envelope<T>;
+  } catch {
+    throw new ApiRequestError(res.status, {
+      code: 'NETWORK_ERROR',
+      message: `Upload failed (${res.status})`,
+    });
+  }
+  if (!res.ok || env.error) {
+    throw new ApiRequestError(
+      res.status,
+      env.error ?? { code: 'INTERNAL_ERROR', message: `Upload failed (${res.status})` },
+    );
+  }
+  return env.data as T;
+}
+
 export const api = {
   get: <T>(path: string, opts?: RequestOptions) =>
     apiRequest<T>(path, { ...opts, method: 'GET' }),
