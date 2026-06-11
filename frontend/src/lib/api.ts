@@ -37,9 +37,14 @@ export class ApiRequestError extends Error {
   }
 }
 
-const BASE_URL =
+const RAW_BASE =
   (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) ||
   'http://localhost:4170';
+
+// NEXT_PUBLIC_API_URL may be a host ("http://localhost:4170") OR already
+// include the prefix ("/api/v1", as the CI build sets it). Normalize so
+// the prefix is applied exactly once — template bug found in suppuo.
+const BASE_URL = RAW_BASE.replace(/\/api\/v1\/?$/, '');
 
 const API_PREFIX = '/api/v1';
 
