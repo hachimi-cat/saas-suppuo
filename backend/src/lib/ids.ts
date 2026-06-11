@@ -15,6 +15,8 @@ export type IdPrefix =
   | 'cnr' // canned reply
   | 'chn' // channel integration
   | 'bsub' // billing subscription
+  | 'ak' // API key
+  | 'whs' // webhook subscription
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

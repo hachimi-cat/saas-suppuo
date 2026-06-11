@@ -17,6 +17,8 @@ import webhooksTwilioRouter from './webhooks-twilio.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import adminCustomersRouter from './admin-customers.js';
 import billingRouter from './billing.js';
+import apiKeysRouter from './api-keys.js';
+import webhookSubscriptionsRouter from './webhook-subscriptions.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -92,6 +94,11 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/webhooks/twilio', webhooksTwilioRouter);
   /** Plugipay billing webhooks (HMAC-signed, no session auth). */
   router.use('/webhooks/plugipay', webhooksPlugipayRouter);
+  /** Programmatic access keys (session callers manage; keys themselves
+   *  authenticate via the sk_live_ Bearer path in middleware/auth.ts). */
+  router.use('/api-keys', requireAuth, apiKeysRouter);
+  /** Outbound webhook endpoints — suppuo.ticket.* event delivery. */
+  router.use('/webhook-subscriptions', requireAuth, webhookSubscriptionsRouter);
 
   // Products mount their own routers here, e.g.:
   //   router.use('/widgets', widgetsRouter);
