@@ -10,10 +10,26 @@ WA pelanggan. With the WhatsApp channel, customers chat on the number
 they already know, and your team answers from the same Suppuo inbox as
 everything else.
 
-> **Beta.** Setup is operator-managed: there's no self-serve WhatsApp
-> configuration in the dashboard yet. If you want WhatsApp on your
-> workspace, contact us at support@forjio.com and we'll connect a
-> number for you. One WhatsApp number per workspace in the beta.
+> **Beta.** Two ways to get a number on your workspace:
+>
+> - **Bring your own Twilio (self-serve, live today)** — connect your
+>   own Twilio account + WhatsApp number at
+>   [/dashboard/channels](/dashboard/channels) in a couple of minutes.
+>   Unlimited messages — you pay Twilio directly, Suppuo doesn't meter
+>   them. Setup steps in
+>   [Channels](/docs/channels#whatsapp-via-your-own-twilio-whatsapp_twilio).
+> - **Suppuo platform number (pending)** — a shared, metered Suppuo
+>   number is awaiting WhatsApp approval and isn't live yet.
+>
+> One WhatsApp number per workspace in the beta.
+
+## Which workspace gets the message?
+
+Routing is multi-tenant by the **receiving number**: a customer's
+message to your connected number lands in *your* workspace's inbox,
+and your agents' replies go back out from that same number — through
+your own Twilio account when it's a BYO number. One number belongs to
+exactly one workspace.
 
 ## How inbound messages become tickets
 
@@ -70,19 +86,26 @@ message is saved on the ticket regardless.
 
 ## Beta limitations, honestly
 
-- **Operator-managed setup** — no self-serve number connection or
-  webhook configuration in the dashboard yet.
+- **The shared platform number isn't live yet** — today the channel
+  requires bringing your own Twilio number (which is self-serve at
+  [/dashboard/channels](/dashboard/channels)). One Twilio-console
+  step is manual: pointing your number's incoming-message webhook at
+  the URL Suppuo gives you — see
+  [Channels](/docs/channels#whatsapp-via-your-own-twilio-whatsapp_twilio).
 - **One number per workspace**, and one workspace per number.
 - Inbound handling is **text-first**: the message body becomes the
   ticket message. Media attachments aren't stored yet.
 - No WhatsApp message templates / outbound-first messaging — the
   channel is for replying within conversations customers start.
+- **Twilio only** for BYO — WhatsApp Cloud API (Meta direct) is on
+  the roadmap.
 
-Self-serve, multi-number setup is on the roadmap as the channel
-graduates from beta.
+Multi-number workspaces are on the roadmap as the channel graduates
+from beta.
 
 ## See also
 
+- [Channels](/docs/channels) — connect your own Twilio, step by step.
 - [Tickets API](/docs/tickets) — statuses, replies, the ticket object
   (including `requesterPhone`).
 - [Getting started](/docs/getting-started) — the inbox basics.

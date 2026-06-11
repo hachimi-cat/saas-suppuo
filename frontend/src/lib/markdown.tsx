@@ -38,13 +38,17 @@ export type DocMeta = {
 export const DOC_NAV: DocMeta[] = [
   { slug: '', title: 'Introduction', group: 'Getting started', href: '/docs' },
   { slug: 'getting-started', title: 'Getting started', group: 'Getting started', href: '/docs/getting-started' },
+  { slug: 'channels', title: 'Channels', group: 'Channels', href: '/docs/channels' },
   { slug: 'public-form', title: 'Hosted support form', group: 'Channels', href: '/docs/public-form' },
   { slug: 'whatsapp', title: 'WhatsApp (beta)', group: 'Channels', href: '/docs/whatsapp' },
   { slug: 'email-notifications', title: 'Email notifications', group: 'Channels', href: '/docs/email-notifications' },
   { slug: 'canned-replies', title: 'Canned replies', group: 'Workspace', href: '/docs/canned-replies' },
+  { slug: 'billing', title: 'Billing & plans', group: 'Workspace', href: '/docs/billing' },
   { slug: 'api-auth', title: 'API authentication', group: 'API', href: '/docs/api-auth' },
+  { slug: 'api-keys', title: 'API keys', group: 'API', href: '/docs/api-keys' },
   { slug: 'tickets', title: 'Tickets API', group: 'API', href: '/docs/tickets' },
-  { slug: 'cli', title: 'CLI', group: 'Developers', href: '/docs/cli' },
+  { slug: 'webhooks', title: 'Webhooks', group: 'API', href: '/docs/webhooks' },
+  { slug: 'cli', title: 'CLI & SDKs', group: 'Developers', href: '/docs/cli' },
 ];
 
 export function docsGroups(): Array<{ heading: string; items: DocMeta[] }> {

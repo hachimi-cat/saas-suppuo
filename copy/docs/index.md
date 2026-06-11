@@ -15,7 +15,7 @@ status moves itself so you always know who's waiting on whom.
 
 ## What Suppuo is
 
-- **One inbox** for your whole team at [/dashboard/tickets](/dashboard/tickets).
+- **One inbox** for your whole team at [/dashboard/inbox](/dashboard/inbox).
 - **A hosted support form** you can share anywhere — link-in-bio,
   website footer, WhatsApp auto-reply. No code needed. See
   [Hosted support form](/docs/public-form).
@@ -33,14 +33,16 @@ status moves itself so you always know who's waiting on whom.
 
 - **Getting started** — sign up, share your form, work your first
   ticket end-to-end.
-- **Channels** — the [hosted form](/docs/public-form),
-  [WhatsApp](/docs/whatsapp), and
+- **Channels** — the [channel overview](/docs/channels) (including
+  bring-your-own Twilio and Resend), the
+  [hosted form](/docs/public-form), [WhatsApp](/docs/whatsapp), and
   [email notifications](/docs/email-notifications).
-- **Workspace** — [canned replies](/docs/canned-replies) and other
-  team settings.
-- **API** — [authentication](/docs/api-auth) and the
-  [Tickets API](/docs/tickets).
-- **Developers** — the [CLI](/docs/cli).
+- **Workspace** — [canned replies](/docs/canned-replies) and
+  [billing & plans](/docs/billing).
+- **API** — [authentication](/docs/api-auth),
+  [API keys](/docs/api-keys), the [Tickets API](/docs/tickets), and
+  [webhooks](/docs/webhooks).
+- **Developers** — the [CLI & SDKs](/docs/cli).
 
 ## The Forjio family
 

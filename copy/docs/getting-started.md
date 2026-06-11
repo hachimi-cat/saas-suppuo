@@ -19,9 +19,18 @@ login works across every Forjio product.
    workspace is your team's helpdesk. Invite teammates from the
    workspace settings; every member can work the inbox as an agent.
 
-## 2. The inbox
+## 2. Around the dashboard
 
-Your inbox lives at [/dashboard/tickets](/dashboard/tickets). Every
+The sidebar has two groups. **Support**: *Dashboard* (overview) and
+*Inbox* (where the work happens). **Workspace**: *Channels* (connect
+WhatsApp / your own email sender — see [Channels](/docs/channels)),
+*Workspaces* (switch between or create Huudis workspaces), *API Keys*,
+*Webhooks*, *Billing*, and *Settings* (your support form URL,
+[canned replies](/docs/canned-replies), team).
+
+## 3. The inbox
+
+Your inbox lives at [/dashboard/inbox](/dashboard/inbox). Every
 customer inquiry is a **ticket** with:
 
 - a per-workspace number (`#1`, `#2`, …),
@@ -38,7 +47,7 @@ puts the ticket back in `open`, an agent reply moves it to `pending`.
 The exact rules are in the [Tickets API](/docs/tickets#ticket-statuses)
 page.
 
-## 3. Share your support form
+## 4. Share your support form
 
 Suppuo hosts a public support form for your workspace — no code, no
 embed script.
@@ -58,7 +67,7 @@ Anything submitted there becomes a ticket in your inbox, and the
 customer immediately gets an email with a private status link. Details
 in [Hosted support form](/docs/public-form).
 
-## 4. Your first ticket, end to end
+## 5. Your first ticket, end to end
 
 Try it yourself with two browser tabs:
 
@@ -85,7 +94,10 @@ Suppuo's core. Everything else builds on it.
 
 - [Canned replies](/docs/canned-replies) — save your common answers
   and insert them with one click.
-- [WhatsApp (beta)](/docs/whatsapp) — receive and answer WhatsApp
-  messages from the same inbox.
-- [API authentication](/docs/api-auth) + the
-  [Tickets API](/docs/tickets) — automate ticket logging and replies.
+- [Channels](/docs/channels) + [WhatsApp (beta)](/docs/whatsapp) —
+  receive and answer WhatsApp messages from the same inbox, with your
+  own Twilio number.
+- [API keys](/docs/api-keys) + the [Tickets API](/docs/tickets) —
+  automate ticket logging and replies.
+- [Webhooks](/docs/webhooks) — push ticket events to your own systems.
+- [Billing](/docs/billing) — the plans, and what early access means.
