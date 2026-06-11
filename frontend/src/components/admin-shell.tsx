@@ -25,7 +25,8 @@ import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
 // rename.sh rewrites these placeholders.
 const BRAND = 'Suppuo';
 const BRAND_SLUG = 'suppuo';
-const BRAND_COLOR = '#F43F5E';
+const BRAND_COLOR = 'hsl(var(--primary))';
+const BRAND_COLOR_SOFT = 'hsl(var(--primary) / 0.15)';
 
 const SECTIONS: NavSection[] = [
   {
@@ -71,6 +72,7 @@ export function AdminShell({
         brandTag="Admin"
         brandHref="/admin/dashboard"
         brandColor={BRAND_COLOR}
+        brandColorSoft={BRAND_COLOR_SOFT}
         brandIcon={<LogoMark size={20} />}
         sections={SECTIONS}
         user={user}
