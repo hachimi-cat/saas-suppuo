@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
-import { Inbox, Menu, Settings } from 'lucide-react';
+import { Building2, CreditCard, Inbox, KeyRound, LayoutDashboard, Menu, Settings, Webhook } from 'lucide-react';
 import {
   Sidebar,
   readActiveWorkspaceId,
@@ -31,7 +31,17 @@ const SECTIONS: NavSection[] = [
   {
     label: 'Support',
     items: [
-      { href: '/dashboard', label: 'Inbox', icon: Inbox },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/dashboard/inbox', label: 'Inbox', icon: Inbox },
+    ],
+  },
+  {
+    label: 'Workspace',
+    items: [
+      { href: '/dashboard/workspaces', label: 'Workspaces', icon: Building2 },
+      { href: '/dashboard/api-keys', label: 'API Keys', icon: KeyRound },
+      { href: '/dashboard/webhooks', label: 'Webhooks', icon: Webhook },
+      { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
       { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],
   },
@@ -73,11 +83,15 @@ export function DashboardShell({
     const cookieId = readActiveWorkspaceId('cookie', BRAND_SLUG);
     // Best-effort — the template ships no /account/workspaces endpoint;
     // a forked product that proxies Huudis workspaces populates it.
-    fetch('/api/v1/account/workspaces', { credentials: 'include' })
+    fetch('/api/v1/huudis/account/workspaces', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
       .then((b) => {
-        const list = (b?.data ?? []) as PortalWorkspace[];
-        const ws = Array.isArray(list) && list.length ? list : [fallback];
+        const raw = (b?.data ?? []) as Array<{ id: string; name: string; role?: string }>;
+        const huudis: PortalWorkspace[] = Array.isArray(raw)
+          ? raw.map((w) => ({ id: w.id, name: w.name, role: (w.role ?? 'member') as PortalWorkspace['role'] }))
+          : [];
+        // Personal (derived) workspace first, then the Huudis workspaces.
+        const ws = [fallback, ...huudis.filter((w) => w.id !== fallback.id)];
         setWorkspaces(ws);
         setActiveId(cookieId && ws.some((w) => w.id === cookieId) ? cookieId : ws[0].id);
       })

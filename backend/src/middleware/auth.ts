@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken, AuthError, type ForjioClaims } from '@forjio/sdk/auth';
-import { resolveSessionForRequest } from '@forjio/sdk/auth-server';
+import { resolveSessionForRequest, parseCookie } from '@forjio/sdk/auth-server';
 import { authConfig } from '../auth-config.js';
 import { sendErr } from '../lib/http.js';
 
@@ -22,9 +22,17 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   // session minted by routes/auth.ts. Portal fetches ride this.
   const bffSession = resolveSessionForRequest(authConfig, req);
   if (bffSession && bffSession.role !== 'admin') {
+    // Workspace switcher override (fulkruma pattern): honor the
+    // `suppuo_active_workspace` cookie when it names a workspace the
+    // session is actually a member of (accountIds from Huudis), else
+    // fall back to the personal derived accountId.
+    const override = parseCookie(req.headers.cookie, 'suppuo_active_workspace');
+    const allowed = new Set([bffSession.accountId, ...(bffSession.accountIds ?? [])]);
+    const accountId =
+      override && allowed.has(override) ? override : bffSession.accountId;
     req.auth = {
       sub: bffSession.huudisSub,
-      accountId: bffSession.accountId,
+      accountId,
       scope: '',
       iss: issuer,
       aud: audience,

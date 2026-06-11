@@ -23,8 +23,8 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    apiRequest<{ user?: { id?: string } }>('/auth/me')
-      .then(({ data }) => setAccountId(data.user?.id ?? null))
+    apiRequest<{ accountId: string }>('/me')
+      .then(({ data }) => setAccountId(data.accountId))
       .catch(() => setAccountId(null));
     loadCanned();
   }, []);
@@ -58,7 +58,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8">
       <header>
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
       </header>

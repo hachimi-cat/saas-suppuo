@@ -8,6 +8,7 @@ import { adminGuard } from '../middleware/admin-guard.js';
 import { requireAuth } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 import ticketsRouter from './tickets.js';
+import meRouter from './me.js';
 import adminCrmRouter from './admin-crm.js';
 import cannedRepliesRouter from './canned-replies.js';
 import publicTicketsRouter from './public-tickets.js';
@@ -76,6 +77,7 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/admin/crm', adminGuard, adminCrmRouter);
 
   /** Suppuo domain — agent surfaces (BFF session or Bearer JWT). */
+  router.use('/me', requireAuth, meRouter);
   router.use('/tickets', requireAuth, ticketsRouter);
   router.use('/canned-replies', requireAuth, cannedRepliesRouter);
   /** Requester-facing public surface — tokenized, rate-limited. */

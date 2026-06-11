@@ -10,6 +10,7 @@ import {
   normalizeWhatsAppFrom,
   webhookSecretMatches,
   whatsappInboundAccountId,
+  validateTwilioSignature,
 } from '../lib/twilio.js';
 
 /*
@@ -40,6 +41,17 @@ router.post(
   asyncHandler(async (req, res) => {
     if (!webhookSecretMatches(typeof req.query.secret === 'string' ? req.query.secret : undefined)) {
       return sendErr(res, req, 401, 'AUTH_REQUIRED', 'bad webhook secret');
+    }
+    // Defense in depth: classic X-Twilio-Signature validation (the URL
+    // Twilio signed includes the ?secret= query).
+    const publicUrl = `${process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com'}/api/v1/webhooks/twilio/whatsapp?secret=${req.query.secret}`;
+    const sigOk = validateTwilioSignature(
+      publicUrl,
+      (req.body ?? {}) as Record<string, string>,
+      req.headers['x-twilio-signature'] as string | undefined,
+    );
+    if (!sigOk) {
+      return sendErr(res, req, 401, 'INVALID_SIGNATURE', 'bad twilio signature');
     }
     const accountId = whatsappInboundAccountId();
     if (!accountId) {

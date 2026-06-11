@@ -104,8 +104,8 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+    <div className="mx-auto max-w-5xl">
+      <Link href="/dashboard/inbox" className="text-sm text-muted-foreground hover:text-foreground">
         ← Inbox
       </Link>
 

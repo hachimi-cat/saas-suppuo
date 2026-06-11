@@ -4,9 +4,9 @@ import crypto from 'node:crypto';
 // sites (a WhatsApp send failure must never fail a ticket write).
 //
 // Env:
-//   TWILIO_ACCOUNT_SID        AC… (the account the API key belongs to)
-//   TWILIO_API_KEY_SID        SK…
-//   TWILIO_API_KEY_SECRET     the key's secret
+//   TWILIO_ACCOUNT_SID        AC…
+//   TWILIO_AUTH_TOKEN         account auth token (REST auth + the
+//                             X-Twilio-Signature webhook validation)
 //   TWILIO_WHATSAPP_FROM      whatsapp:+62… (the workspace's WA number)
 //   SUPPUO_TWILIO_ACCOUNT_ID  which Suppuo workspace owns inbound WA
 //                             tickets (single-number v1; per-workspace
@@ -16,8 +16,7 @@ import crypto from 'node:crypto';
 export function twilioConfigured(): boolean {
   return Boolean(
     process.env.TWILIO_ACCOUNT_SID &&
-      process.env.TWILIO_API_KEY_SID &&
-      process.env.TWILIO_API_KEY_SECRET &&
+      process.env.TWILIO_AUTH_TOKEN &&
       process.env.TWILIO_WHATSAPP_FROM,
   );
 }
@@ -45,10 +44,9 @@ export function normalizeWhatsAppFrom(raw: unknown): string | null {
 /** Send a WhatsApp message via the Twilio REST API (no SDK — one POST). */
 export async function sendWhatsApp(opts: { to: string; body: string }): Promise<void> {
   const account = process.env.TWILIO_ACCOUNT_SID;
-  const keySid = process.env.TWILIO_API_KEY_SID;
-  const keySecret = process.env.TWILIO_API_KEY_SECRET;
+  const token = process.env.TWILIO_AUTH_TOKEN;
   const from = process.env.TWILIO_WHATSAPP_FROM;
-  if (!account || !keySid || !keySecret || !from) {
+  if (!account || !token || !from) {
     console.log(`[twilio:dev] would send WhatsApp to ${opts.to}: ${opts.body.slice(0, 80)}`);
     return;
   }
@@ -57,7 +55,7 @@ export async function sendWhatsApp(opts: { to: string; body: string }): Promise<
     {
       method: 'POST',
       headers: {
-        Authorization: 'Basic ' + Buffer.from(`${keySid}:${keySecret}`).toString('base64'),
+        Authorization: 'Basic ' + Buffer.from(`${account}:${token}`).toString('base64'),
         'content-type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
@@ -70,4 +68,28 @@ export async function sendWhatsApp(opts: { to: string; body: string }): Promise<
   if (!res.ok) {
     throw new Error(`twilio send ${res.status}: ${(await res.text()).slice(0, 200)}`);
   }
+}
+
+/** Classic Twilio webhook validation: base64(HMAC-SHA1(authToken,
+ *  url + sorted(key+value))) compared to X-Twilio-Signature. Used IN
+ *  ADDITION to the URL secret (defense in depth). Soft-passes when the
+ *  auth token isn't configured. */
+export function validateTwilioSignature(
+  url: string,
+  params: Record<string, string>,
+  signature: string | undefined,
+): boolean {
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  if (!token) return true; // not configured — URL secret is the gate
+  if (!signature) return false;
+  const data =
+    url +
+    Object.keys(params)
+      .sort()
+      .map((k) => k + params[k])
+      .join('');
+  const expected = crypto.createHmac('sha1', token).update(data).digest('base64');
+  const a = Buffer.from(expected);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
