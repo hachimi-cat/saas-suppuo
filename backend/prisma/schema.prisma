@@ -117,3 +117,31 @@ model CannedReply {
   @@index([accountId])
   @@map("canned_replies")
 }
+
+// ─── Channels (BYO provider integrations — ripllo pattern) ──────────
+
+/// Per-workspace channel/provider connection. Credentials are
+/// AES-256-GCM-encrypted JSON (lib/channel-crypto.ts); `config` is
+/// public-safe (from-address, WA number, display bits).
+model ChannelIntegration {
+  id          String   @id // chn_<ulid>
+  accountId   String
+  /// whatsapp_twilio | email_resend (more coming: whatsapp_cloud,
+  /// telegram_bot, livechat)
+  provider    String
+  /// Provider-side stable id — the WA number, the Resend domain id.
+  externalId  String?
+  displayName String
+  /// pending | active | error
+  status      String   @default("pending")
+  credentials String   @default("") // encrypted JSON blob
+  config      Json     @default("{}")
+  lastError   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([accountId, provider, externalId])
+  @@index([accountId, status])
+  @@index([provider, externalId])
+  @@map("channel_integrations")
+}

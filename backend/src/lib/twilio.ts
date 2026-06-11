@@ -41,11 +41,19 @@ export function normalizeWhatsAppFrom(raw: unknown): string | null {
   return m ? (m[1] ?? null) : null;
 }
 
-/** Send a WhatsApp message via the Twilio REST API (no SDK — one POST). */
-export async function sendWhatsApp(opts: { to: string; body: string }): Promise<void> {
-  const account = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_WHATSAPP_FROM;
+/** Send a WhatsApp message via the Twilio REST API (no SDK — one POST).
+ *  Creds + from come from the channel resolver (BYO integration or the
+ *  platform number). */
+export async function sendWhatsApp(opts: {
+  to: string;
+  body: string;
+  accountSid?: string;
+  authToken?: string;
+  from?: string;
+}): Promise<void> {
+  const account = opts.accountSid ?? process.env.TWILIO_ACCOUNT_SID;
+  const token = opts.authToken ?? process.env.TWILIO_AUTH_TOKEN;
+  const from = opts.from ?? process.env.TWILIO_WHATSAPP_FROM;
   if (!account || !token || !from) {
     console.log(`[twilio:dev] would send WhatsApp to ${opts.to}: ${opts.body.slice(0, 80)}`);
     return;
@@ -78,8 +86,9 @@ export function validateTwilioSignature(
   url: string,
   params: Record<string, string>,
   signature: string | undefined,
+  authToken?: string,
 ): boolean {
-  const token = process.env.TWILIO_AUTH_TOKEN;
+  const token = authToken ?? process.env.TWILIO_AUTH_TOKEN;
   if (!token) return true; // not configured — URL secret is the gate
   if (!signature) return false;
   const data =

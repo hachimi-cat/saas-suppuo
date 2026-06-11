@@ -13,6 +13,7 @@ export type IdPrefix =
   | 'tkt' // support ticket
   | 'tmsg' // ticket message
   | 'cnr' // canned reply
+  | 'chn' // channel integration
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

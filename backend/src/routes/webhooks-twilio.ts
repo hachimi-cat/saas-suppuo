@@ -9,9 +9,9 @@ import { nextStatusOnMessage, generateAccessToken } from '../lib/ticket-flow.js'
 import {
   normalizeWhatsAppFrom,
   webhookSecretMatches,
-  whatsappInboundAccountId,
   validateTwilioSignature,
 } from '../lib/twilio.js';
+import { resolveWhatsAppByNumber } from '../lib/channels.js';
 
 /*
  * POST /api/v1/webhooks/twilio/whatsapp?secret=… — Twilio inbound
@@ -45,17 +45,27 @@ router.post(
     // Defense in depth: classic X-Twilio-Signature validation (the URL
     // Twilio signed includes the ?secret= query).
     const publicUrl = `${process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com'}/api/v1/webhooks/twilio/whatsapp?secret=${req.query.secret}`;
+
+    // Multi-tenant routing: the receiving number (To) decides which
+    // workspace owns this conversation — BYO integrations first, then
+    // the platform number.
+    const toNumber = normalizeWhatsAppFrom(req.body?.To);
+    const channel = toNumber ? await resolveWhatsAppByNumber(toNumber) : null;
+    if (!channel) {
+      return sendErr(res, req, 404, 'NOT_FOUND', 'no workspace bound to this WhatsApp number');
+    }
+    const accountId = channel.accountId;
+
+    // Signature validation with the OWNING account's auth token (BYO
+    // numbers are signed by the customer's Twilio account).
     const sigOk = validateTwilioSignature(
       publicUrl,
       (req.body ?? {}) as Record<string, string>,
       req.headers['x-twilio-signature'] as string | undefined,
+      channel.creds.authToken,
     );
     if (!sigOk) {
       return sendErr(res, req, 401, 'INVALID_SIGNATURE', 'bad twilio signature');
-    }
-    const accountId = whatsappInboundAccountId();
-    if (!accountId) {
-      return sendErr(res, req, 503, 'NOT_CONFIGURED', 'SUPPUO_TWILIO_ACCOUNT_ID unset');
     }
 
     const phone = normalizeWhatsAppFrom(req.body?.From);

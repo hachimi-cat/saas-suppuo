@@ -14,6 +14,7 @@ import {
 } from '../lib/ticket-flow.js';
 import { sendAgentRepliedEmail, sendTicketReceivedEmail } from '../lib/email.js';
 import { sendWhatsApp } from '../lib/twilio.js';
+import { resolveWhatsAppForAccount } from '../lib/channels.js';
 
 /*
  * /api/v1/tickets — the agent workspace surface (behind requireAuth;
@@ -105,6 +106,7 @@ router.post(
 
     if (ticket.requesterEmail) {
       void sendTicketReceivedEmail({
+        accountId: ticket.accountId,
         to: ticket.requesterEmail,
         ticketNumber: ticket.number,
         subject: ticket.subject,
@@ -180,6 +182,7 @@ router.post(
     if (!isInternal) {
       if (ticket.requesterEmail) {
         void sendAgentRepliedEmail({
+          accountId: ticket.accountId,
           to: ticket.requesterEmail,
           ticketNumber: ticket.number,
           subject: ticket.subject,
@@ -189,9 +192,19 @@ router.post(
         }).catch((e) => console.error('[tickets] replied-email failed', e));
       }
       if (ticket.channel === 'whatsapp' && ticket.requesterPhone) {
-        void sendWhatsApp({ to: ticket.requesterPhone, body: input.body }).catch((e) =>
-          console.error('[tickets] whatsapp reply failed', e),
-        );
+        void resolveWhatsAppForAccount(ticket.accountId)
+          .then((ch) =>
+            ch
+              ? sendWhatsApp({
+                  to: ticket.requesterPhone!,
+                  body: input.body,
+                  accountSid: ch.creds.accountSid,
+                  authToken: ch.creds.authToken,
+                  from: ch.from,
+                })
+              : console.warn('[tickets] no whatsapp channel for', ticket.accountId),
+          )
+          .catch((e) => console.error('[tickets] whatsapp reply failed', e));
       }
     }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
-import { Building2, CreditCard, Inbox, KeyRound, LayoutDashboard, Menu, Settings, Webhook } from 'lucide-react';
+import { Building2, CreditCard, Inbox, KeyRound, LayoutDashboard, Menu, Radio, Settings, Webhook } from 'lucide-react';
 import {
   Sidebar,
   readActiveWorkspaceId,
@@ -38,6 +38,7 @@ const SECTIONS: NavSection[] = [
   {
     label: 'Workspace',
     items: [
+      { href: '/dashboard/channels', label: 'Channels', icon: Radio },
       { href: '/dashboard/workspaces', label: 'Workspaces', icon: Building2 },
       { href: '/dashboard/api-keys', label: 'API Keys', icon: KeyRound },
       { href: '/dashboard/webhooks', label: 'Webhooks', icon: Webhook },
