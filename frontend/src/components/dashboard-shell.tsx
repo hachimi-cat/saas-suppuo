@@ -2,7 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
-import { Building2, CreditCard, Inbox, KeyRound, LayoutDashboard, Menu, Radio, Settings, Webhook } from 'lucide-react';
+import {
+  BarChart3,
+  Building2,
+  CreditCard,
+  Inbox,
+  KeyRound,
+  LayoutDashboard,
+  Menu,
+  MessageSquareText,
+  Radio,
+  Settings,
+  Webhook,
+} from 'lucide-react';
 import {
   Sidebar,
   readActiveWorkspaceId,
@@ -33,15 +45,25 @@ const SECTIONS: NavSection[] = [
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/dashboard/inbox', label: 'Inbox', icon: Inbox },
+      { href: '/dashboard/canned-replies', label: 'Canned replies', icon: MessageSquareText },
+      { href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'Channels',
+    items: [{ href: '/dashboard/channels', label: 'Channels', icon: Radio }],
+  },
+  {
+    label: 'Developers',
+    items: [
+      { href: '/dashboard/api-keys', label: 'API Keys', icon: KeyRound },
+      { href: '/dashboard/webhooks', label: 'Webhooks', icon: Webhook },
     ],
   },
   {
     label: 'Workspace',
     items: [
-      { href: '/dashboard/channels', label: 'Channels', icon: Radio },
       { href: '/dashboard/workspaces', label: 'Workspaces', icon: Building2 },
-      { href: '/dashboard/api-keys', label: 'API Keys', icon: KeyRound },
-      { href: '/dashboard/webhooks', label: 'Webhooks', icon: Webhook },
       { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
       { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],

@@ -66,11 +66,16 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your support workspace at a glance.
-        </p>
+      <header className="mb-6 flex items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your support workspace at a glance.
+          </p>
+        </div>
+        <Link href="/dashboard/reports" className="shrink-0 text-xs text-primary hover:underline">
+          View reports →
+        </Link>
       </header>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
