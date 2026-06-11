@@ -75,6 +75,9 @@ model Ticket {
   requesterExternalId String?
   /// Huudis sub of the assigned agent (workspace member), if any.
   assigneeSub    String?
+  /// Free-form labels (normalized: trimmed, lowercased, deduped;
+  /// max 10 tags × 40 chars — see lib/ticket-query.ts).
+  tags           String[] @default([])
   /// Opaque token for the requester's status link (/t/<token>).
   accessToken    String   @unique
   createdAt      DateTime @default(now())
@@ -87,6 +90,9 @@ model Ticket {
   @@index([accountId, status, lastMessageAt])
   @@index([accountId, requesterPhone])
   @@index([accountId, requesterExternalId])
+  /// Trigram index keeping ILIKE '%q%' subject search fast (the
+  /// migration also does CREATE EXTENSION IF NOT EXISTS pg_trgm).
+  @@index([subject(ops: raw("gin_trgm_ops"))], map: "ix_tickets_subject_trgm", type: Gin)
   @@map("tickets")
 }
 

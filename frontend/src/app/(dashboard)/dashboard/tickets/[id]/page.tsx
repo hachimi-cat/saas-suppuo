@@ -2,12 +2,14 @@
 
 /*
  * Ticket thread — conversation + reply box (public reply or internal
- * note), status/priority controls, canned-reply picker.
+ * note), status/priority controls, assignee member picker (Huudis IAM
+ * roster), inline tag chips, canned-reply picker.
  */
 
 import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { fetchMembers, type Member } from '@/lib/members';
 
 interface Message {
   id: string;
@@ -28,6 +30,8 @@ interface Ticket {
   requesterEmail: string | null;
   requesterPhone: string | null;
   requesterName: string | null;
+  assigneeSub: string | null;
+  tags: string[];
   createdAt: string;
   messages: Message[];
 }
@@ -45,6 +49,9 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
   const { id } = use(params);
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [canned, setCanned] = useState<CannedReply[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const [internal, setInternal] = useState(false);
@@ -64,6 +71,10 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
     apiRequest<{ cannedReplies: CannedReply[] }>('/canned-replies')
       .then(({ data }) => setCanned(data.cannedReplies))
       .catch(() => undefined);
+    fetchMembers().then(setMembers).catch(() => undefined);
+    apiRequest<{ tags: string[] }>('/tickets/tags')
+      .then(({ data }) => setTagSuggestions(data.tags))
+      .catch(() => undefined);
   }, [load]);
 
   async function setField(field: 'status' | 'priority', value: string) {
@@ -75,6 +86,46 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
       setError(e instanceof ApiRequestError ? e.message : 'Update failed');
     }
   }
+
+  async function setAssignee(sub: string | null) {
+    if (!ticket) return;
+    setError(null);
+    try {
+      await apiRequest(`/tickets/${ticket.id}`, {
+        method: 'PATCH',
+        body: { assigneeSub: sub },
+      });
+      load();
+    } catch (e) {
+      setError(e instanceof ApiRequestError ? e.message : 'Update failed');
+    }
+  }
+
+  async function saveTags(tags: string[]) {
+    if (!ticket) return;
+    setError(null);
+    // Optimistic — the reload below settles the normalized truth.
+    setTicket({ ...ticket, tags });
+    try {
+      await apiRequest(`/tickets/${ticket.id}`, { method: 'PATCH', body: { tags } });
+      load();
+    } catch (e) {
+      setError(e instanceof ApiRequestError ? e.message : 'Update failed');
+      load();
+    }
+  }
+
+  function addTag(e: React.FormEvent) {
+    e.preventDefault();
+    if (!ticket) return;
+    const tag = newTag.trim().toLowerCase();
+    if (!tag) return;
+    setNewTag('');
+    if ((ticket.tags ?? []).includes(tag)) return;
+    saveTags([...(ticket.tags ?? []), tag]);
+  }
+
+  const mySub = members.find((m) => m.isYou)?.id ?? null;
 
   async function sendReply(e: React.FormEvent) {
     e.preventDefault();
@@ -145,6 +196,69 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
               ))}
             </select>
           </label>
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            Assignee
+            <select
+              value={ticket.assigneeSub ?? ''}
+              onChange={(e) => setAssignee(e.target.value || null)}
+              className="max-w-[180px] rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium"
+            >
+              <option value="">Unassigned</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name ? `${m.name} (${m.email})` : m.email}
+                  {m.isYou ? ' — you' : ''}
+                </option>
+              ))}
+              {/* Keep an unknown sub visible (e.g. a member who left). */}
+              {ticket.assigneeSub && !members.some((m) => m.id === ticket.assigneeSub) && (
+                <option value={ticket.assigneeSub}>{ticket.assigneeSub}</option>
+              )}
+            </select>
+          </label>
+          {mySub && ticket.assigneeSub !== mySub && (
+            <button
+              onClick={() => setAssignee(mySub)}
+              className="rounded-lg border border-primary/40 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+            >
+              Assign to me
+            </button>
+          )}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">Tags</span>
+          {(ticket.tags ?? []).map((tag) => (
+            <span
+              key={tag}
+              className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-foreground"
+            >
+              {tag}
+              <button
+                onClick={() => saveTags((ticket.tags ?? []).filter((t) => t !== tag))}
+                aria-label={`Remove tag ${tag}`}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <form onSubmit={addTag} className="flex items-center">
+            <input
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              list="tag-suggestions"
+              placeholder="+ add tag"
+              maxLength={40}
+              className="w-24 rounded-full border border-dashed border-border bg-background px-2 py-0.5 text-xs focus:w-36 focus:border-primary/50 focus:outline-none"
+            />
+            <datalist id="tag-suggestions">
+              {tagSuggestions
+                .filter((t) => !(ticket.tags ?? []).includes(t))
+                .map((t) => (
+                  <option key={t} value={t} />
+                ))}
+            </datalist>
+          </form>
         </div>
       </header>
 
