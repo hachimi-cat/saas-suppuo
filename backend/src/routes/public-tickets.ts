@@ -19,9 +19,27 @@ import { sendTicketReceivedEmail } from '../lib/email.js';
  * Tenancy: the hosted form URL carries the workspace's accountId
  * (opaque acc_*); custom slugs come later. Internal notes are NEVER
  * exposed here. Mounted behind the shared rate limiter.
+ *
+ * CORS: this surface is also called CROSS-origin by the embeddable
+ * live-chat widget (frontend/public/widget.js) running on customers'
+ * own sites. Tokens are capability URLs, not cookies, so a permissive
+ * `*` origin is safe here — scoped to THIS router only; the rest of
+ * /api/v1 stays same-origin.
  */
 
 const router = Router();
+
+router.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
 
 const submitBody = z.object({
   accountId: z.string().regex(/^acc_[a-f0-9]{24}$/),

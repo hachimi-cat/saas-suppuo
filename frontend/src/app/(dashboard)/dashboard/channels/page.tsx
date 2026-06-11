@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Globe, Mail, MessageCircle, PenLine, Plug, Trash2 } from 'lucide-react';
+import { Globe, Mail, MessageCircle, MessageSquare, PenLine, Plug, Trash2 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
 
 interface Integration {
@@ -30,6 +30,7 @@ export default function ChannelsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<'whatsapp_twilio' | 'email_resend' | null>(null);
   const [webhookNote, setWebhookNote] = useState<string | null>(null);
+  const [accountId, setAccountId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     apiRequest<ChannelsPayload>('/channels')
@@ -39,6 +40,9 @@ export default function ChannelsPage() {
 
   useEffect(() => {
     load();
+    apiRequest<{ accountId: string }>('/me')
+      .then(({ data }) => setAccountId(data.accountId))
+      .catch(() => setAccountId(null));
   }, [load]);
 
   async function remove(id: string) {
@@ -129,9 +133,19 @@ export default function ChannelsPage() {
           ))}
         </ChannelCard>
 
+        {/* Live chat widget */}
+        <ChannelCard
+          icon={<MessageSquare className="h-5 w-5" />}
+          title="Live chat widget"
+          status="active"
+          statusLabel="Always on"
+          description="An embeddable chat bubble for your site — visitor messages open tickets in this inbox, and your replies show up right in the widget (and by email)."
+        >
+          <WidgetEmbed accountId={accountId} />
+        </ChannelCard>
+
         {/* Coming soon */}
         <ChannelCard icon={<MessageCircle className="h-5 w-5" />} title="WhatsApp Cloud API (Meta direct)" status="soon" statusLabel="Coming soon" description="Connect a Meta WhatsApp Business account directly — no Twilio in between." />
-        <ChannelCard icon={<MessageCircle className="h-5 w-5" />} title="Live chat widget" status="soon" statusLabel="Coming soon" description="An embeddable chat bubble for your site that opens tickets in this inbox." />
         <ChannelCard icon={<Mail className="h-5 w-5" />} title="Email-to-ticket (inbound)" status="soon" statusLabel="Coming soon" description="A support@ address that turns incoming email into tickets." />
       </div>
 
@@ -154,6 +168,45 @@ export default function ChannelsPage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+function WidgetEmbed({ accountId }: { accountId: string | null }) {
+  const [copied, setCopied] = useState(false);
+  if (!accountId) {
+    return <p className="mt-3 text-sm text-muted-foreground">Loading your embed snippet…</p>;
+  }
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://suppuo.com';
+  const snippet = `<script src="${origin}/widget.js" data-suppuo-account="${accountId}" async></script>`;
+  return (
+    <div className="mt-3">
+      <p className="text-xs text-muted-foreground">
+        Paste this just before <code>&lt;/body&gt;</code> on any page:
+      </p>
+      <div className="mt-2 flex items-start gap-2">
+        <code className="min-w-0 flex-1 break-all rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+          {snippet}
+        </code>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(snippet);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+          className="shrink-0 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"
+        >
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <a
+        href={`/widget-demo?account=${accountId}`}
+        target="_blank"
+        rel="noopener"
+        className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
+      >
+        Preview the widget →
+      </a>
     </div>
   );
 }
