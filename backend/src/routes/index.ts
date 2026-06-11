@@ -9,6 +9,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 import ticketsRouter from './tickets.js';
 import meRouter from './me.js';
+import profileRouter from './profile.js';
 import channelsRouter from './channels.js';
 import adminCrmRouter from './admin-crm.js';
 import cannedRepliesRouter from './canned-replies.js';
@@ -90,6 +91,9 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
 
   /** Suppuo domain — agent surfaces (BFF session or Bearer JWT). */
   router.use('/me', requireAuth, meRouter);
+  /** Agent profile — own avatar upload/remove + any member's avatar
+   *  fetch. Display name edits go through /huudis/account instead. */
+  router.use('/profile', requireAuth, profileRouter);
   router.use('/channels', requireAuth, channelsRouter);
   router.use('/tickets', requireAuth, ticketsRouter);
   /** Ticket-message attachments — staged upload + account-scoped

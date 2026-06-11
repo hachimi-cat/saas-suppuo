@@ -11,7 +11,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest, ApiRequestError } from '@/lib/api';
-import { fetchMembers, initials, type Member } from '@/lib/members';
+import { fetchMembers, type Member } from '@/lib/members';
+import { Avatar } from '@/components/ui/avatar';
 
 interface Ticket {
   id: string;
@@ -360,12 +361,12 @@ export default function InboxPage() {
                     {t.priority !== 'normal' ? t.priority : ''}
                   </span>
                   {t.assigneeSub ? (
-                    <span
-                      title={assigneeLabel ?? undefined}
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary"
-                    >
-                      {initials(assigneeLabel)}
-                    </span>
+                    <Avatar
+                      sub={t.assigneeSub}
+                      nameOrEmail={assigneeLabel}
+                      size={24}
+                      className="text-[10px]"
+                    />
                   ) : (
                     <span className="h-6 w-6 shrink-0" aria-hidden />
                   )}

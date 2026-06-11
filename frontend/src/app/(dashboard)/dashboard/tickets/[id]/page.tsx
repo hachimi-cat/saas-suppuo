@@ -9,7 +9,8 @@
 import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest, ApiRequestError, apiUrl, uploadFile } from '@/lib/api';
-import { fetchMembers, type Member } from '@/lib/members';
+import { fetchMembers, memberLabel, type Member } from '@/lib/members';
+import { Avatar } from '@/components/ui/avatar';
 import {
   AttachmentComposer,
   MessageAttachments,
@@ -212,6 +213,14 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
           </label>
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Assignee
+            {ticket.assigneeSub && (
+              <Avatar
+                sub={ticket.assigneeSub}
+                nameOrEmail={memberLabel(ticket.assigneeSub, members)}
+                size={24}
+                className="text-[10px]"
+              />
+            )}
             <select
               value={ticket.assigneeSub ?? ''}
               onChange={(e) => setAssignee(e.target.value || null)}

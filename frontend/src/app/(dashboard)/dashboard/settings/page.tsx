@@ -1,14 +1,16 @@
 'use client';
 
 /*
- * Workspace settings — the shareable hosted-form URL and automation
- * (auto-response + business hours, WIB-aware). Canned replies moved to
- * their own page at /dashboard/canned-replies.
+ * Workspace settings — your agent profile (display name via the Huudis
+ * proxy + a suppuo-local avatar), the shareable hosted-form URL and
+ * automation (auto-response + business hours, WIB-aware). Canned
+ * replies moved to their own page at /dashboard/canned-replies.
  * The accountId comes from /api/v1/auth/me (the BFF session).
  */
 
-import { useEffect, useState } from 'react';
-import { apiRequest, ApiRequestError } from '@/lib/api';
+import { useEffect, useRef, useState } from 'react';
+import { apiRequest, ApiRequestError, apiUrl } from '@/lib/api';
+import { Avatar } from '@/components/ui/avatar';
 
 export default function SettingsPage() {
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -29,6 +31,8 @@ export default function SettingsPage() {
       <header>
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
       </header>
+
+      <ProfileSection />
 
       <section className="rounded-xl border border-border p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -63,6 +67,219 @@ export default function SettingsPage() {
 
       <AutomationSection />
     </div>
+  );
+}
+
+// ─── Your profile (name lives in Huudis; avatar is suppuo-local) ─────
+// Display name reads/writes go through the BFF Huudis proxy
+// (/api/v1/huudis/account) — Suppuo never shows a Huudis page. The
+// avatar has no home in Huudis, so it lives in Suppuo's own
+// agent_profiles table keyed by the Huudis sub.
+
+const AVATAR_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const MAX_AVATAR_BYTES = 1 * 1024 * 1024; // 1MB — matches the backend cap
+
+function ProfileSection() {
+  const [sub, setSub] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  // Name save state.
+  const [savingName, setSavingName] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+
+  // Avatar state. `avatarVersion` busts the <img> cache after changes.
+  const [avatarVersion, setAvatarVersion] = useState(0);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    // Own sub for the avatar endpoints.
+    apiRequest<{ sub: string }>('/me')
+      .then(({ data }) => setSub(data.sub))
+      .catch(() => setSub(null));
+    // Display name from Huudis via the BFF proxy. The proxy forwards
+    // Huudis's own envelope: { data: { id, email, name, … } }.
+    fetch('/api/v1/huudis/account', { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const body = (await res.json().catch(() => null)) as {
+          data?: { name?: string; email?: string };
+        } | null;
+        if (typeof body?.data?.name === 'string') setName(body.data.name);
+        if (typeof body?.data?.email === 'string') setEmail(body.data.email);
+      })
+      .catch(() => undefined)
+      .finally(() => setLoaded(true));
+  }, []);
+
+  async function saveName(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSavingName(true);
+    setNameError(null);
+    setNameSaved(false);
+    try {
+      const res = await fetch('/api/v1/huudis/account', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: { message?: string };
+        } | null;
+        throw new Error(body?.error?.message ?? `Could not save (${res.status})`);
+      }
+      setNameSaved(true);
+    } catch (err) {
+      setNameError(err instanceof Error ? err.message : 'Could not save');
+    } finally {
+      setSavingName(false);
+    }
+  }
+
+  async function uploadAvatar(file: File) {
+    setAvatarError(null);
+    if (!AVATAR_TYPES.includes(file.type)) {
+      setAvatarError('Please choose a PNG, JPG or WebP image.');
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setAvatarError('Image is too large — 1MB max.');
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const res = await fetch(apiUrl('/profile/avatar'), {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: { message?: string };
+        } | null;
+        throw new Error(body?.error?.message ?? `Upload failed (${res.status})`);
+      }
+      setAvatarVersion((v) => v + 1);
+    } catch (err) {
+      setAvatarError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setAvatarBusy(false);
+      if (fileInput.current) fileInput.current.value = '';
+    }
+  }
+
+  async function removeAvatar() {
+    setAvatarBusy(true);
+    setAvatarError(null);
+    try {
+      await apiRequest('/profile/avatar', { method: 'DELETE' });
+      setAvatarVersion((v) => v + 1);
+    } catch (err) {
+      setAvatarError(err instanceof ApiRequestError ? err.message : 'Could not remove');
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-border p-5">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Your profile
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        How you appear to teammates — on ticket assignments and replies.
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-start gap-6">
+        {/* Avatar */}
+        <div className="flex items-center gap-4">
+          <Avatar
+            sub={sub}
+            nameOrEmail={name || email}
+            size={64}
+            version={avatarVersion}
+            className="text-lg"
+          />
+          <div>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInput}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadAvatar(f);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                disabled={avatarBusy || !sub}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary/50 disabled:opacity-50"
+              >
+                {avatarBusy ? 'Working…' : 'Upload photo'}
+              </button>
+              <button
+                type="button"
+                onClick={removeAvatar}
+                disabled={avatarBusy || !sub}
+                className="rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:text-destructive disabled:opacity-50"
+              >
+                Remove
+              </button>
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">PNG, JPG or WebP — 1MB max.</p>
+            {avatarError && <p className="mt-1 text-xs text-destructive">{avatarError}</p>}
+          </div>
+        </div>
+
+        {/* Display name */}
+        <form onSubmit={saveName} className="min-w-[260px] flex-1">
+          <label
+            htmlFor="profile-name"
+            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            Display name
+          </label>
+          <div className="mt-1 flex items-center gap-2">
+            <input
+              id="profile-name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameSaved(false);
+              }}
+              disabled={!loaded}
+              maxLength={120}
+              placeholder={loaded ? 'Your name' : 'Loading…'}
+              className="w-full max-w-sm rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            />
+            <button
+              disabled={!loaded || savingName || !name.trim()}
+              className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            >
+              {savingName ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          {email && <p className="mt-1 text-xs text-muted-foreground">{email}</p>}
+          {nameSaved && (
+            <p className="mt-1.5 text-xs text-emerald-600">
+              Saved — your name updates everywhere within a few minutes.
+            </p>
+          )}
+          {nameError && <p className="mt-1.5 text-xs text-destructive">{nameError}</p>}
+        </form>
+      </div>
+    </section>
   );
 }
 
