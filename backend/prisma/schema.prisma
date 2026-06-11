@@ -118,7 +118,6 @@ model CannedReply {
   @@map("canned_replies")
 }
 
-<<<<<<< HEAD
 // ─── Channels (BYO provider integrations — ripllo pattern) ──────────
 
 /// Per-workspace channel/provider connection. Credentials are
@@ -168,7 +167,7 @@ model BillingSubscription {
 
   @@index([plugipayCheckoutSessionId])
   @@map("billing_subscriptions")
-=======
+
 // ─── API keys + webhooks ─────────────────────────────────────────────
 
 /// Programmatic access key for the Suppuo API. Format
@@ -206,5 +205,4 @@ model WebhookSubscription {
 
   @@index([accountId, active])
   @@map("webhook_subscriptions")
->>>>>>> worktree-agent-suppuo-apikeys
 }
