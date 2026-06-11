@@ -4,8 +4,8 @@ title: "Email-to-ticket"
 
 # Email-to-ticket
 
-Email ke `support@toko-anda.com` bisa langsung jadi tiket — tanpa
-copy-paste. Email-to-ticket is the **inbound** half of the email
+An email to `support@your-store.com` can become a ticket directly —
+no copy-paste. Email-to-ticket is the **inbound** half of the email
 channel: every workspace owns a dedicated address, every email to it
 becomes a ticket, and the customer's plain email replies thread
 straight back into the conversation.

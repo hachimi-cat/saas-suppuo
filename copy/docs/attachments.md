@@ -4,8 +4,8 @@ title: "Attachments"
 
 # Attachments
 
-Foto resi, screenshot error, PDF invoice — file ikut nempel di tiket.
-Ticket messages can carry **file attachments** on every surface: the
+A shipping-label photo, an error screenshot, a PDF invoice — files
+ride along on the ticket. Ticket messages can carry **file attachments** on every surface: the
 agent inbox, the hosted status page, the live chat widget, and inbound
 WhatsApp media. This page documents the rules and the API.
 
@@ -52,15 +52,15 @@ headers doing the work:
 curl -X POST "https://suppuo.com/api/v1/attachments" \
   -H "Authorization: Bearer sk_live_xxx" \
   -H "Content-Type: image/png" \
-  -H "X-Filename: bukti-transfer.png" \
-  --data-binary @bukti-transfer.png
+  -H "X-Filename: payment-proof.png" \
+  --data-binary @payment-proof.png
 ```
 
 ```json
 {
   "data": {
     "id": "att_01jx2v9k3m8q4r5s6t7u8v9w0x",
-    "filename": "bukti-transfer.png",
+    "filename": "payment-proof.png",
     "contentType": "image/png",
     "size": 482133,
     "createdAt": "2026-06-11T03:21:09.000Z"
@@ -80,7 +80,7 @@ curl -X POST "https://suppuo.com/api/v1/tickets/tkt_01jx…/messages" \
   -H "Authorization: Bearer sk_live_xxx" \
   -H "Content-Type: application/json" \
   -d '{
-    "body": "Ini bukti transfernya ya.",
+    "body": "Here is the proof of payment.",
     "attachmentIds": ["att_01jx2v9k3m8q4r5s6t7u8v9w0x"]
   }'
 ```

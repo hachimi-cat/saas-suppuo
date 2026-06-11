@@ -4,7 +4,7 @@ title: "Channels"
 
 # Channels
 
-Channel adalah pintu masuk pelanggan ke inbox Anda — form, live chat,
+A channel is a customer's doorway into your inbox — form, live chat,
 email, WhatsApp, Telegram. A **channel** is where a customer
 conversation enters your workspace. Every channel lands in the same
 inbox as a ticket; this page explains which channels exist and walks
@@ -201,7 +201,7 @@ curl -X POST https://suppuo.com/api/v1/channels \
     "provider": "email_resend",
     "apiKey": "re_xxxxxxxxxxxx",
     "fromEmail": "support@yourstore.com",
-    "fromName": "Toko Anda"
+    "fromName": "Your Store"
   }'
 ```
 

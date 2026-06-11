@@ -4,8 +4,8 @@ title: "Email notifications"
 
 # Email notifications
 
-Pelanggan selalu tahu kabar tiketnya tanpa harus login — Suppuo
-mengirim email otomatis di momen yang penting. Suppuo emails the
+Customers always know where their ticket stands without logging in —
+Suppuo sends automatic emails at the moments that matter. Suppuo emails the
 **requester** (your customer) at the moments that matter, and every
 email carries their private status link so they can read the thread and
 reply without an account. They can also just hit *Reply* — see

@@ -4,8 +4,8 @@ title: "Introduction"
 
 # Suppuo Docs
 
-Suppuo adalah helpdesk sederhana untuk UKM Indonesia — satu inbox rapi
-untuk semua pertanyaan pelanggan, tanpa perlu tim IT. Selamat datang!
+Suppuo is a simple helpdesk for Indonesian SMEs — one tidy inbox for
+every customer question, no IT team required. Welcome!
 
 Suppuo is a lightweight helpdesk and ticketing system. Customer
 inquiries — from your hosted support form, your website's chat

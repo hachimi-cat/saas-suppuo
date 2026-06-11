@@ -4,9 +4,9 @@ title: "WhatsApp"
 
 # WhatsApp channel
 
-Pelanggan Indonesia hidup di WhatsApp — dengan channel ini, chat WA
-masuk ke inbox Suppuo sebagai tiket, dan balasan agen terkirim balik ke
-WA pelanggan. With the WhatsApp channel, customers chat on the number
+Indonesian customers live on WhatsApp — with this channel, WA chats
+land in your Suppuo inbox as tickets, and agent replies are delivered
+back to the customer's WA. With the WhatsApp channel, customers chat on the number
 they already know, and your team answers from the same Suppuo inbox as
 everything else.
 
@@ -25,7 +25,7 @@ everything else.
 >   [Channels](/docs/channels#whatsapp-cloud-api-meta-direct).
 >
 > How many numbers a workspace can connect depends on the plan —
-> 1 on Warung, up to 3 on Toko, unlimited on Bisnis (see
+> 1 on Starter, up to 3 on Growth, unlimited on Business (see
 > [/pricing](/pricing); limits are enforced at launch). With several
 > numbers connected, agent replies currently go out via the most
 > recently connected one.

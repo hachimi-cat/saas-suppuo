@@ -26,7 +26,7 @@ export default function AboutPage() {
             When support lives in a chat thread, there is no status, no owner, and no record.
             Whoever holds the phone answers what they happen to see; everything else quietly
             expires. The enterprise helpdesks that solve this are priced in USD per agent and
-            built for support departments, not for a toko online with three people wearing
+            built for support departments, not for a small online shop with three people wearing
             every hat.
           </p>
 

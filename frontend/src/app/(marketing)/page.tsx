@@ -238,9 +238,9 @@ export default function HomePage() {
               One flat price for the whole team.
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-[62ch] mx-auto">
-              Per workspace, not per agent. Rp 99rb per bulan flat untuk seluruh tim — bukan
-              Rp 400rb per orang seperti tool lain. And during early access, every workspace
-              gets Toko-level features free.
+              Per workspace, not per agent. Rp 99,000 flat per month for the whole team —
+              not Rp 400,000 per agent like other tools. And during early access, every
+              workspace gets Growth-level features free.
             </p>
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function HomePage() {
                   <h3 className="text-[17px] font-semibold tracking-tight">{tier.name}</h3>
                   {tier.earlyAccess && (
                     <span className="inline-flex shrink-0 items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9.5px] font-semibold text-primary">
-                      Early Access — gratis
+                      Early Access — free
                     </span>
                   )}
                 </div>
@@ -301,9 +301,9 @@ export default function HomePage() {
             ))}
           </div>
           <p className="mt-6 text-[12.5px] text-muted-foreground text-center leading-relaxed max-w-3xl mx-auto">
-            Founding members get 50% off for 12 months when billing starts (Warung Rp 49rb ·
-            Toko Rp 149rb) — announced 30+ days in advance. If you don&apos;t pay later, you
-            keep your data and drop to Gratis; export available on every tier.
+            Founding members get 50% off for 12 months when billing starts (Starter Rp 49,000 ·
+            Growth Rp 149,000) — announced 30+ days in advance. If you don&apos;t pay later, you
+            keep your data and drop to Free; export available on every tier.
           </p>
           <p className="mt-2 text-[12.5px] text-muted-foreground text-center leading-relaxed">
             Billed in IDR through Plugipay, USD via PayPal for international customers. See
@@ -349,7 +349,7 @@ export default function HomePage() {
                 {[
                   {
                     cap: 'Pricing model',
-                    s: 'Flat per workspace — from Rp 99rb/bln for the whole team',
+                    s: 'Flat per workspace — from Rp 99,000/mo for the whole team',
                     a: 'Free',
                     b: 'Per agent — multiplies with team size',
                   },
@@ -552,15 +552,15 @@ export default function HomePage() {
             {[
               {
                 q: 'Is early access really free?',
-                a: 'Yes. During early access, every workspace gets Toko-level features free — no card, no trial countdown. When billing starts (announced 30+ days in advance), founding members get 50% off for 12 months: Warung Rp 49rb, Toko Rp 149rb per bulan.',
+                a: 'Yes. During early access, every workspace gets Growth-level features free — no card, no trial countdown. When billing starts (announced 30+ days in advance), founding members get 50% off for 12 months: Starter Rp 49,000, Growth Rp 149,000 per month.',
               },
               {
                 q: 'Why per workspace instead of per agent?',
-                a: 'Because per-agent pricing punishes you for growing your team. Most helpdesk suites charge per agent per month, so the bill multiplies with every hire. Suppuo is flat per workspace: Warung is Rp 99rb per bulan for the whole team, whether one agent answers or three.',
+                a: 'Because per-agent pricing punishes you for growing your team. Most helpdesk suites charge per agent per month, so the bill multiplies with every hire. Suppuo is flat per workspace: Starter is Rp 99,000 per month for the whole team, whether one agent answers or three.',
               },
               {
                 q: 'What happens if I don’t pay when billing starts?',
-                a: 'You keep your data and your workspace drops to the Gratis tier (2 agents, 100 tickets/month). Export is available on every tier, paid or not — no bait-and-switch, no data hostage.',
+                a: 'You keep your data and your workspace drops to the Free tier (2 agents, 100 tickets/month). Export is available on every tier, paid or not — no bait-and-switch, no data hostage.',
               },
               {
                 q: 'How does the WhatsApp channel work? Is there a Suppuo number?',
@@ -655,7 +655,7 @@ export default function HomePage() {
 // own Twilio or Meta Cloud API number) — Suppuo never provides one.
 const PRICING_TIERS = [
   {
-    name: 'Gratis',
+    name: 'Free',
     price: 'Rp 0',
     period: undefined,
     earlyAccess: false,
@@ -666,13 +666,13 @@ const PRICING_TIERS = [
       'Internal notes + 10 canned replies',
       'Hosted form, live chat widget, email-to-ticket',
       'File attachments up to 8MB',
-      'Community support',
+      'Self-serve docs + best-effort email support',
     ],
   },
   {
-    name: 'Warung',
+    name: 'Starter',
     price: 'Rp 99.000',
-    period: '/bln',
+    period: '/mo',
     earlyAccess: true,
     popular: true,
     features: [
@@ -685,13 +685,13 @@ const PRICING_TIERS = [
     ],
   },
   {
-    name: 'Toko',
+    name: 'Growth',
     price: 'Rp 299.000',
-    period: '/bln',
+    period: '/mo',
     earlyAccess: true,
     popular: false,
     features: [
-      '10 agents · everything in Warung',
+      '10 agents · everything in Starter',
       'Up to 3 connected WhatsApp numbers',
       'BYO email — your Resend + domain',
       'REST API + CLI + webhooks',
@@ -699,13 +699,13 @@ const PRICING_TIERS = [
     ],
   },
   {
-    name: 'Bisnis',
+    name: 'Business',
     price: 'Rp 599.000',
-    period: '/bln',
+    period: '/mo',
     earlyAccess: true,
     popular: false,
     features: [
-      '25 agents · everything in Toko',
+      '25 agents · everything in Growth',
       'Unlimited connected WhatsApp numbers',
       'Priority support',
     ],
@@ -743,7 +743,7 @@ function Cell({ value, highlight }: { value: boolean | string; highlight?: boole
 const HERO_TICKETS = [
   {
     id: '#1042',
-    subject: 'Pesanan belum sampai, resi tidak update',
+    subject: "Order hasn't arrived, tracking not updating",
     requester: 'Rina W.',
     status: 'open',
     priority: 'urgent',
@@ -767,7 +767,7 @@ const HERO_TICKETS = [
   },
   {
     id: '#1038',
-    subject: 'Terima kasih, sudah diterima!',
+    subject: 'Thank you, package received!',
     requester: 'Andi P.',
     status: 'resolved',
     priority: 'low',

@@ -4,7 +4,7 @@ title: "Getting started"
 
 # Getting started
 
-Dari daftar sampai tiket pertama selesai dibalas — kira-kira lima menit.
+From sign-up to your first answered ticket — about five minutes.
 This guide walks you from sign-up to your first resolved ticket.
 
 ## 1. Create your workspace

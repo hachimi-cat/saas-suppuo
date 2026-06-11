@@ -4,7 +4,7 @@ title: "API keys"
 
 # API keys
 
-Kunci API untuk skrip dan integrasi — tanpa perlu login browser. An
+API keys for scripts and integrations — no browser login needed. An
 **API key** is a long-lived `sk_live_…` token that authenticates your
 scripts, servers, and integrations against the Suppuo REST API,
 scoped to one workspace.

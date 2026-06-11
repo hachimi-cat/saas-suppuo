@@ -4,8 +4,8 @@ title: "Billing & plans"
 
 # Billing & plans
 
-Harga flat per workspace, dibayar dengan QRIS, VA, e-wallet, atau
-kartu. Suppuo bills **per workspace** with flat monthly IDR pricing —
+Flat per-workspace pricing, payable by QRIS, virtual account,
+e-wallet, or card. Suppuo bills **per workspace** with flat monthly IDR pricing —
 no per-seat surprises. Manage your plan at
 [/dashboard/billing](/dashboard/billing).
 
@@ -13,10 +13,10 @@ no per-seat surprises. Manage your plan at
 
 | Tier | Price / month | For |
 |---|---|---|
-| **Gratis** | Rp 0 | Trying Suppuo out, or a one-person desk — 2 agents, 100 tickets/month, 10 canned replies, hosted form with Suppuo branding |
-| **Warung** | Rp 99.000 | Small teams — 3 agents, unlimited tickets & canned replies, unbranded form, WhatsApp with your own number (1 connected number) |
-| **Toko** | Rp 299.000 | Growing teams building on the API — 10 agents, up to 3 connected WhatsApp numbers, REST API + CLI |
-| **Bisnis** | Rp 599.000 | Bigger teams — 25 agents, unlimited connected WhatsApp numbers, priority support |
+| **Free** | Rp 0 | Trying Suppuo out, or a one-person desk — 2 agents, 100 tickets/month, 10 canned replies, hosted form with Suppuo branding |
+| **Starter** | Rp 99.000 | Small teams — 3 agents, unlimited tickets & canned replies, unbranded form, WhatsApp with your own number (1 connected number) |
+| **Growth** | Rp 299.000 | Growing teams building on the API — 10 agents, up to 3 connected WhatsApp numbers, REST API + CLI |
+| **Business** | Rp 599.000 | Bigger teams — 25 agents, unlimited connected WhatsApp numbers, priority support |
 
 WhatsApp is bring-your-own on every paid tier — [connect your own
 Twilio account](/docs/channels#whatsapp-via-your-own-twilio) or
@@ -31,7 +31,7 @@ from the same source of truth as the API
 ## Early access — everything is free right now
 
 Suppuo is in early access: **no limits are enforced anywhere** —
-every workspace currently gets Toko-level features free. You *can*
+every workspace currently gets Growth-level features free. You *can*
 buy a paid tier today; the purchase is real, the payment is real, and
 your plan is recorded truthfully on the workspace — but it doesn't
 unlock anything extra yet. Limits start applying at launch.
@@ -39,7 +39,7 @@ unlock anything extra yet. Limits start applying at launch.
 ## How checkout works
 
 1. On [/dashboard/billing](/dashboard/billing), pick a tier. The
-   portal calls `POST /api/v1/billing/checkout` with `{"tier": "toko"}`
+   portal calls `POST /api/v1/billing/checkout` with `{"tier": "growth"}`
    and receives a hosted checkout URL.
 2. Your browser is redirected to a **Plugipay hosted checkout page**
    (Plugipay is the Forjio family's payment service). Pay with
@@ -48,8 +48,8 @@ unlock anything extra yet. Limits start applying at launch.
 3. After paying (or canceling) you're sent back to
    `/dashboard/billing?status=success` (or `…=canceled`).
 
-Gratis needs no checkout — it's the default for every workspace; the
-absence of a subscription *is* the Gratis plan.
+Free needs no checkout — it's the default for every workspace; the
+absence of a subscription *is* the Free plan.
 
 ## After payment
 
@@ -83,7 +83,7 @@ curl -H "Authorization: Bearer sk_live_…" \
   "data": {
     "subscription": {
       "accountId": "acc_…",
-      "tier": "toko",
+      "tier": "growth",
       "status": "active",
       "currentPeriodEnd": "2026-07-11T03:00:00.000Z"
     },

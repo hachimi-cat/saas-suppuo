@@ -4,8 +4,8 @@ title: "Hosted support form"
 
 # Hosted support form
 
-Pelanggan Anda tidak perlu akun, tidak perlu install apa-apa — cukup
-buka satu link. The hosted form is Suppuo's zero-setup channel: a
+Your customers don't need an account or an app — just one link to
+open. The hosted form is Suppuo's zero-setup channel: a
 public page where customers submit inquiries, plus a private,
 tokenized status page where they follow up. Everything on this page is
 **unauthenticated** — no login, no API key.
@@ -74,8 +74,8 @@ curl -X POST "https://suppuo.com/api/v1/public/tickets" \
   -H "Content-Type: application/json" \
   -d '{
     "accountId": "acc_5f1e2d3c4b5a69788796a5b4",
-    "subject": "Resi belum muncul",
-    "body": "Order #1042 sudah 2 hari belum ada resi.",
+    "subject": "Tracking number not showing yet",
+    "body": "Order #1042 still has no tracking number after 2 days.",
     "email": "budi@example.com",
     "name": "Budi"
   }'
@@ -110,7 +110,7 @@ server-side and are **never** exposed on this surface.
 {
   "data": {
     "number": 42,
-    "subject": "Resi belum muncul",
+    "subject": "Tracking number not showing yet",
     "status": "pending",
     "createdAt": "2026-06-11T03:21:09.000Z",
     "csat": null,
@@ -119,7 +119,7 @@ server-side and are **never** exposed on this surface.
         "id": "tmsg_01jx…",
         "authorType": "requester",
         "authorName": "Budi",
-        "body": "Order #1042 sudah 2 hari belum ada resi.",
+        "body": "Order #1042 still has no tracking number after 2 days.",
         "createdAt": "2026-06-11T03:21:09.000Z",
         "attachments": []
       },
@@ -127,10 +127,10 @@ server-side and are **never** exposed on this surface.
         "id": "tmsg_01jx…",
         "authorType": "agent",
         "authorName": "Dewi",
-        "body": "Halo Budi! Resi sudah kami update: JNE 1234567890.",
+        "body": "Hi Budi! We have updated your tracking number: JNE 1234567890.",
         "createdAt": "2026-06-11T04:05:00.000Z",
         "attachments": [
-          { "id": "att_01jx…", "filename": "resi.pdf", "contentType": "application/pdf", "size": 48213, "createdAt": "2026-06-11T04:05:00.000Z" }
+          { "id": "att_01jx…", "filename": "tracking.pdf", "contentType": "application/pdf", "size": 48213, "createdAt": "2026-06-11T04:05:00.000Z" }
         ]
       }
     ]
@@ -161,7 +161,7 @@ POST /api/v1/public/tickets/:accessToken/messages
 ```bash
 curl -X POST "https://suppuo.com/api/v1/public/tickets/Vq3…x9A/messages" \
   -H "Content-Type: application/json" \
-  -d '{ "body": "Sudah masuk, terima kasih!" }'
+  -d '{ "body": "It arrived, thank you!" }'
 ```
 
 ```json

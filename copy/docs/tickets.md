@@ -4,8 +4,8 @@ title: "Tickets API"
 
 # Tickets API
 
-API tiket adalah jantungnya Suppuo — semua yang bisa dilakukan agen di
-portal, bisa juga lewat API. The tickets API is the agent surface:
+The tickets API is the heart of Suppuo — everything an agent can do
+in the portal can also be done over the API. The tickets API is the agent surface:
 list the inbox, log inquiries, reply, and update status/priority. All
 endpoints require [authentication](/docs/api-auth) and operate on the
 workspace your credentials belong to.
@@ -27,7 +27,7 @@ All responses use the standard envelope
   "id": "tkt_01jx2v9k3m8q4r5s6t7u8v9w0x",
   "accountId": "acc_5f1e2d3c4b5a69788796a5b4",
   "number": 42,
-  "subject": "Resi belum muncul",
+  "subject": "Tracking number not showing yet",
   "status": "open",
   "priority": "normal",
   "channel": "web",
@@ -36,7 +36,7 @@ All responses use the standard envelope
   "requesterPhone": null,
   "requesterExternalId": null,
   "assigneeSub": null,
-  "tags": ["pengiriman", "vip"],
+  "tags": ["shipping", "vip"],
   "accessToken": "Vq3...x9A",
   "createdAt": "2026-06-11T03:21:09.000Z",
   "updatedAt": "2026-06-11T03:21:09.000Z",
@@ -104,7 +104,7 @@ to get the next page.
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://suppuo.com/api/v1/tickets?status=open&assignee=me&tag=pengiriman&q=resi&limit=20"
+  "https://suppuo.com/api/v1/tickets?status=open&assignee=me&tag=shipping&q=tracking&limit=20"
 ```
 
 ```json
@@ -135,7 +135,7 @@ this is what feeds the tag-filter autocomplete in the inbox.
 
 ```json
 {
-  "data": { "tags": ["komplain", "pengiriman", "refund", "vip"] },
+  "data": { "tags": ["complaint", "refund", "shipping", "vip"] },
   "error": null,
   "meta": { "requestId": "req_01jx…", "timestamp": "2026-06-11T03:25:00.000Z" }
 }
@@ -166,7 +166,7 @@ curl -X POST "https://suppuo.com/api/v1/tickets" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "subject": "Tanya stok warna hitam",
+    "subject": "Asking if the black variant is in stock",
     "body": "Customer called asking if the black variant is back in stock.",
     "requesterEmail": "siti@example.com",
     "requesterName": "Siti",
@@ -203,7 +203,7 @@ carries its `attachments` metadata (`id`, `filename`, `contentType`,
         "authorType": "requester",
         "authorSub": null,
         "authorName": "Budi",
-        "body": "Resi belum muncul, sudah 2 hari.",
+        "body": "Tracking number still not showing, it has been 2 days.",
         "isInternal": false,
         "createdAt": "2026-06-11T03:21:09.000Z"
       },
@@ -256,7 +256,7 @@ public status page, and doesn't change the status.
 curl -X POST "https://suppuo.com/api/v1/tickets/tkt_01jx…/messages" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{ "body": "Halo Budi! Resi sudah kami update: JNE 1234567890.", "authorName": "Dewi" }'
+  -d '{ "body": "Hi Budi! We have updated your tracking number: JNE 1234567890.", "authorName": "Dewi" }'
 ```
 
 ```json
@@ -268,7 +268,7 @@ curl -X POST "https://suppuo.com/api/v1/tickets/tkt_01jx…/messages" \
       "authorType": "agent",
       "authorSub": "usr_01hx…",
       "authorName": "Dewi",
-      "body": "Halo Budi! Resi sudah kami update: JNE 1234567890.",
+      "body": "Hi Budi! We have updated your tracking number: JNE 1234567890.",
       "isInternal": false,
       "createdAt": "2026-06-11T04:05:00.000Z"
     },
@@ -302,7 +302,7 @@ At least one field is required — an empty body returns
 curl -X PATCH "https://suppuo.com/api/v1/tickets/tkt_01jx…" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{ "status": "resolved", "tags": ["pengiriman", "selesai"] }'
+  -d '{ "status": "resolved", "tags": ["shipping", "done"] }'
 ```
 
 Returns `200` with the updated ticket object. Setting `status` to

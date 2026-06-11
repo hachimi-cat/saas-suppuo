@@ -4,8 +4,8 @@ title: "Live chat widget"
 
 # Live chat widget
 
-Satu baris script, dan website Anda punya live chat yang langsung
-nyambung ke inbox Suppuo. The widget is a chat bubble for **your own
+One line of script, and your website has live chat wired straight
+into your Suppuo inbox. The widget is a chat bubble for **your own
 website**: visitors leave a message without leaving the page, it
 becomes a ticket in your inbox, and your replies show up right in the
 widget (and by email).

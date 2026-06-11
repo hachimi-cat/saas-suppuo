@@ -4,8 +4,8 @@ title: "CLI & SDKs"
 
 # CLI & SDKs
 
-Buat yang lebih nyaman di terminal — Suppuo punya CLI resmi, plus SDK
-untuk JS, Python, dan Go. The `suppuo` CLI ships as
+For those more at home in the terminal — Suppuo has an official CLI,
+plus SDKs for JS, Python, and Go. The `suppuo` CLI ships as
 `@forjio/suppuo-cli` on npm and follows the same conventions as every
 Forjio product CLI.
 
@@ -76,7 +76,7 @@ and the whole message thread, with internal notes marked
 ```bash
 suppuo tickets reply tkt_01jx… --message "On it — refund issued."
 suppuo tickets reply tkt_01jx… --message "Note to team" --internal
-suppuo tickets reply tkt_01jx… --message "Halo!" --author-name "Adi"
+suppuo tickets reply tkt_01jx… --message "Hi there!" --author-name "Adi"
 ```
 
 Public by default (the requester is notified and the ticket moves to

@@ -4,8 +4,8 @@ title: "Automation & CSAT"
 
 # Automation & CSAT
 
-Balas otomatis saat tim sedang tutup, dan tanya "puas nggak?" setelah
-tiket selesai — dua hal kecil yang membuat toko terlihat profesional.
+Auto-reply when your team is closed, and ask "how did we do?" after a
+ticket is resolved — two small touches that make a shop look professional.
 This page covers the two workspace automations: the **auto-response**
 (a business-hours-aware acknowledgement on every new ticket) and
 **CSAT surveys** (a one-click satisfaction rating after a ticket is
@@ -22,10 +22,10 @@ and one who writes at 11 am knows you're on it.
 
 Two templates, picked by the clock:
 
-- **Inside business hours** — e.g. *"Terima kasih! Tim kami akan
-  membalas dalam 1–2 jam."*
-- **Outside business hours** — e.g. *"Kami sedang tutup — kami balas
-  besok mulai jam 09:00 WIB."*
+- **Inside business hours** — e.g. *"Thanks for reaching out! Our
+  team will reply within 1–2 hours."*
+- **Outside business hours** — e.g. *"We're closed right now — we'll
+  reply tomorrow from 09:00 WIB."*
 
 The auto-reply:
 
@@ -62,8 +62,8 @@ curl -X PUT https://suppuo.com/api/v1/settings/automation \
   -H "Content-Type: application/json" \
   -d '{
     "autoResponseEnabled": true,
-    "autoResponseInside": "Terima kasih! Tim kami akan membalas dalam 1-2 jam.",
-    "autoResponseOutside": "Kami sedang tutup. Kami balas besok mulai 09:00 WIB.",
+    "autoResponseInside": "Thanks for reaching out! Our team will reply within 1-2 hours.",
+    "autoResponseOutside": "We are closed right now. We will reply tomorrow from 09:00 WIB.",
     "businessHours": {
       "tz": "Asia/Jakarta",
       "days": [
@@ -123,7 +123,7 @@ status page call):
 ```bash
 curl -X POST "https://suppuo.com/api/v1/public/tickets/TICKET_ACCESS_TOKEN/csat" \
   -H "Content-Type: application/json" \
-  -d '{ "score": 3, "comment": "Cepat dan ramah!" }'
+  -d '{ "score": 3, "comment": "Fast and friendly!" }'
 ```
 
 | Field | Type | Notes |

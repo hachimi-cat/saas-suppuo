@@ -4,8 +4,8 @@ import { Check, Minus } from 'lucide-react';
 
 /*
  * Suppuo pricing — per-WORKSPACE flat pricing (not per-agent). 4 tiers:
- * Gratis / Warung / Toko / Bisnis. During early access every paid tier
- * is free (all workspaces get Toko-level features); founding members get
+ * Free / Starter / Growth / Business. During early access every paid tier
+ * is free (all workspaces get Growth-level features); founding members get
  * 50% off for 12 months when billing starts, announced 30+ days ahead.
  *
  * The tier lists mirror backend/src/lib/billing.ts TIER_DEFS EXACTLY —
@@ -35,7 +35,7 @@ type Tier = {
 
 const TIERS: Tier[] = [
   {
-    name: 'Gratis',
+    name: 'Free',
     price: 'Rp 0',
     blurb: 'For trying Suppuo out, or a one-person support desk.',
     earlyAccess: false,
@@ -51,13 +51,13 @@ const TIERS: Tier[] = [
       'Email notifications',
       'File attachments up to 8MB',
       'Reports — volume, response times, CSAT',
-      'Community support',
+      'Self-serve docs + best-effort email support',
     ],
   },
   {
-    name: 'Warung',
+    name: 'Starter',
     price: 'Rp 99.000',
-    period: '/bln',
+    period: '/mo',
     blurb: 'For small teams running real support every day.',
     earlyAccess: true,
     popular: true,
@@ -74,14 +74,14 @@ const TIERS: Tier[] = [
     ],
   },
   {
-    name: 'Toko',
+    name: 'Growth',
     price: 'Rp 299.000',
-    period: '/bln',
+    period: '/mo',
     blurb: 'For growing teams that want to build on the API.',
     earlyAccess: true,
     features: [
       '10 agents',
-      'Everything in Warung',
+      'Everything in Starter',
       'Up to 3 connected WhatsApp numbers',
       'BYO email — your Resend account + domain',
       'REST API + CLI + webhooks',
@@ -89,14 +89,14 @@ const TIERS: Tier[] = [
     ],
   },
   {
-    name: 'Bisnis',
+    name: 'Business',
     price: 'Rp 599.000',
-    period: '/bln',
+    period: '/mo',
     blurb: 'For bigger teams running support across many numbers.',
     earlyAccess: true,
     features: [
       '25 agents',
-      'Everything in Toko',
+      'Everything in Growth',
       'Unlimited connected WhatsApp numbers',
       'Priority support',
     ],
@@ -132,7 +132,7 @@ const COMPARISON_ROWS: Row[] = [
   { label: 'Auto-response + business hours (WIB)', values: [false, true, true, true] },
   { label: 'BYO email (your Resend + domain)', values: [false, false, true, true] },
   { label: 'REST API + CLI + webhooks', values: [false, false, true, true] },
-  { label: 'Support', values: ['Community', 'Email', 'Email', 'Priority'] },
+  { label: 'Support', values: ['Best-effort email', 'Email', 'Email', 'Priority'] },
 ];
 
 export default function PricingPage() {
@@ -143,12 +143,12 @@ export default function PricingPage() {
           One flat price for the whole team.
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Suppuo is priced per workspace, not per agent. Rp 99rb per bulan flat untuk
-          seluruh tim — bukan Rp 400rb per orang seperti tool lain. Every plan includes
+          Suppuo is priced per workspace, not per agent. Rp 99,000 flat per month for the
+          whole team — not Rp 400,000 per agent like other tools. Every plan includes
           the omnichannel inbox: hosted form, live chat widget, email-to-ticket, and more.
         </p>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
-          During early access, every workspace gets Toko-level features free — no card
+          During early access, every workspace gets Growth-level features free — no card
           required.
         </p>
       </div>
@@ -173,7 +173,7 @@ export default function PricingPage() {
               <h2 className="text-lg font-bold">{tier.name}</h2>
               {tier.earlyAccess && (
                 <span className="inline-flex shrink-0 items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                  Early Access — gratis
+                  Early Access — free
                 </span>
               )}
             </div>
@@ -210,10 +210,10 @@ export default function PricingPage() {
       <div className="mx-auto mt-10 max-w-3xl rounded-lg border border-border bg-card/60 p-5 text-sm leading-relaxed text-muted-foreground">
         <p className="font-medium text-foreground">Early access, honestly.</p>
         <p className="mt-2">
-          While Suppuo is in early access, all workspaces get Toko-level features free.
-          Founding members get 50% off for 12 months when billing starts (Warung Rp 49rb ·
-          Toko Rp 149rb) — announced 30+ days in advance. If you don&apos;t pay later, you
-          keep your data and drop to Gratis; export available on every tier.
+          While Suppuo is in early access, all workspaces get Growth-level features free.
+          Founding members get 50% off for 12 months when billing starts (Starter Rp 49,000 ·
+          Growth Rp 149,000) — announced 30+ days in advance. If you don&apos;t pay later, you
+          keep your data and drop to Free; export available on every tier.
         </p>
       </div>
 
@@ -259,7 +259,7 @@ export default function PricingPage() {
           Meta&apos;s WhatsApp Cloud API in minutes, and messages are unlimited — you pay
           your provider directly, Suppuo never meters them and never provides the number.
           Email notifications are outbound updates to your requesters; connect
-          your own Resend on Toko+ to send them from your domain.
+          your own Resend on Growth+ to send them from your domain.
         </p>
       </div>
 

@@ -4,8 +4,8 @@ title: "API authentication"
 
 # API authentication
 
-Semua yang dilakukan portal lewat API ini — dan API yang sama terbuka
-untuk otomasi Anda. This page covers how to authenticate against the
+Everything the portal does goes through this API — and the same API
+is open to your automations. This page covers how to authenticate against the
 Suppuo REST API, the response envelope every endpoint shares, and how
 errors come back.
 

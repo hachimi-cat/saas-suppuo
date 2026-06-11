@@ -4,7 +4,7 @@ title: "Webhooks"
 
 # Webhooks
 
-Daripada polling, biarkan Suppuo yang mengabari sistem Anda. Webhooks
+Instead of polling, let Suppuo notify your systems. Webhooks
 push **signed event notifications** to your own HTTPS endpoint
 whenever something happens in your workspace — a new ticket, a reply,
 a status change.
