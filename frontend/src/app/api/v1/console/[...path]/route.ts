@@ -26,7 +26,11 @@ import { NextRequest } from 'next/server';
  * `:4170`.
  */
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170';
+// Server-side fetches need an ABSOLUTE origin; the CI build sets
+// NEXT_PUBLIC_API_URL to the RELATIVE '/api/v1' (browser-only).
+// Strip the suffix and fall back to the co-located backend.
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170').replace(/\/api\/v1\/?$/, '') ||
+  'http://127.0.0.1:4170';
 const ROLE_HEADER = 'x-suppuo-role';
 
 /** Map a `/console/*` browser path to the backend path. `auth/*` is a

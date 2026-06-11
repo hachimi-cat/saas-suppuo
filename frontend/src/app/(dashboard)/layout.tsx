@@ -13,7 +13,11 @@ import type { SessionUser } from '@forjio/portal-ui';
  */
 
 const SESSION_COOKIE = 'suppuo_session';
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170';
+// Server-side fetches need an ABSOLUTE origin; the CI build sets
+// NEXT_PUBLIC_API_URL to the RELATIVE '/api/v1' (browser-only).
+// Strip the suffix and fall back to the co-located backend.
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4170').replace(/\/api\/v1\/?$/, '') ||
+  'http://127.0.0.1:4170';
 
 type Resolved = { user: SessionUser; accountId: string };
 
