@@ -19,6 +19,8 @@ export type IdPrefix =
   | 'ak' // API key
   | 'whs' // webhook subscription
   | 'csat' // CSAT response
+  | 'rst' // roster identity (SSO capture for admin CRM)
+  | 'rmb' // roster membership (identity ↔ accountId sighting)
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

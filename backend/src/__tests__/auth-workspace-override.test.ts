@@ -18,7 +18,15 @@ import express from 'express';
 
 // requireAuth imports prisma for the API-key path — stub so the unit
 // test doesn't need a live DB (the sk_ path is not under test here).
-vi.mock('../lib/db.js', () => ({ prisma: { apiKey: {} } }));
+// The roster models satisfy requireAuth's fire-and-forget identity
+// capture (covered in identity-roster.test.ts, not here).
+vi.mock('../lib/db.js', () => ({
+  prisma: {
+    apiKey: {},
+    rosterIdentity: { upsert: vi.fn().mockResolvedValue({}) },
+    rosterMembership: { upsert: vi.fn().mockResolvedValue({}) },
+  },
+}));
 
 import { requireAuth } from '../middleware/auth.js';
 import { authConfig } from '../auth-config.js';

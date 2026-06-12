@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../lib/db.js';
 import { sendOk } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
+import { rosterOwnersByAccount } from '../lib/identity-roster.js';
 
 /*
  * /api/v1/admin/crm — the standardized Forjio CRM contract (stats /
@@ -48,6 +49,11 @@ router.get(
       _min: { createdAt: true },
       _max: { lastMessageAt: true },
     });
+    // Identity-roster join: resolve each accountId to its best-known
+    // person (earliest-seen member ≈ owner). Rows stay accountId-only
+    // until someone signs in post-roster — nothing historical exists
+    // to backfill, the roster fills as people log in.
+    const owners = await rosterOwnersByAccount(grouped.map((g) => g.accountId));
     const customers = await Promise.all(
       grouped.map(async (g) => {
         const [openCount, resolvedCount] = await Promise.all([
@@ -58,10 +64,11 @@ router.get(
             where: { accountId: g.accountId, status: { in: ['resolved', 'closed'] } },
           }),
         ]);
+        const owner = owners.get(g.accountId);
         return {
           id: g.accountId,
-          email: null,
-          name: g.accountId,
+          email: owner?.email ?? null,
+          name: owner?.name ?? g.accountId,
           signupAt: g._min.createdAt,
           lastActiveAt: g._max.lastMessageAt,
           status: openCount > 0 ? 'active' : 'quiet',
