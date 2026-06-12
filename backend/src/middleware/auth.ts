@@ -15,6 +15,22 @@ declare module 'express-serve-static-core' {
 const issuer = process.env.HUUDIS_ISSUER ?? 'https://huudis.com';
 const audience = process.env.HUUDIS_AUDIENCE ?? process.env.FORJIO_SERVICE ?? 'suppuo';
 
+/** Live Huudis membership check — only hit on the stale-session path
+ *  (override cookie not in the login-time accountIds snapshot). */
+async function liveWorkspaceIds(accessToken: string): Promise<Set<string> | null> {
+  try {
+    const res = await fetch(`${issuer}/api/v1/account/workspaces`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { data?: Array<{ id?: string }> };
+    return new Set((body.data ?? []).map((w) => w.id).filter((x): x is string => !!x));
+  } catch {
+    return null;
+  }
+}
+
 /** Extracts `Authorization: Bearer <jwt>` and verifies via @forjio/sdk.
  *  Attaches claims to `req.auth`. Rejects with a standard envelope on
  *  failure. */
@@ -30,8 +46,17 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // fall back to the personal derived accountId.
     const override = parseCookie(req.headers.cookie, 'suppuo_active_workspace');
     const allowed = new Set([bffSession.accountId, ...(bffSession.accountIds ?? [])]);
-    const accountId =
-      override && allowed.has(override) ? override : bffSession.accountId;
+    let accountId = override && allowed.has(override) ? override : bffSession.accountId;
+    if (override && !allowed.has(override) && bffSession.huudisAccessToken) {
+      // STALE-SESSION CLASS (serront round 4): accountIds are
+      // snapshotted at LOGIN, so a workspace created after sign-in is
+      // in the switcher (live list) but not the session — the old code
+      // silently served the WRONG workspace (empty data, free tier).
+      // Re-check live membership once before falling back; fail-closed
+      // to the default on non-membership, timeout, or fetch error.
+      const live = await liveWorkspaceIds(bffSession.huudisAccessToken);
+      if (live?.has(override)) accountId = override;
+    }
     req.auth = {
       sub: bffSession.huudisSub,
       accountId,
