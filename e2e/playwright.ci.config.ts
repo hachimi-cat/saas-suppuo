@@ -5,13 +5,13 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * CI's `e2e-staging` job invokes playwright with
  * `--config=playwright.ci.config.ts` after deploying to staging. No
- * webServer — we connect to the staging host via Tailscale MagicDNS
+ * webServer — we connect to the staging host over PUBLIC http
  * (see .github/workflows/ci-cd.yml).
  *
  * Local dev keeps using the base `playwright.config.ts` with its
  * own webServer. This file is CI-only.
  */
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://staging-suppuo';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://staging-suppuo.forjio.com';
 
 export default defineConfig({
   testDir: './tests',
@@ -38,5 +38,5 @@ export default defineConfig({
     },
   ],
 
-  // No webServer — CI connects to staging directly over Tailscale.
+  // No webServer — CI connects to the public staging host on the shared box.
 });

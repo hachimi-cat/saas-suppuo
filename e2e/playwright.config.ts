@@ -3,8 +3,8 @@ import { defineConfig } from '@playwright/test';
 /**
  * Base (local dev) Playwright config.
  *
- * CI overrides with playwright.ci.config.ts (staging, Tailscale
- * MagicDNS, no webServer). See .github/workflows/ci-cd.yml.
+ * CI overrides with playwright.ci.config.ts (staging, public http
+ * on the shared box, no webServer). See .github/workflows/ci-cd.yml.
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3170';
