@@ -7,6 +7,12 @@ const config: Config = {
     // (used inside MarketingNav / Footer / docs scaffold) get extracted
     // into our CSS bundle. Required by every consumer of @forjio/website-ui.
     './node_modules/@forjio/website-ui/dist/**/*.{js,cjs}',
+    // Same for portal-ui (dashboard + buyer-portal Sidebar/shell) and
+    // auth-ui (login/signup) — WITHOUT these, classes only used inside
+    // those packages aren't generated, leaving the Sidebar `position:
+    // sticky` but `top: auto` (no anchor → it scrolled with the body).
+    './node_modules/@forjio/portal-ui/dist/**/*.{js,cjs}',
+    './node_modules/@forjio/auth-ui/dist/**/*.{js,cjs}',
   ],
   theme: {
     extend: {
