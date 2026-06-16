@@ -19,7 +19,8 @@
 import { use, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { apiRequest } from '@/lib/api';
 import { PoweredByFooter } from '@/components/public-branding';
-import { storefrontThemeVars, type PublicBranding } from '@/lib/theme';
+import { SupportTopNav } from '@/components/support-top-nav';
+import { storefrontThemeVars, EMPTY_BRANDING, type PublicBranding } from '@/lib/theme';
 
 export default function SupportThemeLayout({
   children,
@@ -50,6 +51,11 @@ export default function SupportThemeLayout({
 
   return (
     <div style={style} className="min-h-screen bg-background text-foreground">
+      <SupportTopNav
+        accountId={accountId}
+        branding={branding ?? EMPTY_BRANDING}
+        action={{ href: `/portal/${accountId}`, label: 'Sign in' }}
+      />
       <main className="mx-auto max-w-3xl px-4 py-12">
         {children}
         <PoweredByFooter />

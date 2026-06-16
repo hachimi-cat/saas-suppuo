@@ -174,14 +174,6 @@ export default function HelpCenterPage({
         {bundle.intro && (
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">{bundle.intro}</p>
         )}
-        <div className="mt-4">
-          <Link
-            href={`/portal/${accountId}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-          >
-            <Ticket className="size-4" /> Sign in to track your tickets
-          </Link>
-        </div>
         <div className="relative mx-auto mt-6 max-w-xl">
           <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
           <input

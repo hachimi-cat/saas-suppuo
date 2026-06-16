@@ -24,6 +24,7 @@ import {
 import { apiRequest, ApiRequestError } from '@/lib/api';
 import { PortalShell } from '@/components/portal-shell';
 import { usePortalBranding } from '@/components/portal-branding';
+import { SupportTopNav } from '@/components/support-top-nav';
 
 interface Me {
   email: string;
@@ -107,7 +108,13 @@ function SignIn({ accountId }: { accountId: string }) {
   const name = branding.name || 'Support center';
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
+    <div className="flex min-h-screen flex-col">
+      <SupportTopNav
+        accountId={accountId}
+        branding={branding}
+        action={{ href: `/support/${accountId}`, label: 'Help center' }}
+      />
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-12">
       <div className="text-center">
         {branding.logoUrl ? (
           // Padded chip behind the workspace logo (serront storefront-
@@ -182,6 +189,7 @@ function SignIn({ accountId }: { accountId: string }) {
           Back to the help center
         </Link>
       </p>
+      </div>
     </div>
   );
 }

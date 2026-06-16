@@ -268,7 +268,16 @@
   fetch(BASE + '/api/v1/public/widget-config?account=' + encodeURIComponent(ACCOUNT_ID))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (b) {
-      if (b && b.data && b.data.hideBranding) powered.style.display = 'none';
+      if (!b || !b.data) return;
+      if (b.data.hideBranding) powered.style.display = 'none';
+      // Accent follows the workspace brand — recolor the bubble + panel
+      // header now; primaryButton() reads BLUE at call time so forms
+      // opened later pick it up too.
+      if (b.data.accentColor) {
+        BLUE = b.data.accentColor;
+        bubble.style.background = BLUE;
+        header.style.background = BLUE;
+      }
     })
     .catch(function () {});
 

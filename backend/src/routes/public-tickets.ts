@@ -118,7 +118,12 @@ router.get(
     if (!ACCOUNT_ID_RE.test(account)) {
       return sendErr(res, req, 400, 'VALIDATION_ERROR', 'account required (acc_…)');
     }
-    sendOk(res, req, { hideBranding: await accountHidesBranding(account) });
+    const settings = await prisma.accountSettings.findUnique({ where: { accountId: account } });
+    sendOk(res, req, {
+      hideBranding: settings?.hideBranding ?? false,
+      // The widget bubble + panel accent follow the workspace brand.
+      accentColor: settings?.accentColor ?? null,
+    });
   }),
 );
 

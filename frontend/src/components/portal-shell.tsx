@@ -108,7 +108,7 @@ export function PortalShell({
             <Menu className="h-5 w-5" />
           </button>
         </div>
-        <main className="mx-auto w-full max-w-3xl flex-1 p-4 md:p-6">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">{children}</main>
       </div>
     </div>
   );
