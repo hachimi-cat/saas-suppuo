@@ -8,8 +8,8 @@ import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-u
 const SUPPUO_SUPPORT_URL =
   'https://suppuo.com/support/acc_01KPHFWPGDAYH9WG7KYY36KF58';
 
-// Mirror the package DEFAULT_COLUMNS but add a dedicated "Help & live chat"
-// entry pointing at the hosted Suppuo support page.
+// Mirror the package DEFAULT_COLUMNS but add a dedicated "Help center"
+// entry pointing at the hosted Suppuo help center.
 const FOOTER_COLUMNS = [
   {
     title: 'Product',
@@ -24,7 +24,7 @@ const FOOTER_COLUMNS = [
     title: 'Company',
     links: [
       { href: '/about', label: 'About' },
-      { href: SUPPUO_SUPPORT_URL, label: 'Help & live chat' },
+      { href: SUPPUO_SUPPORT_URL, label: 'Help center' },
       { href: '/contact', label: 'Contact' },
     ],
   },
