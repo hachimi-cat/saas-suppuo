@@ -70,7 +70,7 @@ router.get(
     if (badAccount(accountId)) {
       return sendOk(res, req, emptyBundle());
     }
-    const [settings, faqs, articles] = await Promise.all([
+    const [settings, faqs, articles, docs] = await Promise.all([
       prisma.accountSettings.findUnique({ where: { accountId } }),
       prisma.helpArticle.findMany({
         where: { accountId, kind: 'faq', status: 'published' },
@@ -79,6 +79,12 @@ router.get(
       prisma.helpArticle.findMany({
         where: { accountId, kind: 'article', status: 'published' },
         orderBy: [{ position: 'asc' }, { updatedAt: 'desc' }],
+      }),
+      // Ingested product documentation (kind='doc') — rendered as a
+      // separate "Documentation" section; searchable like everything else.
+      prisma.helpArticle.findMany({
+        where: { accountId, kind: 'doc', status: 'published' },
+        orderBy: [{ category: 'asc' }, { position: 'asc' }, { title: 'asc' }],
       }),
     ]);
 
@@ -96,6 +102,7 @@ router.get(
       branding: brandingView(settings),
       faqs: faqs.map(faqView),
       articles: articles.map(articleCardView),
+      docs: docs.map(articleCardView),
     });
   }),
 );
@@ -125,7 +132,12 @@ router.get(
       return sendOk(res, req, { article: null });
     }
     const row = await prisma.helpArticle.findFirst({
-      where: { accountId, slug: String(req.params.slug), kind: 'article', status: 'published' },
+      where: {
+        accountId,
+        slug: String(req.params.slug),
+        kind: { in: ['article', 'doc'] },
+        status: 'published',
+      },
     });
     sendOk(res, req, {
       article: row
@@ -170,6 +182,7 @@ function emptyBundle() {
     branding: emptyBranding(),
     faqs: [] as unknown[],
     articles: [] as unknown[],
+    docs: [] as unknown[],
   };
 }
 

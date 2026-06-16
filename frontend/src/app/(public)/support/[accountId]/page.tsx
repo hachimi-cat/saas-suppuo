@@ -64,6 +64,7 @@ interface Bundle {
   branding: PublicBranding;
   faqs: Faq[];
   articles: ArticleCard[];
+  docs: ArticleCard[];
 }
 interface SearchHit {
   id: string;
@@ -101,6 +102,7 @@ export default function HelpCenterPage({
           branding: EMPTY_BRANDING,
           faqs: [],
           articles: [],
+          docs: [],
         }),
       );
   }, [accountId, setHideBranding]);
@@ -137,7 +139,7 @@ export default function HelpCenterPage({
     return <p className="py-12 text-center text-sm text-muted-foreground">Loading…</p>;
   }
 
-  const { contact, faqs, articles } = bundle;
+  const { contact, faqs, articles, docs } = bundle;
   const branding = bundle.branding ?? EMPTY_BRANDING;
   const hasContact = Boolean(contact.email || contact.phone || contact.address || contact.contactUrl);
 
@@ -279,6 +281,37 @@ export default function HelpCenterPage({
             </section>
           )}
 
+          {/* ── Documentation (ingested from the product's own docs) ──── */}
+          {docs.length > 0 && (
+            <section className="mt-10">
+              <h2 className="text-lg font-semibold tracking-tight">Documentation</h2>
+              <div className="mt-4 space-y-5">
+                {groupByCategory(docs).map(([cat, items]) => (
+                  <div key={cat || '_'}>
+                    {cat && (
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {cat}
+                      </p>
+                    )}
+                    <ul className="grid gap-2 sm:grid-cols-2">
+                      {items.map((d) => (
+                        <li key={d.id}>
+                          <Link
+                            href={`/support/${accountId}/a/${d.slug}`}
+                            className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm transition-colors hover:border-primary hover:text-primary"
+                          >
+                            <FileText className="size-4 shrink-0 text-primary" />
+                            <span className="truncate">{d.title}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* ── Still need help: live chat + ticket ─────────────────── */}
           <section className="mt-10 grid gap-3 sm:grid-cols-2">
             <button
@@ -401,4 +434,16 @@ function HitRow({ accountId, hit }: { accountId: string; hit: SearchHit }) {
 
 function emptyContact(): Contact {
   return { email: null, phone: null, address: null, contactUrl: null, docsUrl: null };
+}
+
+/** Group doc cards by category, preserving first-seen category order. */
+function groupByCategory(items: ArticleCard[]): Array<[string, ArticleCard[]]> {
+  const map = new Map<string, ArticleCard[]>();
+  for (const it of items) {
+    const key = it.category ?? '';
+    const arr = map.get(key);
+    if (arr) arr.push(it);
+    else map.set(key, [it]);
+  }
+  return Array.from(map.entries());
 }

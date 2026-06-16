@@ -8,6 +8,7 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { marked } from 'marked';
 import { ChevronLeft } from 'lucide-react';
 import { apiRequest } from '@/lib/api';
 import { useSetHideBranding } from '@/components/public-branding';
@@ -64,9 +65,14 @@ export default function ArticlePage({
             <p className="text-xs font-medium uppercase tracking-wide text-primary">{article.category}</p>
           )}
           <h1 className="mt-1 text-2xl font-bold tracking-tight">{article.title}</h1>
-          <div className="mt-5 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-            {article.body}
-          </div>
+          {/* Markdown — Suppuo articles + ingested product docs are
+              markdown. Same `marked` + .docs-prose pipeline the marketing
+              /docs uses. Content authors are the workspace owner / the
+              product's own docs (trusted), like a CMS. */}
+          <div
+            className="docs-prose mt-5"
+            dangerouslySetInnerHTML={{ __html: marked.parse(article.body, { async: false }) as string }}
+          />
         </article>
       )}
     </div>
