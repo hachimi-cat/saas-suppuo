@@ -42,10 +42,11 @@ const helpArticle = {
     if (Array.isArray(where.OR)) {
       rows = rows.filter((r) =>
         (where.OR as Array<Record<string, { contains: string }>>).some((cond) => {
-          const [field, f] = Object.entries(cond)[0]!;
-          return (r as unknown as Record<string, string>)[field]
-            .toLowerCase()
-            .includes(f.contains.toLowerCase());
+          const entry = Object.entries(cond)[0];
+          if (!entry) return false;
+          const [field, f] = entry;
+          const val = (r as unknown as Record<string, string>)[field];
+          return typeof val === 'string' && val.toLowerCase().includes(f.contains.toLowerCase());
         }),
       );
     }
