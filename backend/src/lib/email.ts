@@ -74,6 +74,25 @@ export async function sendTicketReceivedEmail(opts: {
   );
 }
 
+/** Magic-link sign-in for the hosted customer support portal
+ *  (suppuo.com/portal/<acc>). The link carries a short-lived login token
+ *  the portal exchanges for a 30-day session. */
+export async function sendRequesterLoginEmail(opts: {
+  accountId: string;
+  to: string;
+  loginToken: string;
+}): Promise<void> {
+  const link = `${PORTAL}/portal/${opts.accountId}/verify?token=${encodeURIComponent(opts.loginToken)}`;
+  const brand = brandingFooter(await accountHidesBranding(opts.accountId));
+  await send(
+    opts.accountId,
+    opts.to,
+    'Your sign-in link',
+    `<div style="font-family:sans-serif;max-width:520px"><p>Use this link to sign in and view your support tickets. It expires in 15 minutes and works once.</p><p><a href="${link}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Sign in to support</a></p><p style="color:#666;font-size:13px">Or paste this URL: ${link}</p><p style="color:#666;font-size:13px">If you didn't request this, you can ignore this email.</p>${brand.html}</div>`,
+    `Sign in to view your support tickets (expires in 15 minutes, single use):\n${link}\n\nIf you didn't request this, ignore this email.${brand.text}`,
+  );
+}
+
 /** Post-resolve CSAT survey — three one-click emoji links onto the
  *  tokenized /t/<token>/rate page. Sent at most once per ticket (the
  *  outbox consumer guards on tickets.csatSentAt). */

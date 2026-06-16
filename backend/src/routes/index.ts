@@ -29,6 +29,9 @@ import csatRouter from './csat.js';
 import reportsRouter from './reports.js';
 import helpRouter from './help.js';
 import publicHelpRouter from './public-help.js';
+import requesterRouter from './requester.js';
+import publicRequesterRouter from './public-requester.js';
+import { requireRequester } from '../middleware/requester.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -116,6 +119,13 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
    *  page (bundle + search + article). Mounted BEFORE /public so the
    *  /public/help prefix resolves here, not the ticket router. */
   router.use('/public/help', rateLimit('ingress'), publicHelpRouter);
+  /** Hosted customer portal — passwordless login (magic link) + verify.
+   *  Mounted before /public so the prefix resolves here. */
+  router.use('/public/requester', rateLimit('ingress'), publicRequesterRouter);
+  /** Authenticated "my tickets" API — requester-scoped (cookie session
+   *  for the hosted portal, or a trusted service header for the embedded
+   *  in-product support center). */
+  router.use('/requester', requireRequester, requesterRouter);
   /** Requester-facing public surface — tokenized, rate-limited. */
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Billing — Plugipay-powered plan subscriptions. */

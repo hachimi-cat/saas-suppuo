@@ -1,0 +1,110 @@
+import { Router } from 'express';
+import type { Request } from 'express';
+import { z } from 'zod';
+import { sendOk } from '../lib/http.js';
+import { h as asyncHandler } from '../lib/async-handler.js';
+import { sendRequesterLoginEmail } from '../lib/email.js';
+import {
+  issueRequesterToken,
+  verifyRequesterToken,
+  REQUESTER_COOKIE,
+} from '../lib/requester-token.js';
+
+/*
+ * /api/v1/public/requester — unauthenticated entry to the HOSTED customer
+ * portal. Passwordless: POST /login emails a magic link; POST /verify
+ * exchanges its token for a 30-day session cookie. The authenticated
+ * "my tickets" API lives at /api/v1/requester (see requireRequester).
+ *
+ * Privacy + anti-enumeration: /login always returns ok (never reveals
+ * whether the email has tickets) and is per-IP rate limited so it can't
+ * be used to email-bomb an address.
+ */
+
+const router = Router();
+const ACCOUNT_ID_RE = /^acc_[0-9A-Za-z]{24,28}$/;
+
+// Per-IP rate limit on the email-sending login endpoint (in-process).
+const RL_MS = 15 * 60 * 1000;
+const RL_MAX = 8; // ≤8 login emails / IP / 15 min
+const ipHits = new Map<string, number[]>();
+function clientIp(req: Request): string {
+  const xff = req.headers['x-forwarded-for'];
+  if (typeof xff === 'string' && xff) return xff.split(',')[0]!.trim();
+  return req.ip || 'unknown';
+}
+function limited(ip: string): boolean {
+  const now = Date.now();
+  const hits = (ipHits.get(ip) ?? []).filter((t) => now - t < RL_MS);
+  if (hits.length >= RL_MAX) {
+    ipHits.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  ipHits.set(ip, hits);
+  return false;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, hits] of ipHits) {
+    const live = hits.filter((t) => now - t < RL_MS);
+    if (live.length === 0) ipHits.delete(ip);
+    else ipHits.set(ip, live);
+  }
+}, RL_MS).unref();
+
+const loginBody = z.object({
+  accountId: z.string().regex(ACCOUNT_ID_RE),
+  email: z.string().trim().email(),
+});
+
+router.post(
+  '/login',
+  asyncHandler(async (req, res) => {
+    const input = loginBody.parse(req.body);
+    if (limited(clientIp(req))) {
+      // Still 200 (don't leak), just skip sending.
+      return sendOk(res, req, { ok: true });
+    }
+    const token = issueRequesterToken(input.accountId, input.email, 'login');
+    void sendRequesterLoginEmail({
+      accountId: input.accountId,
+      to: input.email.toLowerCase(),
+      loginToken: token,
+    }).catch((e) => console.error('[public-requester] login-email failed', e));
+    // Always ok — never reveal whether the address has any tickets.
+    sendOk(res, req, { ok: true });
+  }),
+);
+
+const verifyBody = z.object({ token: z.string().min(10).max(2000) });
+
+router.post(
+  '/verify',
+  asyncHandler(async (req, res) => {
+    const { token } = verifyBody.parse(req.body);
+    const claims = verifyRequesterToken(token, 'login');
+    if (!claims) {
+      return sendOk(res, req, { ok: false });
+    }
+    const session = issueRequesterToken(claims.accountId, claims.email, 'session');
+    res.cookie(REQUESTER_COOKIE, session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    sendOk(res, req, { ok: true, email: claims.email, accountId: claims.accountId });
+  }),
+);
+
+router.post(
+  '/logout',
+  asyncHandler(async (req, res) => {
+    res.clearCookie(REQUESTER_COOKIE, { path: '/' });
+    sendOk(res, req, { ok: true });
+  }),
+);
+
+export default router;

@@ -19,7 +19,11 @@ describe('telegramWebhookSecretMatches', () => {
     expect(telegramWebhookSecretMatches(secret, secret)).toBe(true);
   });
   it('rejects wrong, empty, and non-string supplies', () => {
-    expect(telegramWebhookSecretMatches(secret, secret.slice(0, -1) + '0')).toBe(false);
+    // Flip the last char to a hex digit GUARANTEED to differ (a fixed
+    // '0' is a 1-in-16 false match when the secret already ends in '0').
+    expect(
+      telegramWebhookSecretMatches(secret, secret.slice(0, -1) + (secret.endsWith('0') ? '1' : '0')),
+    ).toBe(false);
     expect(telegramWebhookSecretMatches(secret, secret + 'a')).toBe(false);
     expect(telegramWebhookSecretMatches(secret, '')).toBe(false);
     expect(telegramWebhookSecretMatches(secret, undefined)).toBe(false);

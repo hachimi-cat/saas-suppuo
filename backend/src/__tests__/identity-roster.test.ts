@@ -63,9 +63,16 @@ function makeApp() {
   return app;
 }
 
-/** Drain the fire-and-forget roster write (a few microtask/IO ticks). */
+/** Drain the fire-and-forget roster write. It awaits two sequential
+ *  prisma upserts, so under CPU contention (full-suite parallelism) a
+ *  handful of microtask ticks isn't always enough — drain BOTH the
+ *  microtask and macrotask queues several times so the assertion never
+ *  races the write. */
 async function flush() {
-  for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setImmediate(r));
+    await new Promise((r) => setTimeout(r, 0));
+  }
 }
 
 beforeEach(() => {
