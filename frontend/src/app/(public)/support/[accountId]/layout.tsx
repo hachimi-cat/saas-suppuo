@@ -49,7 +49,7 @@ export default function SupportThemeLayout({
   const style = Object.keys(vars).length > 0 ? (vars as CSSProperties) : undefined;
 
   return (
-    <div style={style} className="min-h-screen bg-background">
+    <div style={style} className="min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-3xl px-4 py-12">
         {children}
         <PoweredByFooter />

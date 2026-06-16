@@ -52,7 +52,7 @@ export default function PortalThemeLayout({
 
   return (
     <PortalBrandingProvider branding={branding}>
-      <div style={style} className="min-h-screen bg-background">
+      <div style={style} className="min-h-screen bg-background text-foreground">
         {children}
       </div>
     </PortalBrandingProvider>
