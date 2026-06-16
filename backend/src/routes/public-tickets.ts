@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import type { Request } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/db.js';
 import { newId } from '../lib/ids.js';
@@ -62,7 +63,51 @@ const submitBody = z.object({
   body: z.string().trim().min(1).max(20_000),
   email: z.string().email(),
   name: z.string().trim().max(200).optional(),
+  // Honeypot — a hidden field real users never fill but form-scraping
+  // bots auto-complete. Any non-empty value = bot → silently dropped.
+  company: z.string().max(300).optional(),
 });
+
+// ── Per-IP rate limit for the public ticket POST ──────────────────────
+// In-process sliding window (suppuo runs a single pm2 worker; resets on
+// restart, which is fine for spam/abuse defense). The shared rateLimit()
+// middleware is a header-only skeleton, so the public submit endpoint
+// enforces its own real limit. 2026-06-16.
+const RL_SOFT_MS = 10 * 60 * 1000; // 10 min window
+const RL_SOFT_MAX = 5; // ≤5 tickets/IP/10min
+const RL_HARD_MS = 60 * 60 * 1000; // 1 h window
+const RL_HARD_MAX = 20; // ≤20 tickets/IP/h
+const ipHits = new Map<string, number[]>();
+
+function clientIp(req: Request): string {
+  const xff = req.headers['x-forwarded-for'];
+  if (typeof xff === 'string' && xff) return xff.split(',')[0]!.trim();
+  return req.ip || 'unknown';
+}
+
+/** True if this IP is over the limit (and does not record the hit). */
+function ticketRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const hits = (ipHits.get(ip) ?? []).filter((t) => now - t < RL_HARD_MS);
+  const recent = hits.filter((t) => now - t < RL_SOFT_MS);
+  if (recent.length >= RL_SOFT_MAX || hits.length >= RL_HARD_MAX) {
+    ipHits.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  ipHits.set(ip, hits);
+  return false;
+}
+
+// Opportunistic sweep so the IP map can't grow unbounded.
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, hits] of ipHits) {
+    const live = hits.filter((t) => now - t < RL_HARD_MS);
+    if (live.length === 0) ipHits.delete(ip);
+    else ipHits.set(ip, live);
+  }
+}, RL_HARD_MS).unref();
 
 /** Pre-ticket config for the embeddable widget + hosted form (the
  *  branding footer renders before any ticket exists). No secrets. */
@@ -81,6 +126,23 @@ router.post(
   '/tickets',
   asyncHandler(async (req, res) => {
     const input = submitBody.parse(req.body);
+
+    // Honeypot — a bot filled the hidden field. Pretend it worked (so it
+    // doesn't retry / probe) but create nothing.
+    if (input.company && input.company.trim().length > 0) {
+      return sendCreated(res, req, { number: 0, accessToken: generateAccessToken() });
+    }
+
+    // Per-IP rate limit — spam/abuse defense on the open endpoint.
+    if (ticketRateLimited(clientIp(req))) {
+      return sendErr(
+        res,
+        req,
+        429,
+        'RATE_LIMITED',
+        'Too many requests — please wait a little before submitting again.',
+      );
+    }
 
     const ticket = await prisma.$transaction(async (tx) => {
       const last = await tx.ticket.aggregate({

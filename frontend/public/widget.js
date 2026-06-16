@@ -350,6 +350,28 @@
       maxlength: '200',
     });
 
+    // Honeypot — a real-looking field hidden off-screen from humans but
+    // auto-filled by form-scraping bots. Any value = bot; the backend
+    // silently drops it. Off-screen (not display:none) so naive bots that
+    // skip hidden fields still fill it; tabindex -1 + autocomplete off so
+    // humans/password managers never touch it.
+    var hpWrap = el('div', {
+      position: 'absolute',
+      left: '-9999px',
+      top: 'auto',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+    });
+    var hpInput = el('input', null, {
+      name: 'company',
+      type: 'text',
+      tabindex: '-1',
+      autocomplete: 'off',
+    });
+    hpInput.setAttribute('aria-hidden', 'true');
+    hpWrap.appendChild(hpInput);
+
     var emailLabel = el('label', LABEL_STYLE, { for: 'suppuo-w-email', text: 'Email' });
     var emailInput = el('input', INPUT_STYLE, {
       id: 'suppuo-w-email',
@@ -380,6 +402,7 @@
 
     form.appendChild(nameLabel);
     form.appendChild(nameInput);
+    form.appendChild(hpWrap);
     form.appendChild(emailLabel);
     form.appendChild(emailInput);
     form.appendChild(msgLabel);
@@ -421,6 +444,7 @@
           body: message,
           email: email,
           name: nameInput.value.trim() || undefined,
+          company: hpInput.value || undefined,
         },
       })
         .then(function (data) {

@@ -105,13 +105,18 @@ describe('parseFromAddress', () => {
 });
 
 describe('isLikelyAccountId', () => {
-  it('accepts the real Huudis shape (acc_ + 24 hex)', () => {
+  it('accepts the derived/personal shape (acc_ + 24 hex)', () => {
     expect(isLikelyAccountId('acc_4593c748ccb0164d7ce64baa')).toBe(true);
+  });
+  it('accepts the Huudis WORKSPACE shape (acc_01 + Crockford ULID)', () => {
+    // Uppercase base32 letters (G/H/J/K/…) — rejected by the old hex-only
+    // regex; every product workspace uses this form.
+    expect(isLikelyAccountId('acc_01KPHFWPCNT7EE9VEKV2G7AFXE')).toBe(true);
   });
   it('rejects junk', () => {
     expect(isLikelyAccountId('acc_short')).toBe(false);
     expect(isLikelyAccountId('usr_4593c748ccb0164d7ce64baa')).toBe(false);
-    expect(isLikelyAccountId('acc_zzzzzzzzzzzzzzzzzzzzzzzz')).toBe(false); // non-hex
+    expect(isLikelyAccountId('acc_has-a-dash-and-symbols!!!')).toBe(false);
   });
 });
 

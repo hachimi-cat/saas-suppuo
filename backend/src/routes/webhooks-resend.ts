@@ -53,11 +53,13 @@ export function verifySvixSignature(
   });
 }
 
-/** Huudis account id shape: `acc_` + 24 hex chars (observed range
- *  tolerated: 20–32). The unguessable id IS the gate — no local
- *  account table exists to check against. */
+/** Huudis account id shape. Two real forms in the family: a derived/
+ *  personal hex id (`acc_` + 24 hex) and a Huudis WORKSPACE id
+ *  (`acc_01` + Crockford base32 ULID — uppercase letters G/H/J/K… that
+ *  the old hex-only regex rejected). Accept both (alnum, 20–32). The
+ *  unguessable id IS the gate — no local account table to check against. */
 export function isLikelyAccountId(x: string): boolean {
-  return /^acc_[a-f0-9]{20,32}$/i.test(x);
+  return /^acc_[0-9A-Za-z]{20,32}$/.test(x);
 }
 
 /** `acc_4593…@in.suppuo.com` (any +tag tolerated) → the accountId. */

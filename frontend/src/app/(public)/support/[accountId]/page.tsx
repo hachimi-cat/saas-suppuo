@@ -19,6 +19,8 @@ export default function SupportFormPage({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [body, setBody] = useState('');
+  // Honeypot — hidden from humans, auto-filled by bots; any value = bot.
+  const [company, setCompany] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ number: number; accessToken: string } | null>(null);
@@ -39,7 +41,10 @@ export default function SupportFormPage({
     try {
       const { data } = await apiRequest<{ number: number; accessToken: string }>(
         '/public/tickets',
-        { method: 'POST', body: { accountId, subject, email, name: name || undefined, body } },
+        {
+          method: 'POST',
+          body: { accountId, subject, email, name: name || undefined, body, company: company || undefined },
+        },
       );
       setDone(data);
     } catch (err) {
@@ -74,6 +79,18 @@ export default function SupportFormPage({
       </p>
       <form onSubmit={submit} className="mt-6 space-y-3">
         {error && <p className="text-sm text-destructive">{error}</p>}
+        {/* Honeypot — off-screen, not display:none, aria-hidden + tabindex
+            -1 + autocomplete off so humans never reach it; bots auto-fill. */}
+        <input
+          type="text"
+          name="company"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}
+        />
         <input required value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What is this about?" className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm" />
         <div className="flex flex-col gap-3 sm:flex-row">
           <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm" />
