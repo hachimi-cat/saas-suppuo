@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import Script from 'next/script';
 import { DashboardShell } from '@/components/dashboard-shell';
 import type { SessionUser } from '@forjio/portal-ui';
 
@@ -69,6 +70,11 @@ export default async function DashboardLayout({
   return (
     <DashboardShell user={resolved.user} accountId={resolved.accountId}>
       {children}
+      <Script
+        src="https://suppuo.com/widget.js"
+        data-suppuo-account="acc_01KPHFWPGDAYH9WG7KYY36KF58"
+        strategy="afterInteractive"
+      />
     </DashboardShell>
   );
 }

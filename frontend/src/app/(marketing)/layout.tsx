@@ -1,6 +1,42 @@
+import Script from 'next/script';
 import { LogoMark } from '@/components/brand/logo';
 
 import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-ui';
+
+// Suppuo's own hosted support page (live chat + help form). Dogfood: Suppuo
+// embeds its own widget and points its help links at its own support page.
+const SUPPUO_SUPPORT_URL =
+  'https://suppuo.com/support/acc_01KPHFWPGDAYH9WG7KYY36KF58';
+
+// Mirror the package DEFAULT_COLUMNS but add a dedicated "Help & live chat"
+// entry pointing at the hosted Suppuo support page.
+const FOOTER_COLUMNS = [
+  {
+    title: 'Product',
+    links: [
+      { href: '/features', label: 'Features' },
+      { href: '/pricing', label: 'Pricing' },
+      { href: '/docs', label: 'Documentation' },
+      { href: '/changelog', label: 'Changelog' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { href: '/about', label: 'About' },
+      { href: SUPPUO_SUPPORT_URL, label: 'Help & live chat' },
+      { href: '/contact', label: 'Contact' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { href: '/privacy', label: 'Privacy Policy' },
+      { href: '/terms', label: 'Terms of Service' },
+      { href: '/refund', label: 'Refund Policy' },
+    ],
+  },
+];
 
 /*
  * Marketing route-group layout — the shared Forjio family chrome
@@ -26,6 +62,12 @@ export default function MarketingLayout({
         brandName={brand}
         brandTagline={`${brand} — helpdesk and ticketing for Indonesian SMEs. Part of the Forjio family.`}
         copyrightSuffix="part of the Forjio family."
+        columns={FOOTER_COLUMNS}
+      />
+      <Script
+        src="https://suppuo.com/widget.js"
+        data-suppuo-account="acc_01KPHFWPGDAYH9WG7KYY36KF58"
+        strategy="afterInteractive"
       />
     </MarketingShell>
   );
