@@ -87,14 +87,17 @@ export function hexToHslTriplet(hex: string | null | undefined): string | null {
  * element's `style`.
  *
  * Accent → `--primary` / `--ring` (buttons/links/highlights).
- * Brand (navy/background) → a derived small DARK palette:
+ * Brand (background) → a derived small palette:
  *   --background = brand
- *   --card / --popover / --secondary = brand +5% L (slightly lighter
- *       navy for surfaces/cards)
- *   --muted   = brand +9% L
- *   --border / --input = brand +13% L
- * Foreground tokens are intentionally NOT overridden — globals.css
- * keeps them light (near-white), which reads on a dark brand like navy.
+ *   --card / --popover / --secondary = brand ±5% L (slightly contrasting
+ *       surface for cards)
+ *   --muted   = brand ±9% L
+ *   --border / --input = brand ±13% L
+ * Foreground tokens ARE derived here from the brand luminance — unlike
+ * serront (whose BASE theme is already dark), Suppuo's base is a LIGHT
+ * theme (dark text), so a dark brand background must flip the text to
+ * light or it renders dark-on-dark. We pick light vs dark foregrounds
+ * for guaranteed contrast against the chosen brand.
  */
 export function storefrontThemeVars(
   accentColor: string | null | undefined,
@@ -102,22 +105,42 @@ export function storefrontThemeVars(
 ): Record<string, string> {
   const vars: Record<string, string> = {};
 
-  const accent = hexToHslTriplet(accentColor);
+  const accent = hexToHslParts(accentColor);
   if (accent) {
-    vars['--primary'] = accent;
-    vars['--ring'] = accent;
+    vars['--primary'] = hslPartsToTriplet(accent);
+    vars['--ring'] = hslPartsToTriplet(accent);
+    // Text/icon color that sits ON the accent (button labels): dark on a
+    // light accent, white on a dark/saturated one.
+    vars['--primary-foreground'] = accent.l > 62 ? `${accent.h} 45% 12%` : '0 0% 100%';
   }
 
   const brand = hexToHslParts(brandColor);
   if (brand) {
-    const surface = hslPartsToTriplet(lighten(brand, 5));
+    const dark = brand.l < 55;
+    // Surfaces step AWAY from the background (lighter on dark, darker on
+    // light) so cards/borders separate either way.
+    const step = (d: number) => hslPartsToTriplet(lighten(brand, dark ? d : -d));
     vars['--background'] = hslPartsToTriplet(brand);
-    vars['--card'] = surface;
-    vars['--popover'] = surface;
-    vars['--secondary'] = surface;
-    vars['--muted'] = hslPartsToTriplet(lighten(brand, 9));
-    vars['--border'] = hslPartsToTriplet(lighten(brand, 13));
-    vars['--input'] = hslPartsToTriplet(lighten(brand, 13));
+    vars['--card'] = step(5);
+    vars['--popover'] = step(5);
+    vars['--secondary'] = step(5);
+    vars['--muted'] = step(9);
+    vars['--border'] = step(13);
+    vars['--input'] = step(13);
+
+    // Foregrounds — flip to contrast the brand background.
+    const fg = dark ? `${brand.h} 25% 96%` : `${brand.h} 32% 12%`;
+    const mutedFg = dark ? `${brand.h} 16% 70%` : `${brand.h} 14% 40%`;
+    for (const t of [
+      '--foreground',
+      '--card-foreground',
+      '--popover-foreground',
+      '--secondary-foreground',
+      '--accent-foreground',
+    ]) {
+      vars[t] = fg;
+    }
+    vars['--muted-foreground'] = mutedFg;
   }
 
   return vars;
