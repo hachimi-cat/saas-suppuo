@@ -49,8 +49,15 @@ router.use((req, res, next) => {
   next();
 });
 
+// Accept BOTH account-id shapes: a derived/personal account
+// (acc_<24 lowercase hex>) AND a Huudis WORKSPACE (acc_01<ULID>,
+// uppercase Crockford base32). The old hex-only regex 400'd every
+// Forjio product workspace — which is exactly what the family widget
+// embeds use (Plugipay = acc_01KPHF…). 2026-06-16.
+const ACCOUNT_ID_RE = /^acc_[0-9A-Za-z]{24,28}$/;
+
 const submitBody = z.object({
-  accountId: z.string().regex(/^acc_[a-f0-9]{24}$/),
+  accountId: z.string().regex(ACCOUNT_ID_RE),
   subject: z.string().trim().min(1).max(300),
   body: z.string().trim().min(1).max(20_000),
   email: z.string().email(),
@@ -63,7 +70,7 @@ router.get(
   '/widget-config',
   asyncHandler(async (req, res) => {
     const account = typeof req.query.account === 'string' ? req.query.account : '';
-    if (!/^acc_[a-f0-9]{24}$/.test(account)) {
+    if (!ACCOUNT_ID_RE.test(account)) {
       return sendErr(res, req, 400, 'VALIDATION_ERROR', 'account required (acc_…)');
     }
     sendOk(res, req, { hideBranding: await accountHidesBranding(account) });
