@@ -103,4 +103,75 @@ function emptyToNull(v: string | null): string | null {
   return v === null || v === '' ? null : v;
 }
 
+// ─── Help-center config: public contact profile + product deep-links ──
+
+const HELP_DEFAULTS = {
+  contactEmail: null as string | null,
+  contactPhone: null as string | null,
+  contactAddress: null as string | null,
+  docsUrl: null as string | null,
+  contactUrl: null as string | null,
+  helpIntro: null as string | null,
+};
+
+const urlOrEmpty = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((v) => v === '' || /^https?:\/\//i.test(v), 'must be an http(s) URL');
+
+const helpPutBody = z.object({
+  contactEmail: z.string().trim().email().or(z.literal('')).nullable().optional(),
+  contactPhone: z.string().trim().max(40).nullable().optional(),
+  contactAddress: z.string().trim().max(500).nullable().optional(),
+  docsUrl: urlOrEmpty.nullable().optional(),
+  contactUrl: urlOrEmpty.nullable().optional(),
+  helpIntro: z.string().trim().max(280).nullable().optional(),
+});
+
+function helpView(s: typeof HELP_DEFAULTS): typeof HELP_DEFAULTS {
+  return {
+    contactEmail: s.contactEmail ?? null,
+    contactPhone: s.contactPhone ?? null,
+    contactAddress: s.contactAddress ?? null,
+    docsUrl: s.docsUrl ?? null,
+    contactUrl: s.contactUrl ?? null,
+    helpIntro: s.helpIntro ?? null,
+  };
+}
+
+router.get(
+  '/help',
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const settings = await prisma.accountSettings.findUnique({ where: { accountId } });
+    sendOk(res, req, helpView(settings ?? HELP_DEFAULTS));
+  }),
+);
+
+router.put(
+  '/help',
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const input = helpPutBody.parse(req.body);
+    const data: Record<string, unknown> = {};
+    for (const k of [
+      'contactEmail',
+      'contactPhone',
+      'contactAddress',
+      'docsUrl',
+      'contactUrl',
+      'helpIntro',
+    ] as const) {
+      if (input[k] !== undefined) data[k] = emptyToNull(input[k] ?? null);
+    }
+    const saved = await prisma.accountSettings.upsert({
+      where: { accountId },
+      create: { accountId, ...data },
+      update: data,
+    });
+    sendOk(res, req, helpView(saved));
+  }),
+);
+
 export default router;

@@ -830,6 +830,17 @@
     if (e.key === 'Escape' && isOpen) closePanel();
   });
 
+  // ── public API ─────────────────────────────────────────────────────
+  // A minimal global so host pages (e.g. the hosted help center's
+  // "Start live chat" button) can drive the widget programmatically.
+  window.Suppuo = window.Suppuo || {};
+  window.Suppuo.open = openPanel;
+  window.Suppuo.close = closePanel;
+  window.Suppuo.toggle = function () {
+    if (isOpen) closePanel();
+    else openPanel();
+  };
+
   // ── mount ──────────────────────────────────────────────────────────
   function mount() {
     document.body.appendChild(root);

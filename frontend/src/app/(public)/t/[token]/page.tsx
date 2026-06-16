@@ -97,7 +97,7 @@ export default function TicketStatusPage({ params }: { params: Promise<{ token: 
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-xl">
       <p className="text-xs font-medium uppercase tracking-wider text-primary">
         Ticket #{ticket.number} · {STATUS_LABEL[ticket.status] ?? ticket.status}
       </p>

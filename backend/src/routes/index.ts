@@ -27,6 +27,8 @@ import webhookSubscriptionsRouter from './webhook-subscriptions.js';
 import settingsRouter from './settings.js';
 import csatRouter from './csat.js';
 import reportsRouter from './reports.js';
+import helpRouter from './help.js';
+import publicHelpRouter from './public-help.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -107,6 +109,13 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   /** Reports — on-the-fly support analytics (volume, response times,
    *  CSAT). Read-only aggregates; powers /dashboard/reports. */
   router.use('/reports', requireAuth, reportsRouter);
+  /** Help center — portal-side KB management (FAQ + articles). The
+   *  public read surface is mounted under /public/help below. */
+  router.use('/help', requireAuth, helpRouter);
+  /** Help center — unauthenticated read surface for the hosted help
+   *  page (bundle + search + article). Mounted BEFORE /public so the
+   *  /public/help prefix resolves here, not the ticket router. */
+  router.use('/public/help', rateLimit('ingress'), publicHelpRouter);
   /** Requester-facing public surface — tokenized, rate-limited. */
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Billing — Plugipay-powered plan subscriptions. */

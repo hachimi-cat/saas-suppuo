@@ -193,10 +193,54 @@ model AccountSettings {
   /// and the public form/status pages (a paid-tier perk; unenforced
   /// during early access like everything else).
   hideBranding        Boolean  @default(false)
+  // ─── Help center: public contact profile + product deep-links ───
+  /// Public contact block on the hosted help center (all optional).
+  contactEmail        String?
+  contactPhone        String?
+  contactAddress      String?
+  /// Deep-link to the PRODUCT's own pages when it has them (the "use
+  /// the product's own data if present" rule). When set, the help
+  /// center surfaces them alongside Suppuo's own KB/contact.
+  docsUrl             String?
+  contactUrl          String?
+  /// Short intro line shown at the top of the help center.
+  helpIntro           String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
   @@map("account_settings")
+}
+
+/// Help-center content — FAQ entries and longer articles, one row per
+/// item, account-scoped. kind='faq' (title=question, body=answer) or
+/// kind='article' (title + markdown body). Published items surface on
+/// the public help center; drafts are portal-only. v1 search is ILIKE
+/// over title+body; the Catentio AI swaps in later behind
+/// lib/help-search without touching this shape.
+model HelpArticle {
+  id        String   @id // hlp_<ulid>
+  accountId String
+  /// faq | article
+  kind      String   @default("faq")
+  /// URL slug for articles (/help/<acc>/a/<slug>); FAQ rows leave it null.
+  slug      String?
+  /// Grouping label on the help center ("Getting started", "Billing"…).
+  category  String?
+  /// FAQ: the question. Article: the title.
+  title     String
+  /// FAQ: the answer. Article: the markdown body.
+  body      String
+  /// draft | published
+  status    String   @default("draft")
+  /// Manual ordering within a category / list (ascending).
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([accountId, slug])
+  @@index([accountId, kind, status, position])
+  @@index([accountId, status])
+  @@map("help_articles")
 }
 
 

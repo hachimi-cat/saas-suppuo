@@ -21,6 +21,7 @@ export type IdPrefix =
   | 'csat' // CSAT response
   | 'rst' // roster identity (SSO capture for admin CRM)
   | 'rmb' // roster membership (identity ↔ accountId sighting)
+  | 'hlp' // help-center article / FAQ
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

@@ -168,6 +168,7 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
+          script_stop: true
           script: |
             cd /opt/saas/suppuo/backend
             # --omit=dev — runtime deps only. dist/ + prisma client are
@@ -377,6 +378,7 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
+          script_stop: true
           script: |
             cd /opt/saas/suppuo/backend
             npm ci --omit=dev
