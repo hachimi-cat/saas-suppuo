@@ -35,6 +35,18 @@ interface HelpConfig {
   helpIntro: string | null;
 }
 
+interface Branding {
+  brandName: string | null;
+  brandLogoUrl: string | null;
+  accentColor: string | null;
+  brandColor: string | null;
+}
+
+// Forjio family defaults — the swatch fallback when a workspace hasn't
+// picked its own (mirrors the public surface's globals.css tokens).
+const DEFAULT_ACCENT = '#3b82f6';
+const DEFAULT_BRAND = '#0b1120';
+
 const EMPTY_DRAFT = {
   kind: 'faq' as 'faq' | 'article',
   slug: '',
@@ -48,16 +60,21 @@ const EMPTY_DRAFT = {
 export default function HelpCenterAdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [cfg, setCfg] = useState<HelpConfig | null>(null);
+  const [branding, setBranding] = useState<Branding | null>(null);
   const [draft, setDraft] = useState({ ...EMPTY_DRAFT });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cfgSaved, setCfgSaved] = useState(false);
+  const [brandSaved, setBrandSaved] = useState(false);
 
   useEffect(() => {
     load();
     apiRequest<HelpConfig>('/settings/help')
       .then(({ data }) => setCfg(data))
       .catch(() => setCfg(blankCfg()));
+    apiRequest<Branding>('/settings/branding')
+      .then(({ data }) => setBranding(data))
+      .catch(() => setBranding(blankBranding()));
   }, []);
 
   function load() {
@@ -76,6 +93,27 @@ export default function HelpCenterAdminPage() {
       setTimeout(() => setCfgSaved(false), 2500);
     } catch {
       /* surfaced via the content error line is overkill; ignore */
+    }
+  }
+
+  async function saveBranding(e: React.FormEvent) {
+    e.preventDefault();
+    if (!branding) return;
+    setBrandSaved(false);
+    try {
+      await apiRequest('/settings/branding', {
+        method: 'PUT',
+        body: {
+          brandName: branding.brandName || null,
+          brandLogoUrl: branding.brandLogoUrl || null,
+          accentColor: branding.accentColor || null,
+          brandColor: branding.brandColor || null,
+        },
+      });
+      setBrandSaved(true);
+      setTimeout(() => setBrandSaved(false), 2500);
+    } catch {
+      /* keep the form; the user can retry */
     }
   }
 
@@ -184,6 +222,76 @@ export default function HelpCenterAdminPage() {
                 Save contact details
               </button>
               {cfgSaved && <span className="text-sm text-primary">Saved ✓</span>}
+            </div>
+          </form>
+        </section>
+      )}
+
+      {/* ── Branding (logo + colors) ────────────────────────────────── */}
+      {branding && (
+        <section className="rounded-xl border border-border p-5">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Branding
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Your logo and colors theme both the public help center (
+            <code className="rounded border border-border bg-muted/40 px-1 py-0.5 text-[11px]">
+              /support
+            </code>
+            ) and the hosted customer ticket portal (
+            <code className="rounded border border-border bg-muted/40 px-1 py-0.5 text-[11px]">
+              /portal
+            </code>
+            ). They never affect your own dashboard.
+          </p>
+          <form onSubmit={saveBranding} className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Field label="Brand name">
+              <input
+                value={branding.brandName ?? ''}
+                onChange={(e) => setBranding({ ...branding, brandName: e.target.value })}
+                placeholder="Your brand"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Logo URL">
+              <input
+                value={branding.brandLogoUrl ?? ''}
+                onChange={(e) => setBranding({ ...branding, brandLogoUrl: e.target.value })}
+                placeholder="https://yourbrand.com/logo.png"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Accent color (buttons, links, highlights)">
+              <ColorField
+                value={branding.accentColor}
+                fallback={DEFAULT_ACCENT}
+                onChange={(v) => setBranding({ ...branding, accentColor: v })}
+              />
+            </Field>
+            <Field label="Brand color (page background)">
+              <ColorField
+                value={branding.brandColor}
+                fallback={DEFAULT_BRAND}
+                onChange={(v) => setBranding({ ...branding, brandColor: v })}
+              />
+            </Field>
+
+            {/* Live preview swatch — the themed surfaces at a glance. */}
+            <div className="sm:col-span-2">
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">Preview</span>
+              <BrandPreview
+                accent={branding.accentColor || DEFAULT_ACCENT}
+                brand={branding.brandColor || DEFAULT_BRAND}
+                logoUrl={branding.brandLogoUrl}
+                name={branding.brandName}
+              />
+            </div>
+
+            <div className="flex items-center gap-3 sm:col-span-2">
+              <button className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+                Save branding
+              </button>
+              {brandSaved && <span className="text-sm text-primary">Saved ✓</span>}
             </div>
           </form>
         </section>
@@ -313,4 +421,85 @@ function blankCfg(): HelpConfig {
     contactUrl: null,
     helpIntro: null,
   };
+}
+
+function blankBranding(): Branding {
+  return { brandName: null, brandLogoUrl: null, accentColor: null, brandColor: null };
+}
+
+// Paired color picker + hex text input, both bound to the same value.
+// Empty string clears the override (→ the public default). A blank/odd
+// value falls the swatch back to `fallback` so the picker still shows.
+function ColorField({
+  value,
+  fallback,
+  onChange,
+}: {
+  value: string | null;
+  fallback: string;
+  onChange: (v: string) => void;
+}) {
+  const hex = /^#[0-9a-fA-F]{6}$/.test(value ?? '') ? (value as string) : fallback;
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="color"
+        value={hex}
+        onChange={(e) => onChange(e.target.value)}
+        className="size-9 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
+        aria-label="Color picker"
+      />
+      <input
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={fallback}
+        className={inputCls + ' font-mono'}
+      />
+    </div>
+  );
+}
+
+// A miniature of the themed public surface — accent button + a card on
+// the brand background, plus the logo chip if set.
+function BrandPreview({
+  accent,
+  brand,
+  logoUrl,
+  name,
+}: {
+  accent: string;
+  brand: string;
+  logoUrl: string | null;
+  name: string | null;
+}) {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-xl border border-border p-4"
+      style={{ background: brand }}
+    >
+      {logoUrl ? (
+        <span className="flex size-10 items-center justify-center rounded-lg bg-black/25 p-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoUrl} alt={name ?? 'Logo'} className="size-full object-contain" />
+        </span>
+      ) : (
+        <span
+          className="flex size-10 items-center justify-center rounded-lg text-sm font-bold uppercase text-white"
+          style={{ background: accent }}
+        >
+          {(name ?? 'S').slice(0, 1)}
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-white">{name || 'Your brand'}</p>
+        <p className="text-xs text-white/60">How can we help?</p>
+      </div>
+      <span
+        className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
+        style={{ background: accent }}
+      >
+        Submit a request
+      </span>
+    </div>
+  );
 }

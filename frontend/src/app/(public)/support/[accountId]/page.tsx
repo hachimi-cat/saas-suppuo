@@ -31,9 +31,11 @@ import {
   ArrowRight,
   LifeBuoy,
   ExternalLink,
+  Ticket,
 } from 'lucide-react';
 import { apiRequest } from '@/lib/api';
 import { useSetHideBranding } from '@/components/public-branding';
+import { EMPTY_BRANDING, type PublicBranding } from '@/lib/theme';
 
 interface Faq {
   id: string;
@@ -59,6 +61,7 @@ interface Bundle {
   contact: Contact;
   intro: string | null;
   hideBranding: boolean;
+  branding: PublicBranding;
   faqs: Faq[];
   articles: ArticleCard[];
 }
@@ -90,7 +93,16 @@ export default function HelpCenterPage({
         setBundle(data);
         if (data.hideBranding) setHideBranding(true);
       })
-      .catch(() => setBundle({ contact: emptyContact(), intro: null, hideBranding: false, faqs: [], articles: [] }));
+      .catch(() =>
+        setBundle({
+          contact: emptyContact(),
+          intro: null,
+          hideBranding: false,
+          branding: EMPTY_BRANDING,
+          faqs: [],
+          articles: [],
+        }),
+      );
   }, [accountId, setHideBranding]);
 
   const runSearch = useCallback(
@@ -126,6 +138,7 @@ export default function HelpCenterPage({
   }
 
   const { contact, faqs, articles } = bundle;
+  const branding = bundle.branding ?? EMPTY_BRANDING;
   const hasContact = Boolean(contact.email || contact.phone || contact.address || contact.contactUrl);
 
   return (
@@ -135,13 +148,40 @@ export default function HelpCenterPage({
 
       {/* ── Hero + search ─────────────────────────────────────────── */}
       <div className="text-center">
-        <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <LifeBuoy className="size-6" strokeWidth={1.75} />
-        </span>
-        <h1 className="mt-4 text-3xl font-bold tracking-tight">How can we help?</h1>
+        {branding.logoUrl ? (
+          // Padded chip behind the workspace logo mark (serront storefront
+          // header pattern) — breathing room + a backdrop so a light mark
+          // still reads on the themed brand background.
+          <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-black/25 p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={branding.logoUrl}
+              alt={branding.name || 'Help center'}
+              className="size-full object-contain"
+            />
+          </span>
+        ) : (
+          <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <LifeBuoy className="size-6" strokeWidth={1.75} />
+          </span>
+        )}
+        {branding.name && (
+          <p className="mt-3 text-sm font-semibold tracking-tight text-muted-foreground">
+            {branding.name}
+          </p>
+        )}
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">How can we help?</h1>
         {bundle.intro && (
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">{bundle.intro}</p>
         )}
+        <div className="mt-4">
+          <Link
+            href={`/portal/${accountId}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+          >
+            <Ticket className="size-4" /> Sign in to track your tickets
+          </Link>
+        </div>
         <div className="relative mx-auto mt-6 max-w-xl">
           <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -271,6 +311,20 @@ export default function HelpCenterPage({
               <span>
                 <span className="block font-medium">Submit a request</span>
                 <span className="block text-sm text-muted-foreground">We&apos;ll reply by email</span>
+              </span>
+            </Link>
+            <Link
+              href={`/portal/${accountId}`}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary sm:col-span-2"
+            >
+              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Ticket className="size-5" />
+              </span>
+              <span>
+                <span className="block font-medium">Track your tickets</span>
+                <span className="block text-sm text-muted-foreground">
+                  Sign in to view and reply to your past requests
+                </span>
               </span>
             </Link>
           </section>

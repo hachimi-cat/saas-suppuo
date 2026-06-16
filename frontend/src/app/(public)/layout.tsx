@@ -1,18 +1,19 @@
 import type { ReactNode } from 'react';
-import { PublicBrandingProvider, PoweredByFooter } from '@/components/public-branding';
+import { PublicBrandingProvider } from '@/components/public-branding';
 
 // (public) — the requester-facing surfaces (help center + hosted ticket
-// form + tokenized ticket status). No auth, minimal chrome. The
-// powered-by footer is context-gated: workspaces with hideBranding
-// suppress it. Width is generous (max-w-3xl) for the help center; the
-// form + status pages re-clamp themselves to max-w-xl.
+// form + tokenized ticket status + the customer ticket portal). No auth,
+// minimal chrome. This layer only provides the hideBranding context +
+// a full-height canvas; each subtree sets its OWN width clamp + footer:
+//   - support/[accountId]/* and t/* → centered reading column via their
+//     own layouts (with the powered-by footer).
+//   - portal/[accountId]/* → full-bleed buyer-portal Sidebar shell.
+// Keeping the clamp out of here lets the portal go edge-to-edge while the
+// help center stays a tidy max-w-3xl column — same split serront uses.
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <PublicBrandingProvider>
-      <main className="mx-auto min-h-screen max-w-3xl px-4 py-12">
-        {children}
-        <PoweredByFooter />
-      </main>
+      <div className="min-h-screen bg-background">{children}</div>
     </PublicBrandingProvider>
   );
 }

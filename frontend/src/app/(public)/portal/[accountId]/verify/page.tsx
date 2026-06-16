@@ -30,7 +30,7 @@ function Verify({ accountId }: { accountId: string }) {
   }, [accountId, router, search]);
 
   return (
-    <div className="mx-auto max-w-md py-12 text-center">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12 text-center">
       {failed ? (
         <>
           <p className="text-sm text-muted-foreground">

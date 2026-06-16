@@ -31,7 +31,7 @@ function WidgetDemoInner() {
   }, [account]);
 
   return (
-    <div>
+    <div className="mx-auto max-w-3xl px-4 py-12">
       <p className="text-xs font-medium uppercase tracking-wider text-primary">Widget demo</p>
       <h1 className="mt-1 text-xl font-bold tracking-tight">Live chat widget preview</h1>
       {account ? (

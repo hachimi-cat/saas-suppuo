@@ -10,17 +10,20 @@
  */
 
 import { use, useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   LifeBuoy,
   Mail,
   Plus,
   ChevronLeft,
-  LogOut,
   Send,
   CheckCircle2,
   CircleDot,
+  Ticket,
 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { PortalShell } from '@/components/portal-shell';
+import { usePortalBranding } from '@/components/portal-branding';
 
 interface Me {
   email: string;
@@ -66,7 +69,11 @@ export default function PortalPage({ params }: { params: Promise<{ accountId: st
   }, []);
 
   if (me === undefined) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">Loading…</p>;
+    return (
+      <p className="flex min-h-screen items-center justify-center py-12 text-center text-sm text-muted-foreground">
+        Loading…
+      </p>
+    );
   }
   return me ? (
     <SignedIn accountId={accountId} me={me} onSignOut={() => setMe(null)} />
@@ -77,6 +84,7 @@ export default function PortalPage({ params }: { params: Promise<{ accountId: st
 
 // ── Sign-in (magic link) ───────────────────────────────────────────────
 function SignIn({ accountId }: { accountId: string }) {
+  const branding = usePortalBranding();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -96,49 +104,89 @@ function SignIn({ accountId }: { accountId: string }) {
     }
   }
 
+  const name = branding.name || 'Support center';
+
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
       <div className="text-center">
-        <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <LifeBuoy className="size-6" strokeWidth={1.75} />
-        </span>
-        <h1 className="mt-4 text-2xl font-bold tracking-tight">Support center</h1>
+        {branding.logoUrl ? (
+          // Padded chip behind the workspace logo (serront storefront-
+          // header pattern) so a light mark reads on the themed brand.
+          <span className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-black/25 p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={branding.logoUrl} alt={name} className="size-full object-contain" />
+          </span>
+        ) : (
+          <span className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <LifeBuoy className="size-6" strokeWidth={1.75} />
+          </span>
+        )}
+        <h1 className="mt-4 text-2xl font-bold tracking-tight">{name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Sign in to view and track your tickets.</p>
       </div>
-      {sent ? (
-        <div className="mt-8 rounded-xl border border-border bg-card p-6 text-center">
-          <Mail className="mx-auto size-6 text-primary" />
-          <p className="mt-3 text-sm">
-            If <strong>{email}</strong> has tickets here, we&apos;ve emailed a sign-in link. It
-            expires in 15 minutes.
-          </p>
-          <button onClick={() => setSent(false)} className="mt-4 text-sm text-primary hover:underline">
-            Use a different email
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={submit} className="mt-8 space-y-3">
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
-          />
-          <button
-            disabled={busy}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-          >
-            {busy ? 'Sending…' : 'Email me a sign-in link'}
-          </button>
-        </form>
-      )}
+
+      {/* Buyer-portal sign-in card (serront /account/sign-in idiom). */}
+      <div className="mt-8 rounded-xl border border-border bg-card p-6">
+        {sent ? (
+          <div className="text-center">
+            <span className="mx-auto flex size-10 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
+              <Mail className="size-5" />
+            </span>
+            <p className="mt-3 text-sm">
+              If <strong>{email}</strong> has tickets here, we&apos;ve emailed a sign-in link. It
+              expires in 15 minutes.
+            </p>
+            <button
+              onClick={() => setSent(false)}
+              className="mt-4 text-sm text-primary hover:underline"
+            >
+              Use a different email
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
+                <Ticket className="size-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">Magic-link sign-in</p>
+                <p className="text-xs text-muted-foreground">
+                  We&apos;ll email you a secure link — no password.
+                </p>
+              </div>
+            </div>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">Email</span>
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary/60"
+              />
+            </label>
+            <button
+              disabled={busy}
+              className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+            >
+              {busy ? 'Sending…' : 'Email me a sign-in link'}
+            </button>
+          </form>
+        )}
+      </div>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        <Link href={`/support/${accountId}`} className="text-primary hover:underline">
+          Back to the help center
+        </Link>
+      </p>
     </div>
   );
 }
 
-// ── Signed in: my tickets ──────────────────────────────────────────────
+// ── Signed in: my tickets (inside the buyer-portal Sidebar shell) ───────
 function SignedIn({
   accountId,
   me,
@@ -148,23 +196,21 @@ function SignedIn({
   me: Me;
   onSignOut: () => void;
 }) {
+  const branding = usePortalBranding();
   const [tab, setTab] = useState<Tab>('open');
   const [rows, setRows] = useState<TicketRow[]>([]);
   const [counts, setCounts] = useState<Counts>({ open: 0, resolved: 0 });
   const [openNumber, setOpenNumber] = useState<number | null>(null);
   const [composing, setComposing] = useState(false);
 
-  const load = useCallback(
-    (t: Tab) => {
-      apiRequest<{ tickets: TicketRow[]; counts: Counts }>(`/requester/tickets?status=${t}`)
-        .then(({ data }) => {
-          setRows(data.tickets);
-          setCounts(data.counts);
-        })
-        .catch(() => undefined);
-    },
-    [],
-  );
+  const load = useCallback((t: Tab) => {
+    apiRequest<{ tickets: TicketRow[]; counts: Counts }>(`/requester/tickets?status=${t}`)
+      .then(({ data }) => {
+        setRows(data.tickets);
+        setCounts(data.counts);
+      })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     load(tab);
@@ -175,8 +221,9 @@ function SignedIn({
     onSignOut();
   }
 
+  let body: React.ReactNode;
   if (composing) {
-    return (
+    body = (
       <NewRequest
         onCancel={() => setComposing(false)}
         onDone={() => {
@@ -186,9 +233,8 @@ function SignedIn({
         }}
       />
     );
-  }
-  if (openNumber !== null) {
-    return (
+  } else if (openNumber !== null) {
+    body = (
       <TicketThread
         number={openNumber}
         onBack={() => {
@@ -197,71 +243,71 @@ function SignedIn({
         }}
       />
     );
-  }
-
-  return (
-    <div className="mx-auto max-w-2xl">
-      <div className="flex items-center justify-between gap-3">
+  } else {
+    body = (
+      <div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Your tickets</h1>
           <p className="text-sm text-muted-foreground">{me.email}</p>
         </div>
-        <button
-          onClick={signOut}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <LogOut className="size-4" /> Sign out
-        </button>
-      </div>
 
-      <div className="mt-6 flex items-center justify-between">
-        <div className="flex gap-1 rounded-lg border border-border p-1 text-sm">
-          {(['open', 'resolved', 'all'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`rounded-md px-3 py-1.5 capitalize ${
-                tab === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t}
-              {t === 'open' && ` (${counts.open})`}
-              {t === 'resolved' && ` (${counts.resolved})`}
-            </button>
-          ))}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex gap-1 rounded-lg border border-border p-1 text-sm">
+            {(['open', 'resolved', 'all'] as Tab[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`rounded-md px-3 py-1.5 capitalize ${
+                  tab === t
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t}
+                {t === 'open' && ` (${counts.open})`}
+                {t === 'resolved' && ` (${counts.resolved})`}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setComposing(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+          >
+            <Plus className="size-4" /> New request
+          </button>
         </div>
-        <button
-          onClick={() => setComposing(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
-        >
-          <Plus className="size-4" /> New request
-        </button>
-      </div>
 
-      <div className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border">
-        {rows.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted-foreground">No tickets here yet.</p>
-        ) : (
-          rows.map((t) => (
-            <button
-              key={t.number}
-              onClick={() => setOpenNumber(t.number)}
-              className="flex w-full items-center justify-between gap-3 bg-card px-4 py-3.5 text-left hover:bg-muted/50"
-            >
-              <span className="min-w-0">
-                <span className="flex items-center gap-2">
-                  <StatusBadge status={t.status} />
-                  <span className="truncate font-medium">{t.subject}</span>
+        <div className="mt-4 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
+          {rows.length === 0 ? (
+            <p className="p-8 text-center text-sm text-muted-foreground">No tickets here yet.</p>
+          ) : (
+            rows.map((t) => (
+              <button
+                key={t.number}
+                onClick={() => setOpenNumber(t.number)}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-muted/50"
+              >
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2">
+                    <StatusBadge status={t.status} />
+                    <span className="truncate font-medium">{t.subject}</span>
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    #{t.number} · updated {new Date(t.lastMessageAt).toLocaleDateString()}
+                  </span>
                 </span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">
-                  #{t.number} · updated {new Date(t.lastMessageAt).toLocaleDateString()}
-                </span>
-              </span>
-            </button>
-          ))
-        )}
+              </button>
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <PortalShell accountId={accountId} email={me.email} branding={branding} onLogout={signOut}>
+      {body}
+    </PortalShell>
   );
 }
 
@@ -312,7 +358,7 @@ function TicketThread({ number, onBack }: { number: number; onBack: () => void }
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div>
       <button onClick={onBack} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ChevronLeft className="size-4" /> Your tickets
       </button>
@@ -334,7 +380,7 @@ function TicketThread({ number, onBack }: { number: number; onBack: () => void }
               return (
                 <div
                   key={m.id}
-                  className={`rounded-xl border p-3.5 text-sm ${
+                  className={`rounded-lg border p-3.5 text-sm ${
                     mine ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'
                   }`}
                 >
@@ -390,7 +436,7 @@ function NewRequest({ onCancel, onDone }: { onCancel: () => void; onDone: () => 
   }
 
   return (
-    <div className="mx-auto max-w-xl">
+    <div>
       <button onClick={onCancel} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ChevronLeft className="size-4" /> Your tickets
       </button>
