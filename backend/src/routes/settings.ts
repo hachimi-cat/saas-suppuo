@@ -174,4 +174,62 @@ router.put(
   }),
 );
 
+// ─── Branding: logo + colors for the help center + hosted portal ──────
+
+const BRAND_DEFAULTS = {
+  brandName: null as string | null,
+  brandLogoUrl: null as string | null,
+  accentColor: null as string | null,
+  brandColor: null as string | null,
+};
+
+const hexColor = z
+  .string()
+  .trim()
+  .regex(/^#[0-9a-fA-F]{6}$/, 'expected #RRGGBB')
+  .or(z.literal(''));
+
+const brandPutBody = z.object({
+  brandName: z.string().trim().max(80).nullable().optional(),
+  brandLogoUrl: urlOrEmpty.nullable().optional(),
+  accentColor: hexColor.nullable().optional(),
+  brandColor: hexColor.nullable().optional(),
+});
+
+function brandView(s: typeof BRAND_DEFAULTS): typeof BRAND_DEFAULTS {
+  return {
+    brandName: s.brandName ?? null,
+    brandLogoUrl: s.brandLogoUrl ?? null,
+    accentColor: s.accentColor ?? null,
+    brandColor: s.brandColor ?? null,
+  };
+}
+
+router.get(
+  '/branding',
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const settings = await prisma.accountSettings.findUnique({ where: { accountId } });
+    sendOk(res, req, brandView(settings ?? BRAND_DEFAULTS));
+  }),
+);
+
+router.put(
+  '/branding',
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const input = brandPutBody.parse(req.body);
+    const data: Record<string, unknown> = {};
+    for (const k of ['brandName', 'brandLogoUrl', 'accentColor', 'brandColor'] as const) {
+      if (input[k] !== undefined) data[k] = emptyToNull(input[k] ?? null);
+    }
+    const saved = await prisma.accountSettings.upsert({
+      where: { accountId },
+      create: { accountId, ...data },
+      update: data,
+    });
+    sendOk(res, req, brandView(saved));
+  }),
+);
+
 export default router;

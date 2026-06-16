@@ -48,6 +48,20 @@ function articleCardView(a: {
   };
 }
 
+// GET /public/help/:accountId/branding — public branding (logo + colors +
+// name) for the help center AND the hosted portal's pre-auth screen.
+router.get(
+  '/:accountId/branding',
+  asyncHandler(async (req, res) => {
+    const accountId = String(req.params.accountId);
+    if (badAccount(accountId)) {
+      return sendOk(res, req, emptyBranding());
+    }
+    const s = await prisma.accountSettings.findUnique({ where: { accountId } });
+    sendOk(res, req, brandingView(s));
+  }),
+);
+
 // GET /public/help/:accountId — the help-center bundle.
 router.get(
   '/:accountId',
@@ -79,6 +93,7 @@ router.get(
       },
       intro: settings?.helpIntro ?? null,
       hideBranding: settings?.hideBranding ?? false,
+      branding: brandingView(settings),
       faqs: faqs.map(faqView),
       articles: articles.map(articleCardView),
     });
@@ -127,11 +142,32 @@ router.get(
   }),
 );
 
+function brandingView(s: {
+  brandName?: string | null;
+  brandLogoUrl?: string | null;
+  accentColor?: string | null;
+  brandColor?: string | null;
+  hideBranding?: boolean;
+} | null) {
+  return {
+    name: s?.brandName ?? null,
+    logoUrl: s?.brandLogoUrl ?? null,
+    accentColor: s?.accentColor ?? null,
+    brandColor: s?.brandColor ?? null,
+    hideBranding: s?.hideBranding ?? false,
+  };
+}
+
+function emptyBranding() {
+  return { name: null, logoUrl: null, accentColor: null, brandColor: null, hideBranding: false };
+}
+
 function emptyBundle() {
   return {
     contact: { email: null, phone: null, address: null, contactUrl: null, docsUrl: null },
     intro: null,
     hideBranding: false,
+    branding: emptyBranding(),
     faqs: [] as unknown[],
     articles: [] as unknown[],
   };

@@ -205,6 +205,15 @@ model AccountSettings {
   contactUrl          String?
   /// Short intro line shown at the top of the help center.
   helpIntro           String?
+  // ─── Branding: applied to the public help center + hosted portal ───
+  /// Customer-facing workspace name (header + sign-in screens).
+  brandName           String?
+  /// Logo URL shown in the help-center hero + portal header chip.
+  brandLogoUrl        String?
+  /// Hex #RRGGBB — accent (→ --primary/--ring: buttons, links).
+  accentColor         String?
+  /// Hex #RRGGBB — brand/surface base (→ --background/--card/… palette).
+  brandColor          String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
