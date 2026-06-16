@@ -160,6 +160,8 @@ function brandingView(s: {
   accentColor?: string | null;
   brandColor?: string | null;
   hideBranding?: boolean;
+  docsUrl?: string | null;
+  contactUrl?: string | null;
 } | null) {
   return {
     name: s?.brandName ?? null,
@@ -167,11 +169,22 @@ function brandingView(s: {
     accentColor: s?.accentColor ?? null,
     brandColor: s?.brandColor ?? null,
     hideBranding: s?.hideBranding ?? false,
+    // Product deep-links — the hosted portal surfaces these as nav items.
+    docsUrl: s?.docsUrl ?? null,
+    contactUrl: s?.contactUrl ?? null,
   };
 }
 
 function emptyBranding() {
-  return { name: null, logoUrl: null, accentColor: null, brandColor: null, hideBranding: false };
+  return {
+    name: null,
+    logoUrl: null,
+    accentColor: null,
+    brandColor: null,
+    hideBranding: false,
+    docsUrl: null,
+    contactUrl: null,
+  };
 }
 
 function emptyBundle() {

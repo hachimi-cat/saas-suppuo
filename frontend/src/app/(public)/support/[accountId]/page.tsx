@@ -29,7 +29,6 @@ import {
   BookOpen,
   ChevronDown,
   ArrowRight,
-  LifeBuoy,
   ExternalLink,
   Ticket,
 } from 'lucide-react';
@@ -146,33 +145,17 @@ export default function HelpCenterPage({
   return (
     <div>
       {/* Live-chat widget — mounts the bottom-right bubble on this page. */}
-      <Script src="/widget.js" data-suppuo-account={accountId} strategy="afterInteractive" />
+      <Script
+        src="/widget.js"
+        data-suppuo-account={accountId}
+        data-suppuo-accent={branding.accentColor ?? ''}
+        strategy="afterInteractive"
+      />
 
       {/* ── Hero + search ─────────────────────────────────────────── */}
+      {/* No logo here — the header already carries it. */}
       <div className="text-center">
-        {branding.logoUrl ? (
-          // Padded chip behind the workspace logo mark (serront storefront
-          // header pattern) — breathing room + a backdrop so a light mark
-          // still reads on the themed brand background.
-          <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-black/25 p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={branding.logoUrl}
-              alt={branding.name || 'Help center'}
-              className="size-full object-contain"
-            />
-          </span>
-        ) : (
-          <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <LifeBuoy className="size-6" strokeWidth={1.75} />
-          </span>
-        )}
-        {branding.name && (
-          <p className="mt-3 text-sm font-semibold tracking-tight text-muted-foreground">
-            {branding.name}
-          </p>
-        )}
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">How can we help?</h1>
+        <h1 className="text-3xl font-bold tracking-tight">How can we help?</h1>
         {bundle.intro && (
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">{bundle.intro}</p>
         )}

@@ -12,7 +12,6 @@
 import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  LifeBuoy,
   Mail,
   Plus,
   ChevronLeft,
@@ -115,20 +114,9 @@ function SignIn({ accountId }: { accountId: string }) {
         action={{ href: `/support/${accountId}`, label: 'Help center' }}
       />
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-12">
+      {/* No logo here — the header already carries it. */}
       <div className="text-center">
-        {branding.logoUrl ? (
-          // Padded chip behind the workspace logo (serront storefront-
-          // header pattern) so a light mark reads on the themed brand.
-          <span className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-black/25 p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={branding.logoUrl} alt={name} className="size-full object-contain" />
-          </span>
-        ) : (
-          <span className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <LifeBuoy className="size-6" strokeWidth={1.75} />
-          </span>
-        )}
-        <h1 className="mt-4 text-2xl font-bold tracking-tight">{name}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Sign in to view and track your tickets.</p>
       </div>
 

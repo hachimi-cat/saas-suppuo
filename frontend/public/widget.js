@@ -52,7 +52,12 @@
   if (document.getElementById('suppuo-widget-root')) return;
 
   // ── tiny helpers ───────────────────────────────────────────────────
-  var BLUE = '#0080FF';
+  // Accent: an embedding page that already knows the brand (e.g. the
+  // hosted help center) can pass data-suppuo-accent for an INSTANT
+  // branded bubble — no flash of default blue, no config round-trip. The
+  // widget-config fetch below still recolors for plain embeds.
+  var ACCENT_ATTR = script.getAttribute('data-suppuo-accent');
+  var BLUE = ACCENT_ATTR && /^#[0-9a-fA-F]{6}$/.test(ACCENT_ATTR) ? ACCENT_ATTR : '#0080FF';
   var FONT =
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 

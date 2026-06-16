@@ -20,7 +20,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { LifeBuoy, Menu, Ticket } from 'lucide-react';
+import { BookOpen, LifeBuoy, Mail, Menu, Ticket } from 'lucide-react';
 import { Sidebar, type NavSection, type SessionUser } from '@forjio/portal-ui';
 import type { PublicBranding } from '@/lib/theme';
 
@@ -44,15 +44,20 @@ export function PortalShell({
 
   const name = branding.name || 'Support';
   const base = `/portal/${accountId}`;
+  // Documentation + Contact link out to the product's own pages (new tab,
+  // via onClick so the portal stays open); shown only when configured.
+  const open2 = (url: string) => () => window.open(url, '_blank', 'noopener');
+  const helpItems: NavSection['items'] = [
+    { href: `/support/${accountId}`, label: 'Help center', icon: LifeBuoy },
+  ];
+  if (branding.docsUrl) helpItems.push({ onClick: open2(branding.docsUrl), label: 'Documentation', icon: BookOpen });
+  if (branding.contactUrl) helpItems.push({ onClick: open2(branding.contactUrl), label: 'Contact', icon: Mail });
   const sections: NavSection[] = [
     {
       label: 'Support',
       items: [{ href: base, label: 'My tickets', icon: Ticket }],
     },
-    {
-      label: 'Help',
-      items: [{ href: `/support/${accountId}`, label: 'Help center', icon: LifeBuoy }],
-    },
+    { label: 'Help', items: helpItems },
   ];
   const sessionUser: SessionUser | null = email ? { email } : null;
 

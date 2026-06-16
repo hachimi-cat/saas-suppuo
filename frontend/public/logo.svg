@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Suppuo logomark — speech bubble + lifebuoy ring. White so it reads
+       on the dark header/sidebar logo chip. Hosted at /logo.svg for the
+       Suppuo workspace's brandLogoUrl. -->
+  <path d="M12 3C7 3 3 6.6 3 11c0 2.4 1.2 4.5 3.1 6L5.4 20.6a.7.7 0 0 0 1 .8l3.9-2.1c.55.1 1.1.2 1.7.2 5 0 9-3.6 9-8.5S17 3 12 3Z" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="12" cy="11" r="3.4" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="12" cy="11" r="1" fill="#ffffff"/>
+</svg>

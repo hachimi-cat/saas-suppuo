@@ -154,6 +154,8 @@ export interface PublicBranding {
   accentColor: string | null;
   brandColor: string | null;
   hideBranding: boolean;
+  docsUrl: string | null;
+  contactUrl: string | null;
 }
 
 export const EMPTY_BRANDING: PublicBranding = {
@@ -162,4 +164,6 @@ export const EMPTY_BRANDING: PublicBranding = {
   accentColor: null,
   brandColor: null,
   hideBranding: false,
+  docsUrl: null,
+  contactUrl: null,
 };
