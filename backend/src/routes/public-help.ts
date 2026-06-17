@@ -4,6 +4,7 @@ import { prisma } from '../lib/db.js';
 import { sendOk, sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { helpSearch } from '../lib/help-search.js';
+import { resolveAccountId } from '../lib/resolve-account.js';
 
 /*
  * /api/v1/public/help — the unauthenticated read surface for the hosted
@@ -14,12 +15,6 @@ import { helpSearch } from '../lib/help-search.js';
  */
 
 const router = Router();
-
-const ACCOUNT_ID_RE = /^acc_[0-9A-Za-z]{24,28}$/;
-
-function badAccount(accountId: string): boolean {
-  return !ACCOUNT_ID_RE.test(accountId);
-}
 
 function faqView(a: {
   id: string;
@@ -53,8 +48,8 @@ function articleCardView(a: {
 router.get(
   '/:accountId/branding',
   asyncHandler(async (req, res) => {
-    const accountId = String(req.params.accountId);
-    if (badAccount(accountId)) {
+    const accountId = await resolveAccountId(String(req.params.accountId));
+    if (!accountId) {
       return sendOk(res, req, emptyBranding());
     }
     const s = await prisma.accountSettings.findUnique({ where: { accountId } });
@@ -66,8 +61,8 @@ router.get(
 router.get(
   '/:accountId/logo',
   asyncHandler(async (req, res) => {
-    const accountId = String(req.params.accountId);
-    if (badAccount(accountId)) return sendErr(res, req, 404, 'NOT_FOUND', 'no logo');
+    const accountId = await resolveAccountId(String(req.params.accountId));
+    if (!accountId) return sendErr(res, req, 404, 'NOT_FOUND', 'no logo');
     const s = await prisma.accountSettings.findUnique({
       where: { accountId },
       select: { brandLogoData: true, brandLogoType: true },
@@ -88,8 +83,8 @@ router.get(
 router.get(
   '/:accountId',
   asyncHandler(async (req, res) => {
-    const accountId = String(req.params.accountId);
-    if (badAccount(accountId)) {
+    const accountId = await resolveAccountId(String(req.params.accountId));
+    if (!accountId) {
       return sendOk(res, req, emptyBundle());
     }
     const [settings, faqs, articles, docs] = await Promise.all([
@@ -135,9 +130,9 @@ const searchQuery = z.object({ q: z.string().trim().max(200).default('') });
 router.get(
   '/:accountId/search',
   asyncHandler(async (req, res) => {
-    const accountId = String(req.params.accountId);
+    const accountId = await resolveAccountId(String(req.params.accountId));
     const { q } = searchQuery.parse(req.query);
-    if (badAccount(accountId) || !q) {
+    if (!accountId || !q) {
       return sendOk(res, req, { query: q, hits: [] });
     }
     const hits = await helpSearch.search(accountId, q, 10);
@@ -149,8 +144,8 @@ router.get(
 router.get(
   '/:accountId/a/:slug',
   asyncHandler(async (req, res) => {
-    const accountId = String(req.params.accountId);
-    if (badAccount(accountId)) {
+    const accountId = await resolveAccountId(String(req.params.accountId));
+    if (!accountId) {
       return sendOk(res, req, { article: null });
     }
     const row = await prisma.helpArticle.findFirst({

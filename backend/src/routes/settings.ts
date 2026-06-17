@@ -178,6 +178,7 @@ router.put(
 // ─── Branding: logo + colors for the help center + hosted portal ──────
 
 const BRAND_DEFAULTS = {
+  slug: null as string | null,
   brandName: null as string | null,
   brandLogoUrl: null as string | null,
   accentColor: null as string | null,
@@ -190,7 +191,25 @@ const hexColor = z
   .regex(/^#[0-9a-fA-F]{6}$/, 'expected #RRGGBB')
   .or(z.literal(''));
 
+// Slug: lowercase-kebab, 3–40 chars. Empty string clears it.
+const slugField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .max(40)
+  .refine((v) => v === '' || /^[a-z0-9]+(?:-[a-z0-9]+){0,}$/.test(v), 'lowercase letters, numbers and hyphens')
+  .refine((v) => v === '' || v.length >= 3, 'at least 3 characters');
+
+// Reserved — would collide with routes/sub-paths on suppuo.com.
+const RESERVED_SLUGS = new Set([
+  'portal', 'support', 'api', 'admin', 'dashboard', 'login', 'logout',
+  'callback', 'verify', 'widget', 'new', 't', 'a', 'settings', 'help',
+  'www', 'app', 'mail', 'static', 'assets', 'public', 'docs', 'about',
+  'pricing', 'contact', 'signup', 'signin', 'auth',
+]);
+
 const brandPutBody = z.object({
+  slug: slugField.nullable().optional(),
   brandName: z.string().trim().max(80).nullable().optional(),
   brandLogoUrl: urlOrEmpty.nullable().optional(),
   accentColor: hexColor.nullable().optional(),
@@ -199,6 +218,7 @@ const brandPutBody = z.object({
 
 function brandView(s: typeof BRAND_DEFAULTS): typeof BRAND_DEFAULTS {
   return {
+    slug: s.slug ?? null,
     brandName: s.brandName ?? null,
     brandLogoUrl: s.brandLogoUrl ?? null,
     accentColor: s.accentColor ?? null,
@@ -224,12 +244,26 @@ router.put(
     for (const k of ['brandName', 'brandLogoUrl', 'accentColor', 'brandColor'] as const) {
       if (input[k] !== undefined) data[k] = emptyToNull(input[k] ?? null);
     }
-    const saved = await prisma.accountSettings.upsert({
-      where: { accountId },
-      create: { accountId, ...data },
-      update: data,
-    });
-    sendOk(res, req, brandView(saved));
+    if (input.slug !== undefined) {
+      const slug = emptyToNull(input.slug ?? null);
+      if (slug && RESERVED_SLUGS.has(slug)) {
+        return sendErr(res, req, 422, 'VALIDATION_ERROR', `"${slug}" is reserved — pick another`);
+      }
+      data.slug = slug;
+    }
+    try {
+      const saved = await prisma.accountSettings.upsert({
+        where: { accountId },
+        create: { accountId, ...data },
+        update: data,
+      });
+      sendOk(res, req, brandView(saved));
+    } catch (e) {
+      if (typeof e === 'object' && e !== null && (e as { code?: string }).code === 'P2002') {
+        return sendErr(res, req, 409, 'CONFLICT', 'that URL slug is already taken');
+      }
+      throw e;
+    }
   }),
 );
 

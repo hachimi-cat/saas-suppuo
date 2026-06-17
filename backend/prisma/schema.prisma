@@ -183,6 +183,10 @@ model CsatResponse {
 /// days is indexed by dow (0 = Sunday); null = closed that day.
 model AccountSettings {
   accountId           String   @id
+  /// Readable, editable URL handle for the hosted help center + portal
+  /// (suppuo.com/support/<slug> + /portal/<slug>). Unique, lowercase-
+  /// kebab. Falls back to the accountId in URLs when unset.
+  slug                String?  @unique
   businessHours       Json?
   autoResponseEnabled Boolean  @default(false)
   /// Auto-ack template sent when a ticket arrives INSIDE business hours.

@@ -37,6 +37,7 @@ interface HelpConfig {
 }
 
 interface Branding {
+  slug: string | null;
   brandName: string | null;
   brandLogoUrl: string | null;
   accentColor: string | null;
@@ -67,6 +68,7 @@ export default function HelpCenterAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [cfgSaved, setCfgSaved] = useState(false);
   const [brandSaved, setBrandSaved] = useState(false);
+  const [brandError, setBrandError] = useState<string | null>(null);
   const [logoBusy, setLogoBusy] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
   const logoInput = useRef<HTMLInputElement>(null);
@@ -104,10 +106,12 @@ export default function HelpCenterAdminPage() {
     e.preventDefault();
     if (!branding) return;
     setBrandSaved(false);
+    setBrandError(null);
     try {
       await apiRequest('/settings/branding', {
         method: 'PUT',
         body: {
+          slug: branding.slug || '',
           brandName: branding.brandName || null,
           brandLogoUrl: branding.brandLogoUrl || null,
           accentColor: branding.accentColor || null,
@@ -116,8 +120,8 @@ export default function HelpCenterAdminPage() {
       });
       setBrandSaved(true);
       setTimeout(() => setBrandSaved(false), 2500);
-    } catch {
-      /* keep the form; the user can retry */
+    } catch (err) {
+      setBrandError(err instanceof ApiRequestError ? err.message : 'Could not save branding');
     }
   }
 
@@ -279,6 +283,21 @@ export default function HelpCenterAdminPage() {
             ). They never affect your own dashboard.
           </p>
           <form onSubmit={saveBranding} className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Field label="URL slug" full>
+              <div className="flex items-center gap-1 rounded-lg border border-border bg-background px-3 text-sm">
+                <span className="shrink-0 text-muted-foreground">suppuo.com/support/</span>
+                <input
+                  value={branding.slug ?? ''}
+                  onChange={(e) => setBranding({ ...branding, slug: e.target.value })}
+                  placeholder="your-brand"
+                  className="w-full bg-transparent py-2 outline-none"
+                />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Lowercase letters, numbers, hyphens. Used for your help center + portal
+                (suppuo.com/portal/{branding.slug || '…'}). The acc_… link keeps working.
+              </p>
+            </Field>
             <Field label="Brand name">
               <input
                 value={branding.brandName ?? ''}
@@ -365,6 +384,7 @@ export default function HelpCenterAdminPage() {
                 Save branding
               </button>
               {brandSaved && <span className="text-sm text-primary">Saved ✓</span>}
+              {brandError && <span className="text-sm text-destructive">{brandError}</span>}
             </div>
           </form>
         </section>
@@ -497,7 +517,7 @@ function blankCfg(): HelpConfig {
 }
 
 function blankBranding(): Branding {
-  return { brandName: null, brandLogoUrl: null, accentColor: null, brandColor: null };
+  return { slug: null, brandName: null, brandLogoUrl: null, accentColor: null, brandColor: null };
 }
 
 // Paired color picker + hex text input, both bound to the same value.

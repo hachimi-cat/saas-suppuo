@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { sendOk } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { sendRequesterLoginEmail } from '../lib/email.js';
+import { resolveAccountId } from '../lib/resolve-account.js';
 import {
   issueRequesterToken,
   verifyRequesterToken,
@@ -22,7 +23,6 @@ import {
  */
 
 const router = Router();
-const ACCOUNT_ID_RE = /^acc_[0-9A-Za-z]{24,28}$/;
 
 // Per-IP rate limit on the email-sending login endpoint (in-process).
 const RL_MS = 15 * 60 * 1000;
@@ -54,7 +54,8 @@ setInterval(() => {
 }, RL_MS).unref();
 
 const loginBody = z.object({
-  accountId: z.string().regex(ACCOUNT_ID_RE),
+  // A handle: acc_… id OR a workspace slug (resolved below).
+  accountId: z.string().trim().min(3).max(64),
   email: z.string().trim().email(),
 });
 
@@ -66,9 +67,16 @@ router.post(
       // Still 200 (don't leak), just skip sending.
       return sendOk(res, req, { ok: true });
     }
-    const token = issueRequesterToken(input.accountId, input.email, 'login');
+    // Resolve the handle (slug or acc_…) to the real workspace id; the
+    // token + email are keyed on the resolved accountId. Still always-200.
+    const accountId = await resolveAccountId(input.accountId);
+    if (!accountId) return sendOk(res, req, { ok: true });
+    const token = issueRequesterToken(accountId, input.email, 'login');
     void sendRequesterLoginEmail({
-      accountId: input.accountId,
+      accountId,
+      // The verify URL uses the handle the user came in on (slug → a clean
+      // /portal/<slug>/verify link); the token itself carries the real acc.
+      handle: input.accountId,
       to: input.email.toLowerCase(),
       loginToken: token,
     }).catch((e) => console.error('[public-requester] login-email failed', e));

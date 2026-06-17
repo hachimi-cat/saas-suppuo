@@ -9,6 +9,7 @@ import { writeOutbox } from '../lib/outbox.js';
 import { nextStatusOnMessage, generateAccessToken } from '../lib/ticket-flow.js';
 import { sendTicketReceivedEmail } from '../lib/email.js';
 import { accountHidesBranding } from '../lib/branding.js';
+import { resolveAccountId } from '../lib/resolve-account.js';
 import { publicAttachmentsRouter } from './attachments.js';
 import {
   ATTACHMENT_META_SELECT,
@@ -50,15 +51,9 @@ router.use((req, res, next) => {
   next();
 });
 
-// Accept BOTH account-id shapes: a derived/personal account
-// (acc_<24 lowercase hex>) AND a Huudis WORKSPACE (acc_01<ULID>,
-// uppercase Crockford base32). The old hex-only regex 400'd every
-// Forjio product workspace — which is exactly what the family widget
-// embeds use (Plugipay = acc_01KPHF…). 2026-06-16.
-const ACCOUNT_ID_RE = /^acc_[0-9A-Za-z]{24,28}$/;
-
 const submitBody = z.object({
-  accountId: z.string().regex(ACCOUNT_ID_RE),
+  // A handle: a raw acc_… id OR a workspace slug (resolved in the handler).
+  accountId: z.string().trim().min(3).max(64),
   subject: z.string().trim().min(1).max(300),
   body: z.string().trim().min(1).max(20_000),
   email: z.string().email(),
@@ -114,9 +109,10 @@ setInterval(() => {
 router.get(
   '/widget-config',
   asyncHandler(async (req, res) => {
-    const account = typeof req.query.account === 'string' ? req.query.account : '';
-    if (!ACCOUNT_ID_RE.test(account)) {
-      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'account required (acc_…)');
+    const handle = typeof req.query.account === 'string' ? req.query.account : '';
+    const account = await resolveAccountId(handle);
+    if (!account) {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'account required (acc_… or slug)');
     }
     const settings = await prisma.accountSettings.findUnique({ where: { accountId: account } });
     sendOk(res, req, {
@@ -149,15 +145,21 @@ router.post(
       );
     }
 
+    // Resolve the handle (acc_… or slug) to the real workspace id.
+    const accountId = await resolveAccountId(input.accountId);
+    if (!accountId) {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'unknown workspace');
+    }
+
     const ticket = await prisma.$transaction(async (tx) => {
       const last = await tx.ticket.aggregate({
-        where: { accountId: input.accountId },
+        where: { accountId },
         _max: { number: true },
       });
       const t = await tx.ticket.create({
         data: {
           id: newId('tkt'),
-          accountId: input.accountId,
+          accountId,
           number: (last._max.number ?? 0) + 1,
           subject: input.subject,
           channel: 'web',
@@ -177,7 +179,7 @@ router.post(
       });
       await writeOutbox(tx, {
         type: 'suppuo.ticket.created.v1',
-        accountId: input.accountId,
+        accountId,
         aggregateId: t.id,
         data: { ticketId: t.id, number: t.number, subject: t.subject, channel: 'web' },
       });

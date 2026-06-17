@@ -79,10 +79,12 @@ export async function sendTicketReceivedEmail(opts: {
  *  the portal exchanges for a 30-day session. */
 export async function sendRequesterLoginEmail(opts: {
   accountId: string;
+  /** URL handle for the verify link (slug when set, else the accountId). */
+  handle?: string;
   to: string;
   loginToken: string;
 }): Promise<void> {
-  const link = `${PORTAL}/portal/${opts.accountId}/verify?token=${encodeURIComponent(opts.loginToken)}`;
+  const link = `${PORTAL}/portal/${opts.handle ?? opts.accountId}/verify?token=${encodeURIComponent(opts.loginToken)}`;
   const brand = brandingFooter(await accountHidesBranding(opts.accountId));
   await send(
     opts.accountId,
