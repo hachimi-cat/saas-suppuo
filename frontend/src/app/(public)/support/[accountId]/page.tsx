@@ -36,6 +36,9 @@ import { apiRequest } from '@/lib/api';
 import { useSetHideBranding } from '@/components/public-branding';
 import { EMPTY_BRANDING, type PublicBranding } from '@/lib/theme';
 
+// Cache-buster for the embedded widget.js — bump when widget.js changes.
+const WIDGET_VERSION = '2026-06-17a';
+
 interface Faq {
   id: string;
   category: string | null;
@@ -144,9 +147,11 @@ export default function HelpCenterPage({
 
   return (
     <div>
-      {/* Live-chat widget — mounts the bottom-right bubble on this page. */}
+      {/* Live-chat widget — mounts the bottom-right bubble on this page.
+          The ?v= cache-buster forces a fresh fetch when widget.js changes
+          (iOS Safari caches it hard despite max-age=0). Bump on edits. */}
       <Script
-        src="/widget.js"
+        src={`/widget.js?v=${WIDGET_VERSION}`}
         data-suppuo-account={accountId}
         data-suppuo-accent={branding.accentColor ?? ''}
         strategy="afterInteractive"
