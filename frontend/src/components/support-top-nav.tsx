@@ -27,7 +27,7 @@ export function SupportTopNav({
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
         <Link href={`/support/${accountId}`} className="flex min-w-0 items-center gap-2.5">
           {branding.logoUrl ? (
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-black/25 p-1.5">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card p-1.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={branding.logoUrl} alt={name} className="size-full object-contain" />
             </span>
