@@ -19,9 +19,14 @@
  */
 
 import { use, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import Script from 'next/script';
 import { apiRequest } from '@/lib/api';
 import { storefrontThemeVars, EMPTY_BRANDING, type PublicBranding } from '@/lib/theme';
 import { PortalBrandingProvider } from '@/components/portal-branding';
+
+// Cache-buster for the embedded widget.js — keep in sync with the help
+// center's WIDGET_VERSION.
+const WIDGET_VERSION = '2026-06-17a';
 
 export default function PortalThemeLayout({
   children,
@@ -52,6 +57,14 @@ export default function PortalThemeLayout({
 
   return (
     <PortalBrandingProvider branding={branding}>
+      {/* Live-chat bubble on the portal too (sign-in + signed-in), themed
+          to the workspace accent — same widget as the help center. */}
+      <Script
+        src={`/widget.js?v=${WIDGET_VERSION}`}
+        data-suppuo-account={accountId}
+        data-suppuo-accent={branding.accentColor ?? ''}
+        strategy="afterInteractive"
+      />
       <div style={style} className="min-h-screen bg-background text-foreground">
         {children}
       </div>
