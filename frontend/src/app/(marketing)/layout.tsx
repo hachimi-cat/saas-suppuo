@@ -6,7 +6,7 @@ import { MarketingShell, MarketingNav, MarketingFooter } from '@forjio/website-u
 // Suppuo's own hosted support page (live chat + help form). Dogfood: Suppuo
 // embeds its own widget and points its help links at its own support page.
 const SUPPUO_SUPPORT_URL =
-  'https://suppuo.com/support/acc_01KPHFWPGDAYH9WG7KYY36KF58';
+  'https://suppuo.com/support/suppuo';
 
 // Mirror the package DEFAULT_COLUMNS but add a dedicated "Help center"
 // entry pointing at the hosted Suppuo help center.

@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 
 // Suppuo's own hosted support page (live chat + help form) — dogfood.
 const SUPPUO_SUPPORT_URL =
-  'https://suppuo.com/support/acc_01KPHFWPGDAYH9WG7KYY36KF58';
+  'https://suppuo.com/support/suppuo';
 
 /*
  * The mailbox, phone, and registered address are family-stable — every
