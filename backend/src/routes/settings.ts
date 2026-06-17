@@ -1,8 +1,9 @@
 import { Router } from 'express';
+import express from 'express';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/db.js';
-import { sendOk } from '../lib/http.js';
+import { sendOk, sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 
 /*
@@ -227,6 +228,65 @@ router.put(
       where: { accountId },
       create: { accountId, ...data },
       update: data,
+    });
+    sendOk(res, req, brandView(saved));
+  }),
+);
+
+// ─── Logo upload — raw image body, stored as bytes (avatar pattern) ───
+
+const MAX_LOGO_BYTES = 1 * 1024 * 1024; // 1MB
+const ALLOWED_LOGO_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+const logoRawBody = express.raw({ limit: '2mb', type: () => true });
+
+function logoServeUrl(accountId: string): string {
+  const base = process.env.SUPPUO_PUBLIC_URL ?? 'https://suppuo.com';
+  // Cache-bust on every upload so a re-uploaded logo shows immediately.
+  return `${base}/api/v1/public/help/${accountId}/logo?v=${Date.now()}`;
+}
+
+router.post(
+  '/branding/logo',
+  logoRawBody,
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const contentType = (req.headers['content-type'] ?? '').split(';')[0]!.trim().toLowerCase();
+    if (!ALLOWED_LOGO_TYPES.has(contentType)) {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'logo must be a PNG, JPEG, WebP or GIF');
+    }
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'empty upload body');
+    }
+    if (req.body.length > MAX_LOGO_BYTES) {
+      return sendErr(res, req, 400, 'VALIDATION_ERROR', 'logo exceeds the 1MB limit');
+    }
+    const bytes = new Uint8Array(req.body);
+    const saved = await prisma.accountSettings.upsert({
+      where: { accountId },
+      create: {
+        accountId,
+        brandLogoData: bytes,
+        brandLogoType: contentType,
+        brandLogoUrl: logoServeUrl(accountId),
+      },
+      update: {
+        brandLogoData: bytes,
+        brandLogoType: contentType,
+        brandLogoUrl: logoServeUrl(accountId),
+      },
+    });
+    sendOk(res, req, brandView(saved));
+  }),
+);
+
+router.delete(
+  '/branding/logo',
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const saved = await prisma.accountSettings.upsert({
+      where: { accountId },
+      create: { accountId },
+      update: { brandLogoData: null, brandLogoType: null, brandLogoUrl: null },
     });
     sendOk(res, req, brandView(saved));
   }),

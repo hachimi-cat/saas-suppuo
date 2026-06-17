@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/db.js';
-import { sendOk } from '../lib/http.js';
+import { sendOk, sendErr } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { helpSearch } from '../lib/help-search.js';
 
@@ -59,6 +59,28 @@ router.get(
     }
     const s = await prisma.accountSettings.findUnique({ where: { accountId } });
     sendOk(res, req, brandingView(s));
+  }),
+);
+
+// GET /public/help/:accountId/logo — serve the uploaded brand logo bytes.
+router.get(
+  '/:accountId/logo',
+  asyncHandler(async (req, res) => {
+    const accountId = String(req.params.accountId);
+    if (badAccount(accountId)) return sendErr(res, req, 404, 'NOT_FOUND', 'no logo');
+    const s = await prisma.accountSettings.findUnique({
+      where: { accountId },
+      select: { brandLogoData: true, brandLogoType: true },
+    });
+    if (!s?.brandLogoData || !s.brandLogoType) {
+      return sendErr(res, req, 404, 'NOT_FOUND', 'no logo');
+    }
+    res.status(200);
+    res.setHeader('Content-Type', s.brandLogoType);
+    res.setHeader('Content-Length', String(s.brandLogoData.length));
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.end(Buffer.from(s.brandLogoData));
   }),
 );
 

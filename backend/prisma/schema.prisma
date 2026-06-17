@@ -208,8 +208,14 @@ model AccountSettings {
   // ─── Branding: applied to the public help center + hosted portal ───
   /// Customer-facing workspace name (header + sign-in screens).
   brandName           String?
-  /// Logo URL shown in the help-center hero + portal header chip.
+  /// Logo URL shown in the help-center header + portal chip. Either an
+  /// external URL the workspace pasted, OR our own serve endpoint when a
+  /// logo was UPLOADED (see brandLogoData below).
   brandLogoUrl        String?
+  /// Uploaded logo image (raw bytes) + its content type — served at
+  /// GET /public/help/<acc>/logo. Set via PUT /settings/branding/logo.
+  brandLogoData       Bytes?
+  brandLogoType       String?
   /// Hex #RRGGBB — accent (→ --primary/--ring: buttons, links).
   accentColor         String?
   /// Hex #RRGGBB — brand/surface base (→ --background/--card/… palette).

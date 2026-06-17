@@ -12,8 +12,9 @@
  *                 draft/published. CRUD /help/articles.
  */
 
-import { useEffect, useState } from 'react';
-import { apiRequest, ApiRequestError } from '@/lib/api';
+import { useEffect, useRef, useState } from 'react';
+import { Image as ImageIcon } from 'lucide-react';
+import { apiRequest, ApiRequestError, uploadFile } from '@/lib/api';
 
 interface Article {
   id: string;
@@ -66,6 +67,9 @@ export default function HelpCenterAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [cfgSaved, setCfgSaved] = useState(false);
   const [brandSaved, setBrandSaved] = useState(false);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const logoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     load();
@@ -114,6 +118,36 @@ export default function HelpCenterAdminPage() {
       setTimeout(() => setBrandSaved(false), 2500);
     } catch {
       /* keep the form; the user can retry */
+    }
+  }
+
+  async function uploadLogo(file: File) {
+    if (!branding) return;
+    setLogoBusy(true);
+    setLogoError(null);
+    try {
+      // Upload the raw image (≤1MB, PNG/JPEG/WebP/GIF) → the server stores
+      // it and returns the new branding incl. the served logo URL.
+      const data = await uploadFile<Branding>('/settings/branding/logo', file);
+      setBranding({ ...branding, brandLogoUrl: data.brandLogoUrl });
+    } catch (err) {
+      setLogoError(err instanceof ApiRequestError ? err.message : 'Could not upload the logo');
+    } finally {
+      setLogoBusy(false);
+    }
+  }
+
+  async function removeLogo() {
+    if (!branding) return;
+    setLogoBusy(true);
+    setLogoError(null);
+    try {
+      await apiRequest('/settings/branding/logo', { method: 'DELETE' });
+      setBranding({ ...branding, brandLogoUrl: null });
+    } catch {
+      /* leave it; the user can retry */
+    } finally {
+      setLogoBusy(false);
     }
   }
 
@@ -253,13 +287,52 @@ export default function HelpCenterAdminPage() {
                 className={inputCls}
               />
             </Field>
-            <Field label="Logo URL">
-              <input
-                value={branding.brandLogoUrl ?? ''}
-                onChange={(e) => setBranding({ ...branding, brandLogoUrl: e.target.value })}
-                placeholder="https://yourbrand.com/logo.png"
-                className={inputCls}
-              />
+            <Field label="Logo">
+              <div className="flex items-center gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background">
+                  {branding.brandLogoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={branding.brandLogoUrl} alt="Logo" className="size-full object-contain p-1" />
+                  ) : (
+                    <ImageIcon className="size-5 text-muted-foreground" />
+                  )}
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={logoBusy}
+                    onClick={() => logoInput.current?.click()}
+                    className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+                  >
+                    {logoBusy ? 'Uploading…' : branding.brandLogoUrl ? 'Change' : 'Upload logo'}
+                  </button>
+                  {branding.brandLogoUrl && (
+                    <button
+                      type="button"
+                      disabled={logoBusy}
+                      onClick={removeLogo}
+                      className="text-sm text-destructive hover:underline disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  )}
+                  <input
+                    ref={logoInput}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) uploadLogo(f);
+                      e.target.value = '';
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                PNG, JPEG, WebP or GIF · up to 1MB.
+              </p>
+              {logoError && <p className="mt-1 text-xs text-destructive">{logoError}</p>}
             </Field>
             <Field label="Accent color (buttons, links, highlights)">
               <ColorField
