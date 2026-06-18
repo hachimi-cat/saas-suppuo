@@ -32,6 +32,7 @@ import publicHelpRouter from './public-help.js';
 import requesterRouter from './requester.js';
 import publicRequesterRouter from './public-requester.js';
 import { requireRequester } from '../middleware/requester.js';
+import { domainsRouter, publicDomainsRouter } from './domains.js';
 
 /**
  * Route factory. Ported from saas-plugipay.
@@ -122,6 +123,10 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   /** Hosted customer portal — passwordless login (magic link) + verify.
    *  Mounted before /public so the prefix resolves here. */
   router.use('/public/requester', rateLimit('ingress'), publicRequesterRouter);
+  /** Custom domains — workspace-managed (CRUD) + the provisioner callback
+   *  and Host→account resolve for the frontend middleware. */
+  router.use('/domains', requireAuth, domainsRouter);
+  router.use('/public/domains', publicDomainsRouter);
   /** Authenticated "my tickets" API — requester-scoped (cookie session
    *  for the hosted portal, or a trusted service header for the embedded
    *  in-product support center). */

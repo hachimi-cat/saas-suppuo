@@ -22,6 +22,7 @@ export type IdPrefix =
   | 'rst' // roster identity (SSO capture for admin CRM)
   | 'rmb' // roster membership (identity ↔ accountId sighting)
   | 'hlp' // help-center article / FAQ
+  | 'cdm' // custom domain
   | 'idem'; // idempotency fallback
 
 export function newId(prefix: IdPrefix): string {

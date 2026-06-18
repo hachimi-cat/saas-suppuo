@@ -230,6 +230,26 @@ model AccountSettings {
   @@map("account_settings")
 }
 
+/// Custom domain mapped to a workspace's help center + portal
+/// (e.g. help.plugipay.com → that workspace). DNS-verified (CNAME →
+/// suppuo.com + TXT token), then SSL+nginx provisioned on the Suppuo box.
+model CustomDomain {
+  id                String   @id // cdm_<ulid>
+  accountId         String
+  domain            String   @unique
+  /// PENDING → VERIFYING → ACTIVE | FAILED
+  status            String   @default("PENDING")
+  verificationToken String
+  sslProvisioned    Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([accountId])
+  @@index([domain])
+  @@index([status])
+  @@map("custom_domains")
+}
+
 /// Help-center content — FAQ entries and longer articles, one row per
 /// item, account-scoped. kind='faq' (title=question, body=answer) or
 /// kind='article' (title + markdown body). Published items surface on
