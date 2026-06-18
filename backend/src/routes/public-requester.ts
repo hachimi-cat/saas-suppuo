@@ -5,6 +5,7 @@ import { sendOk } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
 import { sendRequesterLoginEmail } from '../lib/email.js';
 import { resolveAccountId } from '../lib/resolve-account.js';
+import { isDefaultHostname, resolveHostToAccount } from '../lib/custom-domains.js';
 import {
   issueRequesterToken,
   verifyRequesterToken,
@@ -57,7 +58,28 @@ const loginBody = z.object({
   // A handle: acc_… id OR a workspace slug (resolved below).
   accountId: z.string().trim().min(3).max(64),
   email: z.string().trim().email(),
+  // The origin the user is signing in from (window.location.origin) —
+  // used for the verify link so a custom-domain login's session cookie
+  // lands on that domain. Validated below (must be a Suppuo host or an
+  // ACTIVE custom domain for THIS workspace) to prevent open-redirect.
+  origin: z.string().trim().max(255).optional(),
 });
+
+async function validatedVerifyBase(
+  origin: string | undefined,
+  accountId: string,
+): Promise<string | undefined> {
+  if (!origin) return undefined;
+  let host: string;
+  try {
+    host = new URL(origin).host.toLowerCase();
+  } catch {
+    return undefined;
+  }
+  if (isDefaultHostname(host)) return origin.replace(/\/$/, '');
+  const acc = await resolveHostToAccount(host);
+  return acc === accountId ? origin.replace(/\/$/, '') : undefined;
+}
 
 router.post(
   '/login',
@@ -72,11 +94,14 @@ router.post(
     const accountId = await resolveAccountId(input.accountId);
     if (!accountId) return sendOk(res, req, { ok: true });
     const token = issueRequesterToken(accountId, input.email, 'login');
+    // On a custom domain, the verify link must point back to that domain
+    // (root /portal/verify) so the session cookie lands there; otherwise
+    // the suppuo.com /portal/<handle>/verify link.
+    const verifyBase = await validatedVerifyBase(input.origin, accountId);
     void sendRequesterLoginEmail({
       accountId,
-      // The verify URL uses the handle the user came in on (slug → a clean
-      // /portal/<slug>/verify link); the token itself carries the real acc.
       handle: input.accountId,
+      customBase: verifyBase,
       to: input.email.toLowerCase(),
       loginToken: token,
     }).catch((e) => console.error('[public-requester] login-email failed', e));

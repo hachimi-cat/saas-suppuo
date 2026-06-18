@@ -81,10 +81,17 @@ export async function sendRequesterLoginEmail(opts: {
   accountId: string;
   /** URL handle for the verify link (slug when set, else the accountId). */
   handle?: string;
+  /** Custom-domain origin (e.g. https://help.brand.com) — when set, the
+   *  verify link is rooted there (the domain serves /portal at root) so the
+   *  session cookie lands on that host. */
+  customBase?: string;
   to: string;
   loginToken: string;
 }): Promise<void> {
-  const link = `${PORTAL}/portal/${opts.handle ?? opts.accountId}/verify?token=${encodeURIComponent(opts.loginToken)}`;
+  const tok = encodeURIComponent(opts.loginToken);
+  const link = opts.customBase
+    ? `${opts.customBase}/portal/verify?token=${tok}`
+    : `${PORTAL}/portal/${opts.handle ?? opts.accountId}/verify?token=${tok}`;
   const brand = brandingFooter(await accountHidesBranding(opts.accountId));
   await send(
     opts.accountId,
