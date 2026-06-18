@@ -35,6 +35,7 @@ import {
 import { apiRequest } from '@/lib/api';
 import { useSetHideBranding } from '@/components/public-branding';
 import { EMPTY_BRANDING, type PublicBranding } from '@/lib/theme';
+import { currentHost, hcPath, portalPath } from '@/lib/host-routing';
 
 // Cache-buster for the embedded widget.js — bump when widget.js changes.
 const WIDGET_VERSION = '2026-06-17a';
@@ -89,6 +90,10 @@ export default function HelpCenterPage({
   const [searching, setSearching] = useState(false);
   const setHideBranding = useSetHideBranding();
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Host-aware link base: clean paths on a custom domain, /support/<handle>
+  // on Suppuo. Read after mount so SSR/first paint emits the handle form.
+  const [host, setHost] = useState<string | null>(null);
+  useEffect(() => setHost(currentHost()), []);
 
   useEffect(() => {
     apiRequest<Bundle>(`/public/help/${accountId}`)
@@ -194,7 +199,7 @@ export default function HelpCenterPage({
                   <MessageCircle className="size-4" /> Live chat
                 </button>
                 <Link
-                  href={`/support/${accountId}/new`}
+                  href={hcPath(host, accountId, 'new')}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
                 >
                   Submit a request
@@ -205,7 +210,7 @@ export default function HelpCenterPage({
             <ul className="space-y-2">
               {hits.map((h) => (
                 <li key={h.id}>
-                  <HitRow accountId={accountId} hit={h} />
+                  <HitRow accountId={accountId} host={host} hit={h} />
                 </li>
               ))}
             </ul>
@@ -247,7 +252,7 @@ export default function HelpCenterPage({
                   {articles.map((a) => (
                     <Link
                       key={a.id}
-                      href={`/support/${accountId}/a/${a.slug}`}
+                      href={hcPath(host, accountId, `a/${a.slug}`)}
                       className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary"
                     >
                       <div className="flex items-start gap-3">
@@ -285,7 +290,7 @@ export default function HelpCenterPage({
                       {items.map((d) => (
                         <li key={d.id}>
                           <Link
-                            href={`/support/${accountId}/a/${d.slug}`}
+                            href={hcPath(host, accountId, `a/${d.slug}`)}
                             className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm transition-colors hover:border-primary hover:text-primary"
                           >
                             <FileText className="size-4 shrink-0 text-primary" />
@@ -315,7 +320,7 @@ export default function HelpCenterPage({
               </span>
             </button>
             <Link
-              href={`/support/${accountId}/new`}
+              href={hcPath(host, accountId, 'new')}
               className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary"
             >
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -327,7 +332,7 @@ export default function HelpCenterPage({
               </span>
             </Link>
             <Link
-              href={`/portal/${accountId}`}
+              href={portalPath(host, accountId)}
               className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary sm:col-span-2"
             >
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -402,7 +407,15 @@ function FaqRow({ faq }: { faq: Faq }) {
   );
 }
 
-function HitRow({ accountId, hit }: { accountId: string; hit: SearchHit }) {
+function HitRow({
+  accountId,
+  host,
+  hit,
+}: {
+  accountId: string;
+  host: string | null;
+  hit: SearchHit;
+}) {
   const inner = (
     <div className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -414,7 +427,7 @@ function HitRow({ accountId, hit }: { accountId: string; hit: SearchHit }) {
   );
   // Articles deep-link to their reader; FAQ has no standalone page.
   return hit.kind === 'article' && hit.slug ? (
-    <Link href={`/support/${accountId}/a/${hit.slug}`}>{inner}</Link>
+    <Link href={hcPath(host, accountId, `a/${hit.slug}`)}>{inner}</Link>
   ) : (
     inner
   );

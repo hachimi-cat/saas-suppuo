@@ -54,7 +54,7 @@ export default function SupportThemeLayout({
       <SupportTopNav
         accountId={accountId}
         branding={branding ?? EMPTY_BRANDING}
-        action={{ href: `/portal/${accountId}`, label: 'Sign in' }}
+        action={{ to: 'portal', label: 'Sign in' }}
       />
       <main className="mx-auto max-w-3xl px-4 py-12">
         {children}

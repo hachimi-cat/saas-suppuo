@@ -24,6 +24,7 @@ import { apiRequest, ApiRequestError } from '@/lib/api';
 import { PortalShell } from '@/components/portal-shell';
 import { usePortalBranding } from '@/components/portal-branding';
 import { SupportTopNav } from '@/components/support-top-nav';
+import { currentHost, hcHome } from '@/lib/host-routing';
 
 interface Me {
   email: string;
@@ -88,14 +89,20 @@ function SignIn({ accountId }: { accountId: string }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Host-aware "Back to the help center" link (clean `/` on a custom
+  // domain, `/support/<handle>` on Suppuo). Read after mount, SSR-safe.
+  const [host, setHost] = useState<string | null>(null);
+  useEffect(() => setHost(currentHost()), []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
+      // origin tells the backend where to send the magic-link verify URL
+      // back to — so a custom-domain sign-in returns to that domain.
       await apiRequest('/public/requester/login', {
         method: 'POST',
-        body: { accountId, email },
+        body: { accountId, email, origin: window.location.origin },
       });
       setSent(true);
     } catch {
@@ -111,7 +118,7 @@ function SignIn({ accountId }: { accountId: string }) {
       <SupportTopNav
         accountId={accountId}
         branding={branding}
-        action={{ href: `/support/${accountId}`, label: 'Help center' }}
+        action={{ to: 'help', label: 'Help center' }}
       />
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-12">
       {/* No logo here — the header already carries it. */}
@@ -173,7 +180,7 @@ function SignIn({ accountId }: { accountId: string }) {
       </div>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        <Link href={`/support/${accountId}`} className="text-primary hover:underline">
+        <Link href={hcHome(host, accountId)} className="text-primary hover:underline">
           Back to the help center
         </Link>
       </p>

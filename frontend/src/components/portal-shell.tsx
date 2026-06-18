@@ -18,11 +18,12 @@
  *    mobile-only top bar with a menu button.
  */
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { BookOpen, LifeBuoy, Mail, Menu, Ticket } from 'lucide-react';
 import { Sidebar, type NavSection, type SessionUser } from '@forjio/portal-ui';
 import type { PublicBranding } from '@/lib/theme';
+import { currentHost, hcHome, portalPath } from '@/lib/host-routing';
 
 export function PortalShell({
   accountId,
@@ -38,17 +39,22 @@ export function PortalShell({
   children: ReactNode;
 }) {
   // Read so a route change re-renders the shell; portal-ui resolves the
-  // active item from the pathname internally.
+  // active item from the pathname internally — which on a custom domain is
+  // the CLEAN `/portal`, so the nav hrefs must be clean too (else the
+  // active pill never matches). Read the host after mount (SSR-safe).
   usePathname();
   const [open, setOpen] = useState(false);
+  const [host, setHost] = useState<string | null>(null);
+  useEffect(() => setHost(currentHost()), []);
 
   const name = branding.name || 'Support';
-  const base = `/portal/${accountId}`;
+  const base = portalPath(host, accountId);
+  const helpHome = hcHome(host, accountId);
   // Documentation + Contact link out to the product's own pages (new tab,
   // via onClick so the portal stays open); shown only when configured.
   const open2 = (url: string) => () => window.open(url, '_blank', 'noopener');
   const helpItems: NavSection['items'] = [
-    { href: `/support/${accountId}`, label: 'Help center', icon: LifeBuoy },
+    { href: helpHome, label: 'Help center', icon: LifeBuoy },
   ];
   if (branding.docsUrl) helpItems.push({ onClick: open2(branding.docsUrl), label: 'Documentation', icon: BookOpen });
   if (branding.contactUrl) helpItems.push({ onClick: open2(branding.contactUrl), label: 'Contact', icon: Mail });

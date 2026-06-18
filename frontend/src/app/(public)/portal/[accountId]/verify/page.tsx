@@ -9,11 +9,14 @@ import { use, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { apiRequest } from '@/lib/api';
+import { currentHost, portalPath } from '@/lib/host-routing';
 
 function Verify({ accountId }: { accountId: string }) {
   const router = useRouter();
   const search = useSearchParams();
   const [failed, setFailed] = useState(false);
+  const [host, setHost] = useState<string | null>(null);
+  useEffect(() => setHost(currentHost()), []);
 
   useEffect(() => {
     const token = search.get('token');
@@ -23,7 +26,10 @@ function Verify({ accountId }: { accountId: string }) {
     }
     apiRequest<{ ok: boolean }>('/public/requester/verify', { method: 'POST', body: { token } })
       .then(({ data }) => {
-        if (data.ok) router.replace(`/portal/${accountId}`);
+        // Host-aware destination: clean `/portal` on a custom domain,
+        // `/portal/<handle>` on Suppuo. currentHost() is read synchronously
+        // here (window is available — this only runs client-side post-mount).
+        if (data.ok) router.replace(portalPath(currentHost(), accountId));
         else setFailed(true);
       })
       .catch(() => setFailed(true));
@@ -37,7 +43,7 @@ function Verify({ accountId }: { accountId: string }) {
             This sign-in link is invalid or has expired.
           </p>
           <a
-            href={`/portal/${accountId}`}
+            href={portalPath(host, accountId)}
             className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
           >
             Get a new link

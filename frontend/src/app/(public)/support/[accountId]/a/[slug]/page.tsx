@@ -12,6 +12,7 @@ import { marked } from 'marked';
 import { ChevronLeft } from 'lucide-react';
 import { apiRequest } from '@/lib/api';
 import { useSetHideBranding } from '@/components/public-branding';
+import { currentHost, hcHome } from '@/lib/host-routing';
 
 interface Article {
   id: string;
@@ -30,6 +31,8 @@ export default function ArticlePage({
   const { accountId, slug } = use(params);
   const [article, setArticle] = useState<Article | null | undefined>(undefined);
   const setHideBranding = useSetHideBranding();
+  const [host, setHost] = useState<string | null>(null);
+  useEffect(() => setHost(currentHost()), []);
 
   useEffect(() => {
     // Pick up the workspace branding preference for the footer.
@@ -50,7 +53,7 @@ export default function ArticlePage({
   return (
     <div className="mx-auto max-w-2xl">
       <Link
-        href={`/support/${accountId}`}
+        href={hcHome(host, accountId)}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ChevronLeft className="size-4" /> Help center

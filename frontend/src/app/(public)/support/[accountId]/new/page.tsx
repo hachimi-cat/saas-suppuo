@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
 import { useSetHideBranding } from '@/components/public-branding';
+import { currentHost, hcHome, isCustomDomain } from '@/lib/host-routing';
 
 export default function SupportFormPage({
   params,
@@ -28,6 +29,8 @@ export default function SupportFormPage({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ number: number; accessToken: string } | null>(null);
   const setHideBranding = useSetHideBranding();
+  const [host, setHost] = useState<string | null>(null);
+  useEffect(() => setHost(currentHost()), []);
 
   useEffect(() => {
     apiRequest<{ hideBranding: boolean }>(`/public/widget-config?account=${accountId}`)
@@ -57,6 +60,13 @@ export default function SupportFormPage({
   }
 
   if (done) {
+    // The anonymous ticket-tracking page (/t/<token>) is a Suppuo-host
+    // route — it's NOT part of the custom-domain rewrite map, so on a
+    // custom domain link to it absolutely on suppuo.com rather than let
+    // the middleware rewrite it into a non-existent /support/<acc>/t/… .
+    const trackHref = isCustomDomain(host)
+      ? `https://suppuo.com/t/${done.accessToken}`
+      : `/t/${done.accessToken}`;
     return (
       <div className="mx-auto max-w-xl">
         <div className="rounded-xl border border-border bg-card p-6 text-center">
@@ -66,7 +76,7 @@ export default function SupportFormPage({
             We&apos;ve emailed you a link to follow progress. You can also open it now:
           </p>
           <a
-            href={`/t/${done.accessToken}`}
+            href={trackHref}
             className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
           >
             View your ticket
@@ -79,7 +89,7 @@ export default function SupportFormPage({
   return (
     <div className="mx-auto max-w-xl">
       <Link
-        href={`/support/${accountId}`}
+        href={hcHome(host, accountId)}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ChevronLeft className="size-4" /> Help center
