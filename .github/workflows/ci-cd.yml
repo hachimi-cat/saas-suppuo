@@ -185,10 +185,8 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@100.123.65.113 'bash -se' <<'SCRIPT'
           cd /opt/saas/suppuo/backend
-          sed -i '/^TURNSTILE_SECRET_KEY=/d' .env 2>/dev/null || true
-          echo 'TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }}' >> .env
-          sed -i '/^TURNSTILE_ALLOWED_HOSTNAMES=/d' .env 2>/dev/null || true
-          echo 'TURNSTILE_ALLOWED_HOSTNAMES=${{ secrets.TURNSTILE_ALLOWED_HOSTNAMES }}' >> .env
+          # Staging is uniformly NON-VERIFYING — strip any captcha secret so e2e never blocks.
+          sed -i '/^TURNSTILE_SECRET_KEY=/d; /^TURNSTILE_ALLOWED_HOSTNAMES=/d' .env 2>/dev/null || true
           # --omit=dev — runtime deps only. dist/ + prisma client are
           # already in the artifact from the Build job, so we just need
           # the production node_modules tree here.
