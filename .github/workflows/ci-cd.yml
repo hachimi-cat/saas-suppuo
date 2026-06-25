@@ -141,6 +141,15 @@ jobs:
     needs: build
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.repository != 'hachimi-cat/forjio-service-template'
     steps:
+      # Staging lives on the SHARED box reached only over the tailnet
+      # (taila71a7b.ts.net). Join as an ephemeral CI node so rsync/SSH below
+      # can reach 100.123.65.113. Ephemeral key → the node auto-removes when
+      # the job ends.
+      - name: Connect to tailnet (ephemeral CI node)
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+          hostname: suppuo-deploy-ci
       - uses: actions/download-artifact@v7
         with:
           name: backend-dist
@@ -149,59 +158,62 @@ jobs:
         with:
           name: frontend-out
           path: frontend/
-      - name: Deploy via rsync
-        uses: burnett01/rsync-deployments@7.0.1
-        with:
-          # node_modules excluded — droplet installs runtime deps with
-          # --omit=dev for backend. Frontend is static (`out/`) so no
-          # frontend node_modules ship at all.
-          switches: -avz --delete --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache
-          path: ./
-          remote_path: /opt/saas/suppuo/
-          remote_host: ${{ secrets.STAGING_HOST }}
-          remote_user: root
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Migrate + restart
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 30m
-          script_stop: true
-          script: |
-            cd /opt/saas/suppuo/backend
-            # --omit=dev — runtime deps only. dist/ + prisma client are
-            # already in the artifact from the Build job, so we just need
-            # the production node_modules tree here.
-            npm ci --omit=dev
-            npx prisma migrate deploy
-            pm2 restart suppuo || pm2 start dist/index.js --name suppuo -i 1
-            cd /opt/saas/suppuo/frontend
-            # Dynamic Next app — `.next/` is pre-built in the artifact
-            # (no on-box `next build`; 1GB-droplet OOM gotcha). Install
-            # runtime deps + run `next start` under pm2.
-            npm ci --omit=dev
-            pm2 restart suppuo-frontend || pm2 start npm --name suppuo-frontend -- start
-            pm2 save
-            # Wait for backend to be healthy
-            echo "Waiting for backend health..."
-            for i in $(seq 1 30); do
-              if curl -sf http://localhost:4170/api/v1/health > /dev/null 2>&1; then
-                echo "Backend healthy after ${i}s"
-                break
-              fi
-              sleep 1
-            done
-            # Wait for frontend to be serving
-            echo "Waiting for frontend..."
-            for i in $(seq 1 30); do
-              if curl -sf http://localhost:3170/ > /dev/null 2>&1; then
-                echo "Frontend healthy after ${i}s"
-                break
-              fi
-              sleep 1
-            done
+      - name: Set up deploy SSH key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+      # De-containerized rsync/ssh. The burnett01/appleboy actions run inside
+      # Docker WITHOUT the runner host's tailnet route, so they time out
+      # reaching 100.123.65.113 (the box's tailnet IP — private, only routable
+      # over the tailnet joined above). Plain rsync/ssh run on the host, so
+      # they route over tailscale0. node_modules/.next/cache excluded — the
+      # box installs runtime deps via `npm ci --omit=dev` per the script below.
+      - name: Deploy via rsync (over tailnet)
+        run: |
+          rsync -avz --delete \
+            --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30" \
+            ./ root@100.123.65.113:/opt/saas/suppuo/
+      # bash -se: -e aborts (and fails the job, blocking prod) if
+      # `prisma migrate deploy` fails — replacing appleboy's silent
+      # script-continue. -s reads the script from the heredoc on stdin.
+      - name: Migrate + restart (over tailnet)
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@100.123.65.113 'bash -se' <<'SCRIPT'
+          cd /opt/saas/suppuo/backend
+          # --omit=dev — runtime deps only. dist/ + prisma client are
+          # already in the artifact from the Build job, so we just need
+          # the production node_modules tree here.
+          npm ci --omit=dev
+          npx prisma migrate deploy
+          pm2 restart suppuo || pm2 start dist/index.js --name suppuo -i 1
+          cd /opt/saas/suppuo/frontend
+          # Dynamic Next app — `.next/` is pre-built in the artifact
+          # (no on-box `next build`; 1GB-droplet OOM gotcha). Install
+          # runtime deps + run `next start` under pm2.
+          npm ci --omit=dev
+          pm2 restart suppuo-frontend || pm2 start npm --name suppuo-frontend -- start
+          pm2 save
+          # Wait for backend to be healthy
+          echo "Waiting for backend health..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4170/api/v1/health > /dev/null 2>&1; then
+              echo "Backend healthy after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+          # Wait for frontend to be serving
+          echo "Waiting for frontend..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3170/ > /dev/null 2>&1; then
+              echo "Frontend healthy after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+          SCRIPT
 
   e2e-staging:
     name: E2E Tests (Staging)
@@ -214,6 +226,20 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
+      # Staging runs on the SHARED box reached only over the tailnet
+      # (taila71a7b.ts.net). Join as an ephemeral CI node, then map the
+      # staging hostname → the box's tailnet IP in the runner's /etc/hosts.
+      # We KEEP the hostname (not the raw IP) because nginx routes the ~10
+      # products' staging vhosts by Host header — so e2e must send
+      # Host: staging-<brand>.forjio.com while the connection rides the
+      # tailnet. E2E_BYPASS_SECRET still gates auth.
+      - name: Connect to tailnet (ephemeral CI node)
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+          hostname: suppuo-e2e-ci
+      - name: Route staging host over the tailnet
+        run: echo "100.123.65.113 ${{ secrets.STAGING_HOST }}" | sudo tee -a /etc/hosts
       - uses: actions/setup-node@v5
         with:
           node-version: 22
