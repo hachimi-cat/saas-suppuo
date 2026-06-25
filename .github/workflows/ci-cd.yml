@@ -186,6 +186,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@100.123.65.113 'bash -se' <<'SCRIPT'
           cd /opt/saas/suppuo/backend
           grep -q '^TURNSTILE_SECRET_KEY=' .env 2>/dev/null || echo 'TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }}' >> .env
+          grep -q '^TURNSTILE_ALLOWED_HOSTNAMES=' .env 2>/dev/null || echo 'TURNSTILE_ALLOWED_HOSTNAMES=${{ secrets.TURNSTILE_ALLOWED_HOSTNAMES }}' >> .env
           # --omit=dev — runtime deps only. dist/ + prisma client are
           # already in the artifact from the Build job, so we just need
           # the production node_modules tree here.
@@ -423,6 +424,7 @@ jobs:
           script: |
             cd /opt/saas/suppuo/backend
             grep -q '^TURNSTILE_SECRET_KEY=' .env 2>/dev/null || echo 'TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }}' >> .env
+            grep -q '^TURNSTILE_ALLOWED_HOSTNAMES=' .env 2>/dev/null || echo 'TURNSTILE_ALLOWED_HOSTNAMES=${{ secrets.TURNSTILE_ALLOWED_HOSTNAMES }}' >> .env
             npm ci --omit=dev
             npx prisma generate
             npx prisma migrate deploy
