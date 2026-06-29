@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest, ApiRequestError, apiUrl } from '@/lib/api';
 import { Avatar } from '@/components/ui/avatar';
+import { APP_VERSION, BUILD_SHA, BUILD_DATE } from '@/lib/version';
 
 export default function SettingsPage() {
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -66,7 +67,41 @@ export default function SettingsPage() {
       <BrandingSection />
 
       <AutomationSection />
+
+      <PortalSection />
     </div>
+  );
+}
+
+// ─── Portal version (Forjio family build-time version mechanism) ─────
+// Values come from scripts/gen-version.mjs, regenerated on every
+// build/dev via the prebuild/predev npm hooks — never hand-bumped.
+
+function PortalSection() {
+  const buildDate = BUILD_DATE.slice(0, 10); // YYYY-MM-DD from the ISO timestamp
+
+  return (
+    <section className="rounded-xl border border-border p-5">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Portal
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        The build of the suppuo portal you&apos;re currently running.
+      </p>
+
+      <dl className="mt-4 space-y-2 text-sm">
+        <div className="flex items-center justify-between gap-4">
+          <dt className="text-muted-foreground">Version</dt>
+          <dd className="font-mono">{APP_VERSION}</dd>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <dt className="text-muted-foreground">Build</dt>
+          <dd className="font-mono">
+            {BUILD_SHA} · {buildDate}
+          </dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 
