@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import { gellix } from '@forjio/website-ui/fonts';
 import '@forjio/website-ui/styles/marketing.css';
 import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
 
 const brand = process.env.NEXT_PUBLIC_BRAND_NAME ?? 'Suppuo';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
-const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
+// Geist Sans / Mono — the Forjio family body + mono faces. globals.css
+// binds --font-sans / --font-mono to Geist's --font-geist-* vars.
+// Gellix (family display face) ships from @forjio/website-ui/fonts.
 
 export const metadata: Metadata = {
   title: { default: brand, template: `%s | ${brand}` },
@@ -18,9 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${gellix.variable} font-sans`}
+        className={`${GeistSans.variable} ${GeistMono.variable} ${gellix.variable} font-sans`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

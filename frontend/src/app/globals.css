@@ -29,6 +29,11 @@
     --input: 214 32% 87%;
     --ring: 206 100% 50%;
     --radius: 0.5rem;
+    /* Geist defines --font-geist-* on <body> (layout.tsx); bind the
+       theme's --font-sans / --font-mono to them so Tailwind's
+       font-sans / font-mono utilities resolve to Geist. */
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
   }
 }
 
@@ -39,9 +44,13 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
-  /* The .marketing-site :is(h1...h6) display-font rule ships from
-     @forjio/website-ui/styles/marketing.css (imported in app/layout.tsx).
-     Don't re-declare it here. */
+  /* Gellix display face on titles across the portal/admin (incl. bare
+     headings). The .marketing-site :is(h1...h6) rule from
+     @forjio/website-ui/styles/marketing.css is more specific, so it
+     still wins on the marketing pages. */
+  h1, h2, h3 {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  }
 }
 
 /* Markdown prose — shared by the marketing /docs and the help-center
