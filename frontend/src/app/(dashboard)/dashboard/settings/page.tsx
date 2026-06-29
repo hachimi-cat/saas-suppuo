@@ -69,7 +69,39 @@ export default function SettingsPage() {
       <AutomationSection />
 
       <PortalSection />
+
+      <DeleteAccountSection />
     </div>
+  );
+}
+
+// ─── Delete account (centralized in Huudis — Forjio family model) ────
+// Your account is a Huudis identity (SSO behind every Forjio product),
+// not a Suppuo-local record. Deletion is managed centrally in Huudis
+// (30-day grace, removes access across all products). Suppuo only
+// points there — no destructive behavior lives here.
+
+function DeleteAccountSection() {
+  return (
+    <section className="rounded-xl border border-border p-5">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Delete account
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Your account is your <strong className="font-semibold text-foreground">Huudis identity</strong> —
+        the single sign-on behind every Forjio product, not just Suppuo. Account deletion is
+        managed centrally in Huudis: it schedules a 30-day grace period and removes your access
+        across all Forjio products.
+      </p>
+      <a
+        href="https://huudis.com/dashboard/account"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 inline-flex items-center rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:border-primary/50"
+      >
+        Manage account in Huudis →
+      </a>
+    </section>
   );
 }
 
