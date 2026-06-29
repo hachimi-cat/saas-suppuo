@@ -33,6 +33,17 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 type DomainStatus = 'pending' | 'verifying' | 'active' | 'failed';
 
@@ -159,6 +170,7 @@ function DomainCard({ domain, onChanged }: { domain: Domain; onChanged: () => vo
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState(false);
 
   async function verify() {
     setVerifying(true);
@@ -179,9 +191,6 @@ function DomainCard({ domain, onChanged }: { domain: Domain; onChanged: () => vo
   }
 
   async function remove() {
-    if (!confirm(`Remove ${domain.domain}? Your help center will stop serving on this domain.`)) {
-      return;
-    }
     setRemoving(true);
     try {
       await apiRequest(`/domains/${domain.id}`, { method: 'DELETE' });
@@ -228,7 +237,7 @@ function DomainCard({ domain, onChanged }: { domain: Domain; onChanged: () => vo
             </button>
           )}
           <button
-            onClick={remove}
+            onClick={() => setPendingRemove(true)}
             disabled={removing}
             aria-label="Remove domain"
             className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
@@ -267,6 +276,26 @@ function DomainCard({ domain, onChanged }: { domain: Domain; onChanged: () => vo
           </p>
         </div>
       )}
+
+      <AlertDialog open={pendingRemove} onOpenChange={(o) => { if (!o) setPendingRemove(false); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {domain.domain}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your help center will stop serving on this domain.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={remove}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

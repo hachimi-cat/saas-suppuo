@@ -10,6 +10,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Bell, Globe, Hash, Mail, MessageCircle, MessageSquare, PenLine, Plug, Send, Trash2 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 interface Integration {
   id: string;
@@ -42,6 +61,7 @@ export default function ChannelsPage() {
   const [cloudSetup, setCloudSetup] = useState<{ webhookUrl: string; verifyToken: string } | null>(
     null,
   );
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
 
   const load = useCallback(() => {
     apiRequest<ChannelsPayload>('/channels')
@@ -57,7 +77,6 @@ export default function ChannelsPage() {
   }, [load]);
 
   async function remove(id: string) {
-    if (!confirm('Disconnect this integration?')) return;
     await apiRequest(`/channels/${id}`, { method: 'DELETE' }).catch(() => undefined);
     load();
   }
@@ -150,7 +169,7 @@ export default function ChannelsPage() {
           }
         >
           {byo('whatsapp_twilio').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+            <IntegrationRow key={i.id} i={i} onRemove={() => setPendingRemove(i.id)} />
           ))}
         </ChannelCard>
 
@@ -168,7 +187,7 @@ export default function ChannelsPage() {
           }
         >
           {byo('whatsapp_cloud').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+            <IntegrationRow key={i.id} i={i} onRemove={() => setPendingRemove(i.id)} />
           ))}
         </ChannelCard>
 
@@ -186,7 +205,7 @@ export default function ChannelsPage() {
           }
         >
           {byo('telegram_bot').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+            <IntegrationRow key={i.id} i={i} onRemove={() => setPendingRemove(i.id)} />
           ))}
         </ChannelCard>
         </ChannelSection>
@@ -208,7 +227,7 @@ export default function ChannelsPage() {
           }
         >
           {byo('email_resend').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+            <IntegrationRow key={i.id} i={i} onRemove={() => setPendingRemove(i.id)} />
           ))}
         </ChannelCard>
         </ChannelSection>
@@ -231,7 +250,7 @@ export default function ChannelsPage() {
           }
         >
           {byo('slack_webhook').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+            <IntegrationRow key={i.id} i={i} onRemove={() => setPendingRemove(i.id)} />
           ))}
         </ChannelCard>
 
@@ -249,7 +268,7 @@ export default function ChannelsPage() {
           }
         >
           {byo('discord_webhook').map((i) => (
-            <IntegrationRow key={i.id} i={i} onRemove={() => remove(i.id)} />
+            <IntegrationRow key={i.id} i={i} onRemove={() => setPendingRemove(i.id)} />
           ))}
         </ChannelCard>
         </ChannelSection>
@@ -320,6 +339,34 @@ export default function ChannelsPage() {
           }}
         />
       )}
+
+      <AlertDialog
+        open={!!pendingRemove}
+        onOpenChange={(o) => {
+          if (!o) setPendingRemove(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect this integration?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This channel will stop sending and receiving messages.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingRemove) remove(pendingRemove);
+                setPendingRemove(null);
+              }}
+            >
+              Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -463,21 +510,21 @@ function ConnectTwilioDialog({ onClose, onDone }: { onClose: () => void; onDone:
   }
 
   return (
-    <Dialog title="Connect your Twilio (WhatsApp)" onClose={onClose}>
-      <p className="text-xs text-muted-foreground">
-        Credentials are verified live against Twilio, then stored encrypted. Your number,
-        your message limits.
-      </p>
+    <ConnectDialog
+      title="Connect your Twilio (WhatsApp)"
+      description="Credentials are verified live against Twilio, then stored encrypted. Your number, your message limits."
+      onClose={onClose}
+    >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <form onSubmit={submit} className="space-y-2">
-        <input required value={accountSid} onChange={(e) => setAccountSid(e.target.value)} placeholder="Account SID (AC…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input required type="password" value={authToken} onChange={(e) => setAuthToken(e.target.value)} placeholder="Auth token" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input required value={number} onChange={(e) => setNumber(e.target.value)} placeholder="WhatsApp number (+62…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        <Input required value={accountSid} onChange={(e) => setAccountSid(e.target.value)} placeholder="Account SID (AC…)" />
+        <Input required type="password" value={authToken} onChange={(e) => setAuthToken(e.target.value)} placeholder="Auth token" />
+        <Input required value={number} onChange={(e) => setNumber(e.target.value)} placeholder="WhatsApp number (+62…)" />
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? 'Verifying…' : 'Connect'}
-        </button>
+        </Button>
       </form>
-    </Dialog>
+    </ConnectDialog>
   );
 }
 
@@ -518,23 +565,28 @@ function ConnectWhatsAppCloudDialog({
   }
 
   return (
-    <Dialog title="Connect WhatsApp Cloud API (Meta direct)" onClose={onClose}>
-      <p className="text-xs text-muted-foreground">
-        From your Meta App dashboard (WhatsApp → API Setup): a permanent access token and the
-        Phone number ID. Credentials are verified live against Meta, then stored encrypted.
-        You&apos;ll get a webhook URL + verify token to finish setup.
-      </p>
+    <ConnectDialog
+      title="Connect WhatsApp Cloud API (Meta direct)"
+      description={
+        <>
+          From your Meta App dashboard (WhatsApp → API Setup): a permanent access token and the
+          Phone number ID. Credentials are verified live against Meta, then stored encrypted.
+          You&apos;ll get a webhook URL + verify token to finish setup.
+        </>
+      }
+      onClose={onClose}
+    >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <form onSubmit={submit} className="space-y-2">
-        <input required type="password" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="Access token (EAA…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input required value={phoneNumberId} onChange={(e) => setPhoneNumberId(e.target.value)} placeholder="Phone number ID (digits)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input required value={displayNumber} onChange={(e) => setDisplayNumber(e.target.value)} placeholder="WhatsApp number (+62…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input type="password" value={appSecret} onChange={(e) => setAppSecret(e.target.value)} placeholder="App secret (optional — enables signature checks)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        <Input required type="password" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="Access token (EAA…)" />
+        <Input required value={phoneNumberId} onChange={(e) => setPhoneNumberId(e.target.value)} placeholder="Phone number ID (digits)" />
+        <Input required value={displayNumber} onChange={(e) => setDisplayNumber(e.target.value)} placeholder="WhatsApp number (+62…)" />
+        <Input type="password" value={appSecret} onChange={(e) => setAppSecret(e.target.value)} placeholder="App secret (optional — enables signature checks)" />
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? 'Verifying…' : 'Connect'}
-        </button>
+        </Button>
       </form>
-    </Dialog>
+    </ConnectDialog>
   );
 }
 
@@ -562,21 +614,21 @@ function ConnectResendDialog({ onClose, onDone }: { onClose: () => void; onDone:
   }
 
   return (
-    <Dialog title="Connect your Resend (email)" onClose={onClose}>
-      <p className="text-xs text-muted-foreground">
-        Requester notifications will send from your own verified domain via your Resend
-        account.
-      </p>
+    <ConnectDialog
+      title="Connect your Resend (email)"
+      description="Requester notifications will send from your own verified domain via your Resend account."
+      onClose={onClose}
+    >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <form onSubmit={submit} className="space-y-2">
-        <input required type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Resend API key (re_…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input required type="email" value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} placeholder="From email (support@yourdomain.com)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <input value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="From name (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        <Input required type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Resend API key (re_…)" />
+        <Input required type="email" value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} placeholder="From email (support@yourdomain.com)" />
+        <Input value={fromName} onChange={(e) => setFromName(e.target.value)} placeholder="From name (optional)" />
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? 'Verifying…' : 'Connect'}
-        </button>
+        </Button>
       </form>
-    </Dialog>
+    </ConnectDialog>
   );
 }
 
@@ -602,19 +654,19 @@ function ConnectTelegramDialog({ onClose, onDone }: { onClose: () => void; onDon
   }
 
   return (
-    <Dialog title="Connect your Telegram bot" onClose={onClose}>
-      <p className="text-xs text-muted-foreground">
-        Create a bot with @BotFather and paste its token. We verify it live, store it
-        encrypted, and register the inbound webhook for you — no manual setup.
-      </p>
+    <ConnectDialog
+      title="Connect your Telegram bot"
+      description="Create a bot with @BotFather and paste its token. We verify it live, store it encrypted, and register the inbound webhook for you — no manual setup."
+      onClose={onClose}
+    >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <form onSubmit={submit} className="space-y-2">
-        <input required type="password" value={botToken} onChange={(e) => setBotToken(e.target.value)} placeholder="Bot token (123456789:AA…)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        <Input required type="password" value={botToken} onChange={(e) => setBotToken(e.target.value)} placeholder="Bot token (123456789:AA…)" />
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? 'Verifying…' : 'Connect'}
-        </button>
+        </Button>
       </form>
-    </Dialog>
+    </ConnectDialog>
   );
 }
 
@@ -649,30 +701,51 @@ function ConnectWebhookDialog({
   }
 
   return (
-    <Dialog title={isSlack ? 'Connect Slack notifications' : 'Connect Discord notifications'} onClose={onClose}>
-      <p className="text-xs text-muted-foreground">
-        {isSlack
+    <ConnectDialog
+      title={isSlack ? 'Connect Slack notifications' : 'Connect Discord notifications'}
+      description={
+        isSlack
           ? 'Slack → your channel → Add an app → Incoming Webhooks → copy the webhook URL. We post a "connected ✓" test message to verify it, then store it encrypted.'
-          : 'Discord → Server Settings → Integrations → Webhooks → copy the webhook URL. We post a "connected ✓" test message to verify it, then store it encrypted.'}
-      </p>
+          : 'Discord → Server Settings → Integrations → Webhooks → copy the webhook URL. We post a "connected ✓" test message to verify it, then store it encrypted.'
+      }
+      onClose={onClose}
+    >
       {error && <p className="text-sm text-destructive">{error}</p>}
       <form onSubmit={submit} className="space-y-2">
-        <input required type="url" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)} placeholder={isSlack ? 'https://hooks.slack.com/services/…' : 'https://discord.com/api/webhooks/…'} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <button disabled={busy} className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        <Input required type="url" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)} placeholder={isSlack ? 'https://hooks.slack.com/services/…' : 'https://discord.com/api/webhooks/…'} />
+        <Button type="submit" disabled={busy} className="w-full">
           {busy ? 'Sending test message…' : 'Connect'}
-        </button>
+        </Button>
       </form>
-    </Dialog>
+    </ConnectDialog>
   );
 }
 
-function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function ConnectDialog({
+  title,
+  description,
+  onClose,
+  children,
+}: {
+  title: string;
+  description: React.ReactNode;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-3 rounded-xl border border-border bg-background p-5 shadow-xl">
-        <h2 className="text-lg font-semibold">{title}</h2>
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
         {children}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

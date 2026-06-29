@@ -13,6 +13,24 @@ import Link from 'next/link';
 import { apiRequest, ApiRequestError } from '@/lib/api';
 import { fetchMembers, type Member } from '@/lib/members';
 import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 interface Ticket {
   id: string;
@@ -36,6 +54,9 @@ interface ListResponse {
   cursor: string | null;
   hasMore: boolean;
 }
+
+// Radix Select forbids value="" — use this sentinel for the "any/anyone" option.
+const ALL = 'all';
 
 const STATUS_TABS = ['all', 'open', 'pending', 'resolved', 'closed'] as const;
 const CHANNELS = ['web', 'email', 'whatsapp', 'telegram'] as const;
@@ -174,9 +195,6 @@ export default function InboxPage() {
     return chips;
   }, [filters, members]);
 
-  const selectCls =
-    'rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-muted-foreground';
-
   return (
     <div className="mx-auto max-w-5xl">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -187,20 +205,15 @@ export default function InboxPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <input
+          <Input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search tickets…"
             aria-label="Search tickets"
-            className="w-48 rounded-lg border border-border bg-background px-3 py-2 text-sm sm:w-64"
+            className="w-48 sm:w-64"
           />
-          <button
-            onClick={() => setShowNew(true)}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
-          >
-            New ticket
-          </button>
+          <Button onClick={() => setShowNew(true)}>New ticket</Button>
         </div>
       </header>
 
@@ -222,62 +235,74 @@ export default function InboxPage() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <select
-          value={filters.assignee}
-          onChange={(e) => setFilters((f) => ({ ...f, assignee: e.target.value }))}
-          aria-label="Filter by assignee"
-          className={selectCls}
+        <Select
+          value={filters.assignee || ALL}
+          onValueChange={(v) => setFilters((f) => ({ ...f, assignee: v === ALL ? '' : v }))}
         >
-          <option value="">Assignee: anyone</option>
-          <option value="me">Assigned to me</option>
-          <option value="unassigned">Unassigned</option>
-          {members
-            .filter((m) => !m.isYou)
-            .map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name ?? m.email}
-              </option>
+          <SelectTrigger aria-label="Filter by assignee" className="h-auto w-auto py-1.5 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Assignee: anyone</SelectItem>
+            <SelectItem value="me">Assigned to me</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+            {members
+              .filter((m) => !m.isYou)
+              .map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.name ?? m.email}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.tag || ALL}
+          onValueChange={(v) => setFilters((f) => ({ ...f, tag: v === ALL ? '' : v }))}
+        >
+          <SelectTrigger aria-label="Filter by tag" className="h-auto w-auto py-1.5 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Tag: any</SelectItem>
+            {tags.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t}
+              </SelectItem>
             ))}
-        </select>
-        <select
-          value={filters.tag}
-          onChange={(e) => setFilters((f) => ({ ...f, tag: e.target.value }))}
-          aria-label="Filter by tag"
-          className={selectCls}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.channel || ALL}
+          onValueChange={(v) => setFilters((f) => ({ ...f, channel: v === ALL ? '' : v }))}
         >
-          <option value="">Tag: any</option>
-          {tags.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filters.channel}
-          onChange={(e) => setFilters((f) => ({ ...f, channel: e.target.value }))}
-          aria-label="Filter by channel"
-          className={selectCls}
+          <SelectTrigger aria-label="Filter by channel" className="h-auto w-auto py-1.5 text-xs capitalize">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Channel: any</SelectItem>
+            {CHANNELS.map((c) => (
+              <SelectItem key={c} value={c} className="capitalize">
+                {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.priority || ALL}
+          onValueChange={(v) => setFilters((f) => ({ ...f, priority: v === ALL ? '' : v }))}
         >
-          <option value="">Channel: any</option>
-          {CHANNELS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filters.priority}
-          onChange={(e) => setFilters((f) => ({ ...f, priority: e.target.value }))}
-          aria-label="Filter by priority"
-          className={selectCls}
-        >
-          <option value="">Priority: any</option>
-          {PRIORITIES.map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger aria-label="Filter by priority" className="h-auto w-auto py-1.5 text-xs capitalize">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Priority: any</SelectItem>
+            {PRIORITIES.map((p) => (
+              <SelectItem key={p} value={p} className="capitalize">
+                {p}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {activeChips.map((c) => (
           <button
@@ -435,38 +460,43 @@ function NewTicketDialog({ onClose, onCreated }: { onClose: () => void; onCreate
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <form
-        onSubmit={submit}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md space-y-3 rounded-xl border border-border bg-background p-5 shadow-xl"
-      >
-        <h2 className="text-lg font-semibold">Log a ticket</h2>
-        <p className="text-xs text-muted-foreground">
-          For requests that arrived outside the form — WhatsApp, phone, DM. The customer gets the
-          status link by email.
-        </p>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <input required value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <div className="flex gap-2">
-          <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Customer email" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (optional)" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        </div>
-        <textarea required value={body} onChange={(e) => setBody(e.target.value)} placeholder="What do they need?" rows={4} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-        <select value={channel} onChange={(e) => setChannel(e.target.value as never)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
-          <option value="whatsapp">Came in via WhatsApp</option>
-          <option value="email">Came in via email</option>
-          <option value="web">Other / walk-in</option>
-        </select>
-        <div className="flex justify-end gap-2 pt-1">
-          <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm">
-            Cancel
-          </button>
-          <button disabled={busy} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-            {busy ? 'Creating…' : 'Create ticket'}
-          </button>
-        </div>
-      </form>
-    </div>
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Log a ticket</DialogTitle>
+          <DialogDescription>
+            For requests that arrived outside the form — WhatsApp, phone, DM. The customer gets the
+            status link by email.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="space-y-3">
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Input required value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" />
+          <div className="flex gap-2">
+            <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Customer email" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (optional)" />
+          </div>
+          <Textarea required value={body} onChange={(e) => setBody(e.target.value)} placeholder="What do they need?" rows={4} />
+          <Select value={channel} onValueChange={(v) => setChannel(v as never)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="whatsapp">Came in via WhatsApp</SelectItem>
+              <SelectItem value="email">Came in via email</SelectItem>
+              <SelectItem value="web">Other / walk-in</SelectItem>
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {busy ? 'Creating…' : 'Create ticket'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

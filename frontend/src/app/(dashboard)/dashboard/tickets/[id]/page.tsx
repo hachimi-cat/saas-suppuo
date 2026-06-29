@@ -16,6 +16,13 @@ import {
   MessageAttachments,
   type AttachmentMeta,
 } from '@/components/ui/attachments';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Message {
   id: string;
@@ -189,27 +196,35 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
         <div className="mt-3 flex flex-wrap gap-2">
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Status
-            <select
-              value={ticket.status}
-              onChange={(e) => setField('status', e.target.value)}
-              className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium capitalize"
-            >
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            <Select value={ticket.status} onValueChange={(v) => setField('status', v)}>
+              <SelectTrigger
+                aria-label="Status"
+                className="h-8 w-[130px] gap-1.5 rounded-lg px-2 py-1 text-xs font-medium capitalize"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Priority
-            <select
-              value={ticket.priority}
-              onChange={(e) => setField('priority', e.target.value)}
-              className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium capitalize"
-            >
-              {PRIORITIES.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
+            <Select value={ticket.priority} onValueChange={(v) => setField('priority', v)}>
+              <SelectTrigger
+                aria-label="Priority"
+                className="h-8 w-[120px] gap-1.5 rounded-lg px-2 py-1 text-xs font-medium capitalize"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PRIORITIES.map((p) => (
+                  <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Assignee
@@ -221,23 +236,30 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
                 className="text-[10px]"
               />
             )}
-            <select
-              value={ticket.assigneeSub ?? ''}
-              onChange={(e) => setAssignee(e.target.value || null)}
-              className="max-w-[180px] rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium"
+            <Select
+              value={ticket.assigneeSub ?? 'none'}
+              onValueChange={(v) => setAssignee(v === 'none' ? null : v)}
             >
-              <option value="">Unassigned</option>
-              {members.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name ? `${m.name} (${m.email})` : m.email}
-                  {m.isYou ? ' — you' : ''}
-                </option>
-              ))}
-              {/* Keep an unknown sub visible (e.g. a member who left). */}
-              {ticket.assigneeSub && !members.some((m) => m.id === ticket.assigneeSub) && (
-                <option value={ticket.assigneeSub}>{ticket.assigneeSub}</option>
-              )}
-            </select>
+              <SelectTrigger
+                aria-label="Assignee"
+                className="h-8 max-w-[180px] gap-1.5 rounded-lg px-2 py-1 text-xs font-medium"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Unassigned</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.name ? `${m.name} (${m.email})` : m.email}
+                    {m.isYou ? ' — you' : ''}
+                  </SelectItem>
+                ))}
+                {/* Keep an unknown sub visible (e.g. a member who left). */}
+                {ticket.assigneeSub && !members.some((m) => m.id === ticket.assigneeSub) && (
+                  <SelectItem value={ticket.assigneeSub}>{ticket.assigneeSub}</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </label>
           {mySub && ticket.assigneeSub !== mySub && (
             <button
@@ -321,19 +343,25 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
 
       <form onSubmit={sendReply} className="mt-5 space-y-2 rounded-xl border border-border p-4">
         {canned.length > 0 && (
-          <select
+          <Select
             value=""
-            onChange={(e) => {
-              const c = canned.find((x) => x.id === e.target.value);
+            onValueChange={(v) => {
+              const c = canned.find((x) => x.id === v);
               if (c) setReply((r) => (r ? `${r}\n\n${c.body}` : c.body));
             }}
-            className="rounded-lg border border-border bg-background px-2 py-1 text-xs"
           >
-            <option value="">Insert canned reply…</option>
-            {canned.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
+            <SelectTrigger
+              aria-label="Insert canned reply"
+              className="h-8 w-auto max-w-[240px] gap-1.5 rounded-lg px-2 py-1 text-xs"
+            >
+              <SelectValue placeholder="Insert canned reply…" />
+            </SelectTrigger>
+            <SelectContent>
+              {canned.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
         <textarea
           value={reply}

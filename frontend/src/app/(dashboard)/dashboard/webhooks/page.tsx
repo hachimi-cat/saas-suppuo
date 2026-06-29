@@ -8,6 +8,28 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 interface Subscription {
   id: string;
@@ -30,6 +52,7 @@ export default function WebhooksPage() {
   // Secret of the most recently created endpoint — shown once, inline.
   const [newSecret, setNewSecret] = useState<{ id: string; secret: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<Subscription | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -61,7 +84,6 @@ export default function WebhooksPage() {
   }
 
   async function remove(sub: Subscription) {
-    if (!window.confirm(`Remove the endpoint ${sub.url}? Deliveries stop immediately.`)) return;
     try {
       await apiRequest(`/webhook-subscriptions/${sub.id}`, { method: 'DELETE' });
       if (newSecret?.id === sub.id) setNewSecret(null);
@@ -174,7 +196,7 @@ export default function WebhooksPage() {
                 {s.active ? 'Active' : 'Paused'}
               </span>
               <button
-                onClick={() => remove(s)}
+                onClick={() => setPendingRemove(s)}
                 className="shrink-0 text-xs text-destructive hover:underline"
               >
                 Remove
@@ -238,6 +260,36 @@ const valid =
           }}
         />
       )}
+
+      <AlertDialog
+        open={!!pendingRemove}
+        onOpenChange={(o) => {
+          if (!o) setPendingRemove(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove endpoint?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Remove the endpoint{' '}
+              <span className="break-all font-mono">{pendingRemove?.url}</span>? Deliveries stop
+              immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingRemove) remove(pendingRemove);
+                setPendingRemove(null);
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -282,63 +334,66 @@ function AddEndpointDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <form
-        onSubmit={submit}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md space-y-3 rounded-xl border border-border bg-background p-5 shadow-xl"
-      >
-        <h2 className="text-lg font-semibold">Add webhook endpoint</h2>
-        <p className="text-xs text-muted-foreground">
-          You&apos;ll get the signing secret right after — it&apos;s shown only once.
-        </p>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <input
-          required
-          autoFocus
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://example.com/webhooks/suppuo"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-        />
-        <fieldset className="space-y-2 rounded-lg border border-border p-3">
-          <label className="flex items-start gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={allEvents}
-              onChange={(e) => setAllEvents(e.target.checked)}
-              className="mt-0.5"
-            />
-            <span>
-              All events <code className="font-mono text-xs text-muted-foreground">(*)</code>
-            </span>
-          </label>
-          {!allEvents &&
-            EVENT_CATALOG.map((ev) => (
-              <label key={ev.type} className="flex items-start gap-2 pl-5 text-sm">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(ev.type)}
-                  onChange={() => toggle(ev.type)}
-                  className="mt-0.5"
-                />
-                <code className="font-mono text-xs">{ev.type}</code>
-              </label>
-            ))}
-        </fieldset>
-        <div className="flex justify-end gap-2 pt-1">
-          <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm">
-            Cancel
-          </button>
-          <button
-            disabled={busy}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-          >
-            {busy ? 'Adding…' : 'Add endpoint'}
-          </button>
-        </div>
-      </form>
-    </div>
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add webhook endpoint</DialogTitle>
+          <DialogDescription>
+            You&apos;ll get the signing secret right after — it&apos;s shown only once.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="space-y-3">
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Input
+            required
+            autoFocus
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com/webhooks/suppuo"
+          />
+          <fieldset className="space-y-2 rounded-lg border border-border p-3">
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="webhook-all-events"
+                checked={allEvents}
+                onCheckedChange={(c) => setAllEvents(c === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="webhook-all-events" className="text-sm font-normal">
+                All events <code className="font-mono text-xs text-muted-foreground">(*)</code>
+              </Label>
+            </div>
+            {!allEvents &&
+              EVENT_CATALOG.map((ev) => (
+                <div key={ev.type} className="flex items-start gap-2 pl-5">
+                  <Checkbox
+                    id={`webhook-event-${ev.type}`}
+                    checked={selected.includes(ev.type)}
+                    onCheckedChange={() => toggle(ev.type)}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor={`webhook-event-${ev.type}`} className="text-sm font-normal">
+                    <code className="font-mono text-xs">{ev.type}</code>
+                  </Label>
+                </div>
+              ))}
+          </fieldset>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {busy ? 'Adding…' : 'Add endpoint'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

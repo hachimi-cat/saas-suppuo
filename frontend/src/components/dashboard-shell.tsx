@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
 import {
   BarChart3,
+  BookOpen,
   Building2,
   CreditCard,
+  FileText,
   Globe,
   Inbox,
   KeyRound,
@@ -15,6 +17,7 @@ import {
   MessageSquareText,
   Radio,
   Settings,
+  Shield,
   Webhook,
 } from 'lucide-react';
 import {
@@ -73,6 +76,16 @@ const SECTIONS: NavSection[] = [
       { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],
   },
+];
+
+// Profile-dropdown footer links (portal-ui Sidebar `dropdownLinks`).
+// Support + docs + legal live here — in the profile dropdown — rather
+// than as main-nav items. Only links to pages that actually exist.
+const DROPDOWN_LINKS = [
+  { href: '/docs', label: 'Documentation', icon: BookOpen },
+  { href: '/contact', label: 'Support', icon: LifeBuoy },
+  { href: '/terms', label: 'Terms of Service', icon: FileText },
+  { href: '/privacy', label: 'Privacy Policy', icon: Shield },
 ];
 
 async function logout() {
@@ -143,6 +156,7 @@ export function DashboardShell({
         sections={SECTIONS}
         user={user}
         onLogout={logout}
+        dropdownLinks={DROPDOWN_LINKS}
         open={open}
         onClose={() => setOpen(false)}
       />

@@ -15,6 +15,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import { apiRequest, ApiRequestError, uploadFile } from '@/lib/api';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Article {
   id: string;
@@ -398,14 +405,24 @@ export default function HelpCenterAdminPage() {
         {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
         <form onSubmit={submitDraft} className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-3">
-            <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value as 'faq' | 'article' })} className={inputCls + ' max-w-[140px]'}>
-              <option value="faq">FAQ</option>
-              <option value="article">Article</option>
-            </select>
-            <select value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value as 'draft' | 'published' })} className={inputCls + ' max-w-[150px]'}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
+            <Select value={draft.kind} onValueChange={(v) => setDraft({ ...draft, kind: v as 'faq' | 'article' })}>
+              <SelectTrigger aria-label="Kind" className="max-w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="faq">FAQ</SelectItem>
+                <SelectItem value="article">Article</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={draft.status} onValueChange={(v) => setDraft({ ...draft, status: v as 'draft' | 'published' })}>
+              <SelectTrigger aria-label="Status" className="max-w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+              </SelectContent>
+            </Select>
             <input value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} placeholder="Category (optional)" className={inputCls + ' flex-1'} />
           </div>
           {draft.kind === 'article' && (

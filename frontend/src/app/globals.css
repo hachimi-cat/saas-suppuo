@@ -29,11 +29,6 @@
     --input: 214 32% 87%;
     --ring: 206 100% 50%;
     --radius: 0.5rem;
-    /* Geist defines --font-geist-* on <body> (layout.tsx); bind the
-       theme's --font-sans / --font-mono to them so Tailwind's
-       font-sans / font-mono utilities resolve to Geist. */
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
   }
 }
 
@@ -43,6 +38,13 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    /* Geist defines --font-geist-* on <body> (layout.tsx); bind the
+       theme's --font-sans / --font-mono HERE, where those vars resolve
+       (binding them on :root leaves --font-geist-* out of scope, which
+       makes --font-sans guaranteed-invalid and poisons font-family).
+       Matches fulkruma / malapos. */
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
   }
   /* Gellix display face on titles across the portal/admin (incl. bare
      headings). The .marketing-site :is(h1...h6) rule from
