@@ -1,0 +1,112 @@
+# Depllo CI for saas-suppuo — PHASE A (CI only: lint/test/build).
+# Runs ALONGSIDE GitHub Actions (which still deploys) to validate Depllo
+# handles the real build with postgres/redis service containers.
+stages:
+  - test
+  - build
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "main" ||
+        $CI_COMMIT_BRANCH == "master")
+    - if: $CI_PIPELINE_SOURCE == "pull_request"
+    - if: $CI_PIPELINE_SOURCE == "manual"
+lint:
+  stage: test
+  image: node:22-bookworm
+  script:
+    - "# GHA job: Lint & Type Check"
+    - "# actions/checkout omitted — the Depllo runner clones the repository
+      automatically (depth 50, at the pipeline sha)"
+    - "# -- Workflow shell sanity"
+    - python3 scripts/check-workflow-continuations.py
+    - "# node provided by image"
+    - "#   (actions/setup-node@v5 → job image node:22-bookworm; GHA npm cache:
+      consider a Depllo cache: keyed on the lockfile)"
+    - "# -- Backend type check"
+    - cd backend && npm ci && npm run type-check
+    - "# -- Frontend lint"
+    - cd frontend && npm ci && npm run lint
+test:
+  stage: test
+  image: node:22-bookworm
+  services:
+    - name: postgres:16
+      alias: postgres
+      variables:
+        POSTGRES_PASSWORD: test
+        POSTGRES_DB: suppuo_test
+    - name: redis:7
+      alias: redis
+  script:
+    - "# GHA job: Unit & Integration Tests"
+    - "# NOTE: service 'postgres' GHA ports ([\"5432:5432\"]) dropped — reach it
+      at hostname 'postgres' on the private job network"
+    - "# NOTE: service 'postgres' GHA options not translated (e.g. --health-cmd)
+      — add a script-level readiness wait if needed"
+    - "# NOTE: service 'redis' GHA ports ([\"6379:6379\"]) dropped — reach it at
+      hostname 'redis' on the private job network"
+    - "# actions/checkout omitted — the Depllo runner clones the repository
+      automatically (depth 50, at the pipeline sha)"
+    - "# node provided by image"
+    - "#   (actions/setup-node@v5 → job image node:22-bookworm; GHA npm cache:
+      consider a Depllo cache: keyed on the lockfile)"
+    - "# -- Backend tests"
+    - cd backend && npm ci
+    - |-
+      DATABASE_URL=postgresql://postgres:test@localhost:5432/suppuo_test \
+        npx prisma migrate deploy
+    - |-
+      DATABASE_URL=postgresql://postgres:test@localhost:5432/suppuo_test \
+        REDIS_URL=redis://localhost:6379 \
+        JWT_SECRET=test-secret JWT_REFRESH_SECRET=test-refresh-secret \
+        npm test
+    - "# -- Frontend tests"
+    - cd frontend && npm ci && npm test
+build:
+  stage: build
+  image: node:22-bookworm
+  needs:
+    - lint
+    - test
+  artifacts:
+    paths:
+      - backend/dist/
+      - backend/package.json
+      - backend/package-lock.json
+      - backend/prisma/
+      - frontend/.next/
+      - frontend/public/
+      - frontend/package.json
+      - frontend/package-lock.json
+      - frontend/next.config.*
+  script:
+    - "# GHA job: Build"
+    - "# actions/checkout omitted — the Depllo runner clones the repository
+      automatically (depth 50, at the pipeline sha)"
+    - "# node provided by image"
+    - "#   (actions/setup-node@v5 → job image node:22-bookworm; GHA npm cache:
+      consider a Depllo cache: keyed on the lockfile)"
+    - "# -- Build backend"
+    - cd backend && npm ci && npx prisma generate && npm run build
+    - "# -- Upload backend dist"
+    - "# actions/upload-artifact@v6 (name: backend-dist) → merged into this
+      job's artifacts.paths"
+    - "# -- Install frontend deps"
+    - cd frontend && npm ci
+    - "# -- Build frontend (staging)"
+    - export NEXT_PUBLIC_API_URL="/api/v1"
+    - export NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="$MIDTRANS_CLIENT_KEY"
+    - cd frontend && npm run build
+    - "# -- Upload frontend build (staging)"
+    - "# actions/upload-artifact@v6 (name: frontend-out-staging) → merged into
+      this job's artifacts.paths"
+    - "# -- Clean frontend .next for prod rebuild"
+    - rm -rf frontend/.next
+    - "# -- Build frontend (production)"
+    - export NEXT_PUBLIC_API_URL="/api/v1"
+    - export NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="$MIDTRANS_CLIENT_KEY"
+    - export NEXT_PUBLIC_TURNSTILE_SITE_KEY="$TURNSTILE_SITE_KEY"
+    - cd frontend && npm run build
+    - "# -- Upload frontend build (production)"
+    - "# actions/upload-artifact@v6 (name: frontend-out-production) → merged
+      into this job's artifacts.paths"
