@@ -61,7 +61,7 @@ test:
     - )
     - "# -- Frontend tests"
     - (
-    - "  cd frontend && npm test"
+    - "  cd frontend && npm ci && npm test"
     - )
 build-staging:
   stage: build
