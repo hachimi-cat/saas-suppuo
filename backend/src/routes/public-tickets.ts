@@ -42,7 +42,13 @@ const router = Router();
 router.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Filename');
+  // x-e2e-bypass: every Forjio product's Playwright suite injects this
+  // header on ALL requests (setExtraHTTPHeaders is context-global), so a
+  // dashboard page embedding the widget trips CORS preflight on it and
+  // fails the suite's zero-console-error gate. Allowing it here is inert —
+  // this public surface never reads it (2026-07-15, found by ripllo's
+  // first Depllo-run e2e).
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Filename, x-e2e-bypass');
   res.setHeader('Access-Control-Max-Age', '86400');
   if (req.method === 'OPTIONS') {
     res.sendStatus(204);
