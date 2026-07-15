@@ -140,14 +140,14 @@ deploy-staging:
       # Assemble the exact GHA deploy payload (artifact contents only —
       # NOT the full clone) so rsync --delete ships dist + manifests, not src.
       mkdir -p /tmp/payload
-      cp -r --parents backend/dist backend/package.json backend/package-lock.json backend/prisma /tmp/payload/
+      cp -r --parents backend/dist backend/package.json backend/package-lock.json backend/prisma copy /tmp/payload/
       cp -r --parents frontend/.next frontend/public frontend/package.json frontend/package-lock.json /tmp/payload/
       for f in frontend/next.config.*; do { [ -e "$f" ] && cp -r --parents "$f" /tmp/payload/; } || true; done
     - |-
       rsync -az --delete \
         --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache \
         -e "ssh -i $SSH_PRIVATE_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30" \
-        /tmp/payload/backend /tmp/payload/frontend root@$STAGING_HOST:/opt/saas/suppuo/
+        /tmp/payload/backend /tmp/payload/frontend /tmp/payload/copy root@$STAGING_HOST:/opt/saas/suppuo/
     - |-
       ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@$STAGING_HOST 'bash -se' <<'SCRIPT'
       cd /opt/saas/suppuo/backend
@@ -223,14 +223,14 @@ deploy-production:
       rsync openssh-client >/dev/null
     - |-
       mkdir -p /tmp/payload
-      cp -r --parents backend/dist backend/package.json backend/package-lock.json backend/prisma /tmp/payload/
+      cp -r --parents backend/dist backend/package.json backend/package-lock.json backend/prisma copy /tmp/payload/
       cp -r --parents frontend/.next frontend/public frontend/package.json frontend/package-lock.json /tmp/payload/
       for f in frontend/next.config.*; do { [ -e "$f" ] && cp -r --parents "$f" /tmp/payload/; } || true; done
     - |-
       rsync -az --delete \
         --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache \
         -e "ssh -i $SSH_PRIVATE_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30" \
-        /tmp/payload/backend /tmp/payload/frontend root@$PRODUCTION_HOST:/opt/saas/suppuo/
+        /tmp/payload/backend /tmp/payload/frontend /tmp/payload/copy root@$PRODUCTION_HOST:/opt/saas/suppuo/
     - |-
       ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@$PRODUCTION_HOST 'bash -se' <<SCRIPT
       cd /opt/saas/suppuo/backend
