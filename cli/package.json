@@ -1,6 +1,6 @@
 {
   "name": "@forjio/suppuo-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "CLI for Suppuo (part of the Forjio commerce suite).",
   "type": "module",
   "main": "dist/index.js",
@@ -31,5 +31,13 @@
   ],
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hachimi-cat/suppuo-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hachimi-cat/suppuo-cli/issues"
+  },
+  "homepage": "https://github.com/hachimi-cat/suppuo-cli#readme"
 }
