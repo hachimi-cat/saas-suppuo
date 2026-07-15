@@ -1,4 +1,4 @@
-# Depllo CI for saas-suppuo — PHASE A (CI only: lint/test/build), alongside GHA.
+# Depllo CI for saas-suppuo — PHASE A (CI only), alongside GHA.
 stages:
   - test
   - build
@@ -42,6 +42,9 @@ test:
     - name: redis:7
       alias: redis
   script:
+    - "# wait for the postgres service to accept connections"
+    - for i in $(seq 1 30); do (echo > /dev/tcp/postgres/5432) >/dev/null 2>&1
+      && break; sleep 1; done
     - "# GHA job: Unit & Integration Tests"
     - "# NOTE: service 'postgres' GHA ports ([\"5432:5432\"]) dropped — reach it
       at hostname 'postgres' on the private job network"
@@ -58,11 +61,11 @@ test:
     - (
     - "  cd backend && npm ci"
     - |2-
-        DATABASE_URL=postgresql://postgres:test@localhost:5432/suppuo_test \
+        DATABASE_URL=postgresql://postgres:test@postgres:5432/suppuo_test \
         npx prisma migrate deploy
     - |2-
-        DATABASE_URL=postgresql://postgres:test@localhost:5432/suppuo_test \
-        REDIS_URL=redis://localhost:6379 \
+        DATABASE_URL=postgresql://postgres:test@postgres:5432/suppuo_test \
+        REDIS_URL=redis://redis:6379 \
         JWT_SECRET=test-secret JWT_REFRESH_SECRET=test-refresh-secret \
         npm test
     - )
@@ -70,6 +73,8 @@ test:
     - (
     - "  cd frontend && npm ci && npm test"
     - )
+    - "# NOTE: rewrote localhost:<port> → the service alias for:
+      postgres(:5432), redis(:6379)"
 build:
   stage: build
   image: node:22-bookworm
