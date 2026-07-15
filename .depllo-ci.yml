@@ -1,7 +1,15 @@
-# Depllo CI for saas-suppuo — PHASE A (CI only), alongside GHA.
+# Depllo CI/CD for saas-suppuo — PHASE B (full cutover: CI + staging/prod
+# deploys run on Depllo; GHA workflows remain as manual-dispatch fallback).
+#
+# Deploys ride PUBLIC hostnames (stg-share/prod-share, verified reachable
+# from runner containers on :22) with the depllo-deploy key delivered as a
+# file-type project variable ($SSH_PRIVATE_KEY = path inside the job).
+# Release + visual-regression stay on GHA workflow_dispatch — both need a
+# GitHub write token that Depllo jobs don't carry.
 stages:
   - test
   - build
+  - deploy
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && ($CI_COMMIT_BRANCH == "main" ||
@@ -12,16 +20,10 @@ lint:
   stage: test
   image: node:22-bookworm
   script:
-    - "# GHA job: Lint & Type Check"
-    - "# actions/checkout omitted — the Depllo runner clones the repository
-      automatically (depth 50, at the pipeline sha)"
     - "# -- Workflow shell sanity"
     - (
     - "  python3 scripts/check-workflow-continuations.py"
     - )
-    - "# node provided by image"
-    - "#   (actions/setup-node@v5 → job image node:22-bookworm; GHA npm cache:
-      consider a Depllo cache: keyed on the lockfile)"
     - "# -- Backend type check"
     - (
     - "  cd backend && npm ci && npm run type-check"
@@ -45,18 +47,6 @@ test:
     - "# wait for the postgres service to accept connections"
     - for i in $(seq 1 30); do (echo > /dev/tcp/postgres/5432) >/dev/null 2>&1
       && break; sleep 1; done
-    - "# GHA job: Unit & Integration Tests"
-    - "# NOTE: service 'postgres' GHA ports ([\"5432:5432\"]) dropped — reach it
-      at hostname 'postgres' on the private job network"
-    - "# NOTE: service 'postgres' GHA options not translated (e.g. --health-cmd)
-      — add a script-level readiness wait if needed"
-    - "# NOTE: service 'redis' GHA ports ([\"6379:6379\"]) dropped — reach it at
-      hostname 'redis' on the private job network"
-    - "# actions/checkout omitted — the Depllo runner clones the repository
-      automatically (depth 50, at the pipeline sha)"
-    - "# node provided by image"
-    - "#   (actions/setup-node@v5 → job image node:22-bookworm; GHA npm cache:
-      consider a Depllo cache: keyed on the lockfile)"
     - "# -- Backend tests"
     - (
     - "  cd backend && npm ci"
@@ -71,16 +61,15 @@ test:
     - )
     - "# -- Frontend tests"
     - (
-    - "  cd frontend && npm ci && npm test"
+    - "  cd frontend && npm test"
     - )
-    - "# NOTE: rewrote localhost:<port> → the service alias for:
-      postgres(:5432), redis(:6379)"
-build:
+build-staging:
   stage: build
   image: node:22-bookworm
   needs:
     - lint
     - test
+  timeout: 30m
   artifacts:
     paths:
       - backend/dist/
@@ -93,43 +82,175 @@ build:
       - frontend/package-lock.json
       - frontend/next.config.*
   script:
-    - "# GHA job: Build"
-    - "# actions/checkout omitted — the Depllo runner clones the repository
-      automatically (depth 50, at the pipeline sha)"
-    - "# node provided by image"
-    - "#   (actions/setup-node@v5 → job image node:22-bookworm; GHA npm cache:
-      consider a Depllo cache: keyed on the lockfile)"
     - "# -- Build backend"
     - (
     - "  cd backend && npm ci && npx prisma generate && npm run build"
     - )
-    - "# -- Upload backend dist"
-    - "# actions/upload-artifact@v6 (name: backend-dist) → merged into this
-      job's artifacts.paths"
-    - "# -- Install frontend deps"
-    - (
-    - "  cd frontend && npm ci"
-    - )
-    - "# -- Build frontend (staging)"
+    - "# -- Build frontend (staging — no Turnstile site key inlined)"
     - export NEXT_PUBLIC_API_URL="/api/v1"
     - export NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="$MIDTRANS_CLIENT_KEY"
     - (
-    - "  cd frontend && npm run build"
+    - "  cd frontend && npm ci && npm run build"
     - )
-    - "# -- Upload frontend build (staging)"
-    - "# actions/upload-artifact@v6 (name: frontend-out-staging) → merged into
-      this job's artifacts.paths"
-    - "# -- Clean frontend .next for prod rebuild"
+build-production:
+  stage: build
+  image: node:22-bookworm
+  needs:
+    - lint
+    - test
+  timeout: 30m
+  artifacts:
+    paths:
+      - backend/dist/
+      - backend/package.json
+      - backend/package-lock.json
+      - backend/prisma/
+      - frontend/.next/
+      - frontend/public/
+      - frontend/package.json
+      - frontend/package-lock.json
+      - frontend/next.config.*
+  script:
+    - "# -- Build backend"
     - (
-    - "  rm -rf frontend/.next"
+    - "  cd backend && npm ci && npx prisma generate && npm run build"
     - )
-    - "# -- Build frontend (production)"
+    - "# -- Build frontend (production — Turnstile site key inlined)"
     - export NEXT_PUBLIC_API_URL="/api/v1"
     - export NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="$MIDTRANS_CLIENT_KEY"
     - export NEXT_PUBLIC_TURNSTILE_SITE_KEY="$TURNSTILE_SITE_KEY"
     - (
-    - "  cd frontend && npm run build"
+    - "  cd frontend && npm ci && npm run build"
     - )
-    - "# -- Upload frontend build (production)"
-    - "# actions/upload-artifact@v6 (name: frontend-out-production) → merged
-      into this job's artifacts.paths"
+deploy-staging:
+  stage: deploy
+  image: node:22-bookworm
+  needs:
+    - build-staging
+  dependencies:
+    - build-staging
+  timeout: 30m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE != "pull_request"
+  script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends
+      rsync openssh-client >/dev/null
+    - |-
+      # Assemble the exact GHA deploy payload (artifact contents only —
+      # NOT the full clone) so rsync --delete ships dist + manifests, not src.
+      mkdir -p /tmp/payload
+      cp -r --parents backend/dist backend/package.json backend/package-lock.json backend/prisma /tmp/payload/
+      cp -r --parents frontend/.next frontend/public frontend/package.json frontend/package-lock.json /tmp/payload/
+      for f in frontend/next.config.*; do { [ -e "$f" ] && cp -r --parents "$f" /tmp/payload/; } || true; done
+    - |-
+      rsync -az --delete \
+        --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache \
+        -e "ssh -i $SSH_PRIVATE_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30" \
+        /tmp/payload/backend /tmp/payload/frontend root@$STAGING_HOST:/opt/saas/suppuo/
+    - |-
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@$STAGING_HOST 'bash -se' <<'SCRIPT'
+      cd /opt/saas/suppuo/backend
+      # Staging is uniformly NON-VERIFYING — strip any captcha secret so e2e never blocks.
+      sed -i '/^TURNSTILE_SECRET_KEY=/d; /^TURNSTILE_ALLOWED_HOSTNAMES=/d' .env 2>/dev/null || true
+      npm ci --omit=dev
+      npx prisma migrate deploy
+      pm2 restart suppuo || pm2 start dist/index.js --name suppuo -i 1
+      cd /opt/saas/suppuo/frontend
+      npm ci --omit=dev
+      pm2 restart suppuo-frontend || pm2 start npm --name suppuo-frontend -- start
+      pm2 save
+      echo "Waiting for backend health..."
+      for i in $(seq 1 30); do
+        curl -sf http://localhost:4170/api/v1/health >/dev/null 2>&1 && { echo "backend healthy after ${i}s"; break; }
+        sleep 1
+      done
+      echo "Waiting for frontend..."
+      for i in $(seq 1 30); do
+        curl -sf http://localhost:3170/ >/dev/null 2>&1 && { echo "frontend healthy after ${i}s"; break; }
+        sleep 1
+      done
+      SCRIPT
+e2e-staging:
+  stage: deploy
+  image: node:22-bookworm
+  needs:
+    - deploy-staging
+  dependencies: []
+  timeout: 45m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE != "pull_request"
+  script:
+    - |-
+      echo "Waiting for staging (backend + frontend)..."
+      for i in $(seq 1 30); do
+        curl -sf "http://$STAGING_HOST/api/v1/health" >/dev/null 2>&1 && { echo "backend healthy"; break; }
+        sleep 3
+      done
+      for i in $(seq 1 20); do
+        STATUS=$(curl -so /dev/null -w '%{http_code}' "http://$STAGING_HOST/" 2>/dev/null || echo 000)
+        [ "$STATUS" = "200" ] && { echo "frontend serving"; break; }
+        sleep 3
+      done
+      sleep 5
+    - (
+    - "  cd e2e && npm ci && npx playwright install chromium --with-deps"
+    - )
+    - |-
+      # Signs in for real as gojo (the designated E2E identity) against
+      # staging; GOJO_HUUDIS_PASSWORD arrives as a masked project variable.
+      cd e2e
+      GOJO_HUUDIS_EMAIL=gojo@forjio.com \
+      BACKEND_URL="http://$STAGING_HOST/api/v1" \
+      FRONTEND_URL="http://$STAGING_HOST" \
+      PW_SKIP_WEBSERVER=1 \
+      npx playwright test --reporter=list --config=playwright.ci.config.ts
+deploy-production:
+  stage: deploy
+  image: node:22-bookworm
+  needs:
+    - e2e-staging
+    - build-production
+  dependencies:
+    - build-production
+  timeout: 30m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE != "pull_request"
+  script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends
+      rsync openssh-client >/dev/null
+    - |-
+      mkdir -p /tmp/payload
+      cp -r --parents backend/dist backend/package.json backend/package-lock.json backend/prisma /tmp/payload/
+      cp -r --parents frontend/.next frontend/public frontend/package.json frontend/package-lock.json /tmp/payload/
+      for f in frontend/next.config.*; do { [ -e "$f" ] && cp -r --parents "$f" /tmp/payload/; } || true; done
+    - |-
+      rsync -az --delete \
+        --exclude node_modules --exclude .git --exclude .env --exclude .npmrc --exclude frontend/.next/cache \
+        -e "ssh -i $SSH_PRIVATE_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30" \
+        /tmp/payload/backend /tmp/payload/frontend root@$PRODUCTION_HOST:/opt/saas/suppuo/
+    - |-
+      ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 root@$PRODUCTION_HOST 'bash -se' <<SCRIPT
+      cd /opt/saas/suppuo/backend
+      sed -i '/^TURNSTILE_SECRET_KEY=/d' .env 2>/dev/null || true
+      echo 'TURNSTILE_SECRET_KEY=$TURNSTILE_SECRET_KEY' >> .env
+      sed -i '/^TURNSTILE_ALLOWED_HOSTNAMES=/d' .env 2>/dev/null || true
+      echo 'TURNSTILE_ALLOWED_HOSTNAMES=$TURNSTILE_ALLOWED_HOSTNAMES' >> .env
+      npm ci --omit=dev
+      npx prisma generate
+      npx prisma migrate deploy
+      pm2 restart suppuo || pm2 start dist/index.js --name suppuo -i 1
+      cd /opt/saas/suppuo/frontend
+      npm ci --omit=dev
+      pm2 restart suppuo-frontend || pm2 start npm --name suppuo-frontend -- start
+      pm2 save
+      echo "Waiting for backend health..."
+      for i in \$(seq 1 30); do
+        curl -sf http://localhost:4170/api/v1/health >/dev/null 2>&1 && { echo "backend healthy after \${i}s"; break; }
+        sleep 1
+      done
+      echo "Waiting for frontend..."
+      for i in \$(seq 1 30); do
+        curl -sf http://localhost:3170/ >/dev/null 2>&1 && { echo "frontend healthy after \${i}s"; break; }
+        sleep 1
+      done
+      SCRIPT

@@ -1,10 +1,9 @@
 name: CI/CD
 
+# CI/CD moved to Depllo (.depllo-ci.yml) 2026-07-15 — push/PR triggers
+# disabled; this workflow remains as a manual-dispatch FALLBACK only
+# (and still owns release + visual-regression, which need GitHub tokens).
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
     inputs:
       update_baselines:
