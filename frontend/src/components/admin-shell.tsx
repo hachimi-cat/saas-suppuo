@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { LogoMark } from '@/components/brand/logo';
-import { Building2, LayoutDashboard, Menu, Ticket, Users } from 'lucide-react';
+import {
+  Activity,
+  Building2,
+  Flag,
+  LayoutDashboard,
+  LineChart,
+  Menu,
+  Ticket,
+  Users,
+} from 'lucide-react';
 import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
 
 /*
@@ -39,6 +48,17 @@ const SECTIONS: NavSection[] = [
       { href: '/admin/customers', label: 'Customers', icon: Users },
       { href: '/admin/workspaces', label: 'Workspaces', icon: Building2 },
       { href: '/admin/tickets', label: 'Tickets', icon: Ticket },
+    ],
+  },
+  // The MANDATORY admin-portal standard — every Forjio product ships
+  // these. See forjio/documentation/2. Technical/13-Admin-Portal-Standard.md.
+  // Product sections go alongside them, never in place of them.
+  {
+    label: 'Platform',
+    items: [
+      { href: '/admin/metrics', label: 'Business metrics', icon: LineChart },
+      { href: '/admin/system', label: 'System metrics', icon: Activity },
+      { href: '/admin/feature-flags', label: 'Feature flags', icon: Flag },
     ],
   },
   // Products add their own admin sections here, e.g.:

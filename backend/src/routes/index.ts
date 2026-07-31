@@ -20,6 +20,9 @@ import webhooksTelegramRouter from './webhooks-telegram.js';
 import webhooksPlugipayRouter from './webhooks-plugipay.js';
 import webhooksResendRouter from './webhooks-resend.js';
 import adminCustomersRouter from './admin-customers.js';
+import adminMetricsRouter from './admin-metrics.js';
+import adminSystemHealthRouter from './admin-system-health.js';
+import adminFeatureFlagsRouter from './admin-feature-flags.js';
 import billingRouter from './billing.js';
 import attachmentsRouter from './attachments.js';
 import apiKeysRouter from './api-keys.js';
@@ -94,6 +97,13 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
    *  at /api/v1/console/customers. */
   router.use('/admin/customers', adminGuard, adminCustomersRouter);
   router.use('/admin/crm', adminGuard, adminCrmRouter);
+
+  /** The three endpoints behind the MANDATORY admin-portal standard.
+   *  Every Forjio product serves these — see
+   *  forjio/documentation/2. Technical/13-Admin-Portal-Standard.md. */
+  router.use('/admin/metrics', adminGuard, adminMetricsRouter);
+  router.use('/admin/system-health', adminGuard, adminSystemHealthRouter);
+  router.use('/admin/feature-flags', adminGuard, adminFeatureFlagsRouter);
 
   /** Suppuo domain — agent surfaces (BFF session or Bearer JWT). */
   router.use('/me', requireAuth, meRouter);

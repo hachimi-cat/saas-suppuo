@@ -9,7 +9,8 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowRight, Building2, RefreshCw, Ticket, Users } from 'lucide-react';
+import { ArrowRight, RefreshCw } from 'lucide-react';
+import { AdminOverviewPanel } from '@forjio/admin-ui';
 import {
   adminFetch,
   Badge,
@@ -47,19 +48,16 @@ const QUICK_LINKS = [
     href: '/admin/customers',
     label: 'Customers',
     description: 'Everyone signed into this product via Huudis SSO.',
-    icon: Users,
   },
   {
     href: '/admin/workspaces',
     label: 'Workspaces',
     description: 'Per-workspace ticket rollups and activity.',
-    icon: Building2,
   },
   {
     href: '/admin/tickets',
     label: 'Tickets',
     description: 'The cross-workspace ticket stream.',
-    icon: Ticket,
   },
 ];
 
@@ -92,10 +90,17 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* The MANDATORY standard first — business metrics, system health and
+          feature flags from the three shared contracts. Suppuo's own ticket
+          activity follows BELOW: on top of the standard, never instead. */}
+      <AdminOverviewPanel brand={brand} quickLinks={QUICK_LINKS} />
+
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{brand} Admin</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">
+            Ticket activity
+          </h2>
+          <p className="text-xs text-muted-foreground">
             Platform-wide ticket activity across every workspace.
           </p>
         </div>
@@ -177,22 +182,6 @@ export default function AdminDashboardPage() {
         </section>
       )}
 
-      <section className="mt-7 grid gap-3 sm:grid-cols-3">
-        {QUICK_LINKS.map(({ href, label, description, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary"
-          >
-            <div className="flex items-center gap-2">
-              <Icon className="h-4 w-4 text-primary" />
-              <span className="font-medium">{label}</span>
-              <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-            </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">{description}</p>
-          </Link>
-        ))}
-      </section>
     </div>
   );
 }
