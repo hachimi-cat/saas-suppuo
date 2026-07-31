@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowRight, RefreshCw } from 'lucide-react';
 import { AdminOverviewPanel } from '@forjio/admin-ui';
+import { SUPPUO_ADMIN_ENDPOINTS } from '@/lib/admin-endpoints';
 import {
   adminFetch,
   Badge,
@@ -93,7 +94,7 @@ export default function AdminDashboardPage() {
       {/* The MANDATORY standard first — business metrics, system health and
           feature flags from the three shared contracts. Suppuo's own ticket
           activity follows BELOW: on top of the standard, never instead. */}
-      <AdminOverviewPanel brand={brand} quickLinks={QUICK_LINKS} />
+      <AdminOverviewPanel brand={brand} quickLinks={QUICK_LINKS} endpoints={SUPPUO_ADMIN_ENDPOINTS} />
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         <div>

@@ -8,7 +8,8 @@
  */
 
 import { SystemHealthPanel } from '@forjio/admin-ui';
+import { SUPPUO_ADMIN_ENDPOINTS } from '@/lib/admin-endpoints';
 
 export default function Page() {
-  return <SystemHealthPanel />;
+  return <SystemHealthPanel endpoint={SUPPUO_ADMIN_ENDPOINTS.health} />;
 }

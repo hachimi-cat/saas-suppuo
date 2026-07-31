@@ -15,7 +15,8 @@
  */
 
 import { CustomersPanel } from '@forjio/admin-ui';
+import { SUPPUO_ADMIN_ENDPOINTS } from '@/lib/admin-endpoints';
 
 export default function Page() {
-  return <CustomersPanel />;
+  return <CustomersPanel endpoint={SUPPUO_ADMIN_ENDPOINTS.customers} />;
 }
