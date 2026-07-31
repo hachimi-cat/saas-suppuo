@@ -39,12 +39,16 @@ const BRAND_COLOR = 'hsl(var(--primary))';
 const BRAND_COLOR_SOFT = 'hsl(var(--primary) / 0.15)';
 
 const SECTIONS: NavSection[] = [
+  // The FOUR GROUPS, in this order, in every Forjio admin portal:
+  // Overview / Customers / Platform / Operations. An operator who knows
+  // one portal knows all thirteen, so the names and the order are fixed
+  // even where a product has nothing to put in a group.
   {
     label: 'Overview',
     items: [{ href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard }],
   },
   {
-    label: 'CRM',
+    label: 'Customers',
     items: [
       { href: '/admin/customers', label: 'Customers', icon: Users },
       { href: '/admin/transactions', label: 'Transactions', icon: Receipt },
@@ -64,7 +68,7 @@ const SECTIONS: NavSection[] = [
     ],
   },
   // Products add their own admin sections here, e.g.:
-  // { label: 'Review', items: [{ href: '/admin/kyc', label: 'KYC', icon: ShieldCheck }] },
+  // { label: 'Operations', items: [{ href: '/admin/kyc', label: 'KYC', icon: ShieldCheck }] },
 ];
 
 async function logout() {
