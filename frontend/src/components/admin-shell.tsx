@@ -11,6 +11,7 @@ import {
   Menu,
   Ticket,
   Users,
+  Receipt,
 } from 'lucide-react';
 import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
 
@@ -46,6 +47,7 @@ const SECTIONS: NavSection[] = [
     label: 'CRM',
     items: [
       { href: '/admin/customers', label: 'Customers', icon: Users },
+      { href: '/admin/transactions', label: 'Transactions', icon: Receipt },
       { href: '/admin/workspaces', label: 'Workspaces', icon: Building2 },
       { href: '/admin/tickets', label: 'Tickets', icon: Ticket },
     ],
