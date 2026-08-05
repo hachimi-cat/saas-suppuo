@@ -163,17 +163,18 @@
   var root = el('div', null, { id: 'suppuo-widget-root' });
 
   var sideStyle = {};
-  sideStyle[POSITION] = '20px';
+  sideStyle[POSITION] = '0';
 
-  // Bubble button
+  // Edge tab — replaces the round floating bubble (bang 2026-08-05):
+  // the circle sat over page content; a slim tab flush with the
+  // viewport edge, up at ~70% from the bottom, covers nothing that
+  // matters and reads as a fixture, not an overlay. The variable keeps
+  // its historic name so the rest of the file doesn't churn.
   var bubble = el(
     'button',
     {
       position: 'fixed',
-      bottom: '20px',
-      width: '56px',
-      height: '56px',
-      borderRadius: '50%',
+      bottom: '70%',
       border: 'none',
       background: BLUE,
       color: '#fff',
@@ -183,34 +184,50 @@
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '0',
+      gap: '8px',
+      padding: '14px 9px',
+      writingMode: 'vertical-rl',
+      fontFamily: FONT,
+      fontSize: '13px',
+      fontWeight: '600',
+      letterSpacing: '0.05em',
+      lineHeight: '1',
+      borderRadius: POSITION === 'left' ? '0 10px 10px 0' : '10px 0 0 10px',
       transition: 'transform 0.15s ease',
     },
     { type: 'button', 'aria-label': 'Open support chat', 'aria-expanded': 'false' },
   );
   css(bubble, sideStyle);
   var CHAT_ICON =
-    '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
   var CLOSE_ICON =
-    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-  bubble.innerHTML = CHAT_ICON;
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  var TAB_OPEN_HTML = CHAT_ICON + '<span>Ask Support</span>';
+  var TAB_CLOSE_HTML = CLOSE_ICON + '<span>Close</span>';
+  bubble.innerHTML = TAB_OPEN_HTML;
+  var HOVER_NUDGE =
+    POSITION === 'left' ? 'translateX(2px)' : 'translateX(-2px)';
   bubble.onmouseenter = function () {
-    bubble.style.transform = 'scale(1.06)';
+    bubble.style.transform = HOVER_NUDGE;
   };
   bubble.onmouseleave = function () {
-    bubble.style.transform = 'scale(1)';
+    bubble.style.transform = 'none';
   };
 
-  // Panel
+  // Panel — anchored to the bottom corner like a chat window, its own
+  // side offset (the tab hugs the edge at bottom:70%, so the panel
+  // caps at 70vh to never sit under it).
+  var panelSide = {};
+  panelSide[POSITION] = '16px';
   var panel = el(
     'div',
     {
       position: 'fixed',
-      bottom: '88px',
+      bottom: '20px',
       width: '360px',
       maxWidth: 'calc(100vw - 32px)',
       height: '520px',
-      maxHeight: 'calc(100vh - 110px)',
+      maxHeight: 'calc(70vh - 28px)',
       background: '#fff',
       borderRadius: '14px',
       boxShadow: '0 12px 40px rgba(0,0,0,0.22)',
@@ -225,7 +242,7 @@
     },
     { role: 'dialog', 'aria-label': 'Support chat' },
   );
-  css(panel, sideStyle);
+  css(panel, panelSide);
 
   // Header
   var header = el('div', {
@@ -822,7 +839,7 @@
   function openPanel() {
     isOpen = true;
     panel.style.display = 'flex';
-    bubble.innerHTML = CLOSE_ICON;
+    bubble.innerHTML = TAB_CLOSE_HTML;
     bubble.setAttribute('aria-label', 'Close support chat');
     bubble.setAttribute('aria-expanded', 'true');
     if (memToken) renderThread(false);
@@ -831,7 +848,7 @@
   function closePanel() {
     isOpen = false;
     panel.style.display = 'none';
-    bubble.innerHTML = CHAT_ICON;
+    bubble.innerHTML = TAB_OPEN_HTML;
     bubble.setAttribute('aria-label', 'Open support chat');
     bubble.setAttribute('aria-expanded', 'false');
     stopPolling();
