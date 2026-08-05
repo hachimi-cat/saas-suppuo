@@ -58,8 +58,15 @@
   // widget-config fetch below still recolors for plain embeds.
   var ACCENT_ATTR = script.getAttribute('data-suppuo-accent');
   var BLUE = ACCENT_ATTR && /^#[0-9a-fA-F]{6}$/.test(ACCENT_ATTR) ? ACCENT_ATTR : '#0080FF';
-  var FONT =
+  // Font doctrine (bang 2026-08-05): the tab + panel headings carry the
+  // Forjio display face (Gellix — loaded by every Forjio host; graceful
+  // fallback elsewhere); panel BODY text inherits the host product's own
+  // font (Geist on Forjio products) via `inherit`, falling back to the
+  // system stack only when the host sets nothing.
+  var SYSTEM_FONT =
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  var DISPLAY_FONT = "Gellix, " + SYSTEM_FONT;
+  var FONT = 'inherit';
 
   function el(tag, styles, attrs) {
     var node = document.createElement(tag);
@@ -192,7 +199,7 @@
       padding: '14px 9px',
       writingMode: 'vertical-rl',
       transform: 'rotate(180deg)',
-      fontFamily: FONT,
+      fontFamily: DISPLAY_FONT,
       fontSize: '13px',
       fontWeight: '600',
       letterSpacing: '0.05em',
@@ -264,7 +271,11 @@
     gap: '8px',
   });
   var headerText = el('div', { flex: '1', minWidth: '0' });
-  var headerTitle = el('div', { fontWeight: '700', fontSize: '15px' }, { text: 'Chat with us' });
+  var headerTitle = el(
+    'div',
+    { fontWeight: '700', fontSize: '15px', fontFamily: DISPLAY_FONT },
+    { text: 'Chat with us' },
+  );
   var headerSub = el('div', { fontSize: '12px', opacity: '0.85', marginTop: '2px' }, {
     text: 'We usually reply within a few hours',
   });
