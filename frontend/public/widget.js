@@ -170,11 +170,15 @@
   // viewport edge, up at ~70% from the bottom, covers nothing that
   // matters and reads as a fixture, not an overlay. The variable keeps
   // its historic name so the rest of the file doesn't churn.
+  // rotate(180deg) on top of vertical-rl makes the label read
+  // BOTTOM-TO-TOP (the feedback-tab convention bang referenced) and
+  // visually flips the rounded corners + any translateX — hence the
+  // "wrong-way" radius ternary and hover transform below.
   var bubble = el(
     'button',
     {
       position: 'fixed',
-      bottom: '70%',
+      bottom: '25%',
       border: 'none',
       background: BLUE,
       color: '#fff',
@@ -187,12 +191,13 @@
       gap: '8px',
       padding: '14px 9px',
       writingMode: 'vertical-rl',
+      transform: 'rotate(180deg)',
       fontFamily: FONT,
       fontSize: '13px',
       fontWeight: '600',
       letterSpacing: '0.05em',
       lineHeight: '1',
-      borderRadius: POSITION === 'left' ? '0 10px 10px 0' : '10px 0 0 10px',
+      borderRadius: POSITION === 'left' ? '10px 0 0 10px' : '0 10px 10px 0',
       transition: 'transform 0.15s ease',
     },
     { type: 'button', 'aria-label': 'Open support chat', 'aria-expanded': 'false' },
@@ -203,20 +208,23 @@
   var CLOSE_ICON =
     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
   var TAB_OPEN_HTML = CHAT_ICON + '<span>Ask Support</span>';
-  var TAB_CLOSE_HTML = CLOSE_ICON + '<span>Close</span>';
   bubble.innerHTML = TAB_OPEN_HTML;
+  // Under rotate(180deg), translateX inverts: +2px moves a right-edge
+  // tab visually LEFT (out of the edge), which is the wanted nudge.
   var HOVER_NUDGE =
-    POSITION === 'left' ? 'translateX(2px)' : 'translateX(-2px)';
+    POSITION === 'left'
+      ? 'rotate(180deg) translateX(-2px)'
+      : 'rotate(180deg) translateX(2px)';
   bubble.onmouseenter = function () {
     bubble.style.transform = HOVER_NUDGE;
   };
   bubble.onmouseleave = function () {
-    bubble.style.transform = 'none';
+    bubble.style.transform = 'rotate(180deg)';
   };
 
   // Panel — anchored to the bottom corner like a chat window, its own
-  // side offset (the tab hugs the edge at bottom:70%, so the panel
-  // caps at 70vh to never sit under it).
+  // side offset. The tab hides while the panel is open, so the panel
+  // is free to use the viewport's height.
   var panelSide = {};
   panelSide[POSITION] = '16px';
   var panel = el(
@@ -227,7 +235,7 @@
       width: '360px',
       maxWidth: 'calc(100vw - 32px)',
       height: '520px',
-      maxHeight: 'calc(70vh - 28px)',
+      maxHeight: 'calc(100vh - 40px)',
       background: '#fff',
       borderRadius: '14px',
       boxShadow: '0 12px 40px rgba(0,0,0,0.22)',
@@ -244,19 +252,41 @@
   );
   css(panel, panelSide);
 
-  // Header
+  // Header — carries the panel's close button: the edge tab HIDES while
+  // the panel is open (bang 2026-08-05), so the panel must close itself.
   var header = el('div', {
     background: BLUE,
     color: '#fff',
     padding: '14px 16px',
     flexShrink: '0',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '8px',
   });
+  var headerText = el('div', { flex: '1', minWidth: '0' });
   var headerTitle = el('div', { fontWeight: '700', fontSize: '15px' }, { text: 'Chat with us' });
   var headerSub = el('div', { fontSize: '12px', opacity: '0.85', marginTop: '2px' }, {
     text: 'We usually reply within a few hours',
   });
-  header.appendChild(headerTitle);
-  header.appendChild(headerSub);
+  headerText.appendChild(headerTitle);
+  headerText.appendChild(headerSub);
+  var headerClose = el(
+    'button',
+    {
+      border: 'none',
+      background: 'transparent',
+      color: '#fff',
+      cursor: 'pointer',
+      padding: '2px',
+      lineHeight: '0',
+      opacity: '0.85',
+      flexShrink: '0',
+    },
+    { type: 'button', 'aria-label': 'Close support chat' },
+  );
+  headerClose.innerHTML = CLOSE_ICON;
+  header.appendChild(headerText);
+  header.appendChild(headerClose);
 
   // Body (scrollable view area)
   var body = el('div', {
@@ -839,8 +869,9 @@
   function openPanel() {
     isOpen = true;
     panel.style.display = 'flex';
-    bubble.innerHTML = TAB_CLOSE_HTML;
-    bubble.setAttribute('aria-label', 'Close support chat');
+    // The tab disappears while the panel is open — the panel's header
+    // X (and Escape) are the close paths.
+    bubble.style.display = 'none';
     bubble.setAttribute('aria-expanded', 'true');
     if (memToken) renderThread(false);
     else renderForm();
@@ -848,8 +879,7 @@
   function closePanel() {
     isOpen = false;
     panel.style.display = 'none';
-    bubble.innerHTML = TAB_OPEN_HTML;
-    bubble.setAttribute('aria-label', 'Open support chat');
+    bubble.style.display = 'flex';
     bubble.setAttribute('aria-expanded', 'false');
     stopPolling();
   }
@@ -857,6 +887,7 @@
     if (isOpen) closePanel();
     else openPanel();
   };
+  headerClose.onclick = closePanel;
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && isOpen) closePanel();
   });
