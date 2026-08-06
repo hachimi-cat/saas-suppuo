@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { LifeBuoy } from 'lucide-react';
+import { LogoMark } from '@/components/brand/logo';
 import { DockedChat, createBffChatAdapters, type ChatAction } from '@forjio/agent-ui';
 import { catentioHttp } from '@/lib/catentio-http';
 import { applyChatAction } from '@/components/catentio/chat-actions';
@@ -66,7 +66,7 @@ export function CatentioDockedChat() {
         // The detached circle left of the resting dock, on the product's
         // primary fill (bang, 2026-08-06). A life ring is suppuo's
         // support mark.
-        brandIcon={<LifeBuoy />}
+        brandIcon={<LogoMark />}
         onApplyAction={onApplyAction}
       />
     </div>
