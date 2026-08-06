@@ -14,14 +14,14 @@
  *    back to the public help center.
  *  - Sign-out runs the requester logout and drops back to the sign-in
  *    screen (handled by the parent via onLogout).
- *  - Layout mirrors serront: the only chrome outside the sidebar is a
- *    mobile-only top bar with a menu button.
+ *  - Layout mirrors serront: the only chrome outside the sidebar is the
+ *    phone-only `MobileHeader` island chrome (brand island + burger).
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { BookOpen, LifeBuoy, Mail, Menu, Ticket } from 'lucide-react';
-import { Sidebar, type NavSection, type SessionUser } from '@forjio/portal-ui';
+import { BookOpen, LifeBuoy, Mail, Ticket } from 'lucide-react';
+import { MobileHeader, Sidebar, type NavSection, type SessionUser } from '@forjio/portal-ui';
 import type { PublicBranding } from '@/lib/theme';
 import { currentHost, hcHome, portalPath } from '@/lib/host-routing';
 
@@ -67,6 +67,37 @@ export function PortalShell({
   ];
   const sessionUser: SessionUser | null = email ? { email } : null;
 
+  // One brand icon, shared by the desktop Sidebar and the phone-only
+  // MobileHeader island so the two always render the same identity.
+  const brandIcon = branding.logoUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={branding.logoUrl}
+      alt={name}
+      style={{ width: 24, height: 24, flex: '0 0 24px', objectFit: 'contain' }}
+    />
+  ) : (
+    <span
+      aria-hidden
+      style={{
+        width: 24,
+        height: 24,
+        flex: '0 0 24px',
+        borderRadius: 6,
+        background: 'var(--brand-soft)',
+        color: 'var(--brand-color)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 12,
+        fontWeight: 700,
+        textTransform: 'uppercase',
+      }}
+    >
+      {name.slice(0, 1)}
+    </span>
+  );
+
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar
@@ -75,36 +106,7 @@ export function PortalShell({
         brandHref={base}
         brandColor="hsl(var(--primary))"
         brandColorSoft="hsl(var(--primary) / 0.15)"
-        brandIcon={
-          branding.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={branding.logoUrl}
-              alt={name}
-              style={{ width: 24, height: 24, flex: '0 0 24px', objectFit: 'contain' }}
-            />
-          ) : (
-            <span
-              aria-hidden
-              style={{
-                width: 24,
-                height: 24,
-                flex: '0 0 24px',
-                borderRadius: 6,
-                background: 'var(--brand-soft)',
-                color: 'var(--brand-color)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 12,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-              }}
-            >
-              {name.slice(0, 1)}
-            </span>
-          )
-        }
+        brandIcon={brandIcon}
         sections={sections}
         user={sessionUser}
         onLogout={onLogout}
@@ -113,12 +115,17 @@ export function PortalShell({
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile-only top bar — just the menu button. */}
-        <div className="flex h-14 items-center border-b border-border bg-card px-4 lg:hidden">
-          <button onClick={() => setOpen(true)} aria-label="Open menu" className="text-foreground">
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
+        {/* Phone-only island header — brand island + burger (opens the
+            Sidebar drawer). No-workspace mode. Hidden on lg+. */}
+        <MobileHeader
+          brandSlug={accountId}
+          brandName={name}
+          brandHref={base}
+          brandColor="hsl(var(--primary))"
+          brandColorSoft="hsl(var(--primary) / 0.15)"
+          brandIcon={brandIcon}
+          onMenuOpen={() => setOpen(true)}
+        />
         <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">{children}</main>
       </div>
     </div>

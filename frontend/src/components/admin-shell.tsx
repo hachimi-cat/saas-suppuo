@@ -8,12 +8,11 @@ import {
   Flag,
   LayoutDashboard,
   LineChart,
-  Menu,
   Ticket,
   Users,
   Receipt,
 } from 'lucide-react';
-import { Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
+import { MobileHeader, Sidebar, type SessionUser, type NavSection } from '@forjio/portal-ui';
 
 /*
  * Admin portal shell — the authenticated chrome for the built-in admin
@@ -111,13 +110,17 @@ export function AdminShell({
         onClose={() => setOpen(false)}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar — the Sidebar drawer has no open trigger of
-            its own, so the host renders one. Hidden on lg+. */}
-        <div className="flex h-14 items-center border-b border-border bg-card px-4 lg:hidden">
-          <button onClick={() => setOpen(true)} aria-label="Open menu" className="text-foreground">
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
+        {/* Phone-only island header — brand island + burger (opens the
+            Sidebar drawer). No-workspace mode. Hidden on lg+. */}
+        <MobileHeader
+          brandSlug={BRAND_SLUG}
+          brandName={BRAND}
+          brandHref="/admin/dashboard"
+          brandColor={BRAND_COLOR}
+          brandColorSoft={BRAND_COLOR_SOFT}
+          brandIcon={<LogoMark size={20} />}
+          onMenuOpen={() => setOpen(true)}
+        />
         <main className="min-w-0 flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>
