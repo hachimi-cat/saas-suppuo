@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiRequest } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 
 interface ReportSummary {
   periodDays: number;
@@ -64,29 +65,27 @@ export default function ReportsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            How your support is doing — volume, response times, and satisfaction.
-          </p>
-        </div>
-        <div className="inline-flex rounded-lg border border-border p-0.5">
-          {PERIODS.map((p) => (
-            <button
-              key={p}
-              onClick={() => setDays(p)}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
-                days === p
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {p}d
-            </button>
-          ))}
-        </div>
-      </header>
+      <PageHeader
+        title="Reports"
+        description="How your support is doing — volume, response times, and satisfaction."
+        action={
+          <div className="inline-flex rounded-lg border border-border p-0.5">
+            {PERIODS.map((p) => (
+              <button
+                key={p}
+                onClick={() => setDays(p)}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
+                  days === p
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {p}d
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

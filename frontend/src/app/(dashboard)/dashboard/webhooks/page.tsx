@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -95,20 +96,18 @@ export default function WebhooksPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Webhooks</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Get an HTTPS POST whenever something happens to your tickets.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
-        >
-          Add endpoint
-        </button>
-      </header>
+      <PageHeader
+        title="Webhooks"
+        description="Get an HTTPS POST whenever something happens to your tickets."
+        action={
+          <button
+            onClick={() => setShowAdd(true)}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+          >
+            Add endpoint
+          </button>
+        }
+      />
 
       {error && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm">

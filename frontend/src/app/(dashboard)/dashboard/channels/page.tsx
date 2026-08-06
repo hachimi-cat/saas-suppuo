@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Bell, Globe, Hash, Mail, MessageCircle, MessageSquare, PenLine, Plug, Send, Trash2 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -86,13 +87,10 @@ export default function ChannelsPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Channels</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Where your customers reach you. Bring your own provider accounts for unlimited
-          volume and your own branding.
-        </p>
-      </header>
+      <PageHeader
+        title="Channels"
+        description="Where your customers reach you. Bring your own provider accounts for unlimited volume and your own branding."
+      />
 
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm">

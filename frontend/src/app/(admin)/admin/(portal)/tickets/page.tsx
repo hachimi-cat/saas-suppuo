@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { PageHeader } from '@/components/dashboard/page-header';
 import {
   adminFetch,
   Badge,
@@ -67,39 +68,37 @@ export default function AdminTicketsPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tickets</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            The latest tickets across every workspace, newest first.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg border border-border p-0.5">
-            {LIMITS.map((n) => (
-              <button
-                key={n}
-                onClick={() => setLimit(n)}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
-                  limit === n
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => load(limit)}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm hover:border-primary disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Tickets"
+        description="The latest tickets across every workspace, newest first."
+        action={
+          <>
+            <div className="inline-flex rounded-lg border border-border p-0.5">
+              {LIMITS.map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setLimit(n)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
+                    limit === n
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => load(limit)}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm hover:border-primary disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </>
+        }
+      />
 
       {data && (
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">

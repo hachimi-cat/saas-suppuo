@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 
 interface CannedReply {
   id: string;
@@ -53,13 +54,10 @@ export default function CannedRepliesPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Canned replies</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Saved snippets for the answers you type all the time. Use them from the reply box on
-          any ticket.
-        </p>
-      </header>
+      <PageHeader
+        title="Canned replies"
+        description="Saved snippets for the answers you type all the time. Use them from the reply box on any ticket."
+      />
 
       <section className="rounded-xl border border-border p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">

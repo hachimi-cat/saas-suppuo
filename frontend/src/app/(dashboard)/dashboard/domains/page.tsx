@@ -33,6 +33,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -108,16 +109,18 @@ export default function DomainsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Custom domains</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Serve your help center + portal on your own domain — e.g.{' '}
-          <code className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs">
-            help.yourbrand.com
-          </code>
-          . Add a domain, point its DNS at us, then verify. Up to 5 per workspace.
-        </p>
-      </header>
+      <PageHeader
+        title="Custom domains"
+        description={
+          <>
+            Serve your help center + portal on your own domain — e.g.{' '}
+            <code className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs">
+              help.yourbrand.com
+            </code>
+            . Add a domain, point its DNS at us, then verify. Up to 5 per workspace.
+          </>
+        }
+      />
 
       {/* ── Add domain ──────────────────────────────────────────────── */}
       <section className="rounded-xl border border-border p-5">

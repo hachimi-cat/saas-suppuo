@@ -30,7 +30,7 @@ export function PageHeader({
         </span>
       )}
       <div className="min-w-0 sm:flex-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         {description && (
           <div className="mt-1 text-sm text-muted-foreground">{description}</div>
         )}

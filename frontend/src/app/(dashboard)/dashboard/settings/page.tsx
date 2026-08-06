@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest, ApiRequestError, apiUrl } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 import { Avatar } from '@/components/ui/avatar';
 import { APP_VERSION, BUILD_SHA, BUILD_DATE } from '@/lib/version';
 
@@ -29,9 +30,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-      </header>
+      <PageHeader title="Settings" />
 
       <ProfileSection />
 

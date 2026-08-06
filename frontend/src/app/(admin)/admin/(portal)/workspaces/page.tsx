@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
+import { PageHeader } from '@/components/dashboard/page-header';
 import {
   adminFetch,
   Badge,
@@ -80,22 +81,20 @@ export default function AdminWorkspacesPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Workspaces</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Every workspace running a support inbox, with its ticket volume and activity.
-          </p>
-        </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm hover:border-primary disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        title="Workspaces"
+        description="Every workspace running a support inbox, with its ticket volume and activity."
+        action={
+          <button
+            onClick={load}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm hover:border-primary disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        }
+      />
 
       {stats && (
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">

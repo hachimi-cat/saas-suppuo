@@ -15,6 +15,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import { apiRequest, ApiRequestError, uploadFile } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 import {
   Select,
   SelectContent,
@@ -226,16 +227,18 @@ export default function HelpCenterAdminPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Help center</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your public help center lives at{' '}
-          <code className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs">
-            suppuo.com/support/&lt;workspace&gt;
-          </code>
-          . Manage its FAQ, articles, and contact details here.
-        </p>
-      </header>
+      <PageHeader
+        title="Help center"
+        description={
+          <>
+            Your public help center lives at{' '}
+            <code className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs">
+              suppuo.com/support/&lt;workspace&gt;
+            </code>
+            . Manage its FAQ, articles, and contact details here.
+          </>
+        }
+      />
 
       {/* ── Contact + product links ─────────────────────────────────── */}
       {cfg && (

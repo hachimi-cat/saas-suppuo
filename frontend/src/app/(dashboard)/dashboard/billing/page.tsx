@@ -17,6 +17,7 @@ import { useSearchParams } from 'next/navigation';
 import { Check } from 'lucide-react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
 import { fetchMembers } from '@/lib/members';
+import { PageHeader } from '@/components/dashboard/page-header';
 
 interface Subscription {
   id: string | null;
@@ -136,12 +137,10 @@ function BillingContent() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          One flat price per workspace, billed in IDR through Plugipay.
-        </p>
-      </header>
+      <PageHeader
+        title="Billing"
+        description="One flat price per workspace, billed in IDR through Plugipay."
+      />
 
       {checkoutStatus === 'success' && (
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-700">

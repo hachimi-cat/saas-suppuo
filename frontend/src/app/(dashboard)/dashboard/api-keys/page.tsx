@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { apiRequest, ApiRequestError } from '@/lib/api';
+import { PageHeader } from '@/components/dashboard/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -68,19 +69,19 @@ export default function ApiKeysPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">API keys</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title="API keys"
+        description={
+          <>
             Authenticate API calls with{' '}
             <code className="rounded bg-muted/60 px-1 py-0.5 text-xs">
               Authorization: Bearer sk_live_…
             </code>
             . Keys are shown once — store them like passwords.
-          </p>
-        </div>
-        <Button onClick={() => setShowCreate(true)}>Create key</Button>
-      </header>
+          </>
+        }
+        action={<Button onClick={() => setShowCreate(true)}>Create key</Button>}
+      />
 
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm">

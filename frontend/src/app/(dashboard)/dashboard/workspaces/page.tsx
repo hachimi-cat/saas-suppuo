@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { writeActiveWorkspace } from '@forjio/portal-ui';
+import { PageHeader } from '@/components/dashboard/page-header';
 
 interface Workspace {
   id: string;
@@ -86,16 +87,18 @@ export default function WorkspacesPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Workspaces</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Each workspace has its own inbox, form, billing and settings. Managed in{' '}
-          <a href="https://huudis.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">
-            Huudis
-          </a>
-          , usable everywhere in the Forjio family.
-        </p>
-      </header>
+      <PageHeader
+        title="Workspaces"
+        description={
+          <>
+            Each workspace has its own inbox, form, billing and settings. Managed in{' '}
+            <a href="https://huudis.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              Huudis
+            </a>
+            , usable everywhere in the Forjio family.
+          </>
+        }
+      />
 
       {error && (
         <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm">

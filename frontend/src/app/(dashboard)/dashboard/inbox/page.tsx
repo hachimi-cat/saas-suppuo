@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { apiRequest, ApiRequestError } from '@/lib/api';
 import { fetchMembers, type Member } from '@/lib/members';
+import { PageHeader } from '@/components/dashboard/page-header';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -197,25 +198,23 @@ export default function InboxPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inbox</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Every customer request, in one place.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tickets…"
-            aria-label="Search tickets"
-            className="w-48 sm:w-64"
-          />
-          <Button onClick={() => setShowNew(true)}>New ticket</Button>
-        </div>
-      </header>
+      <PageHeader
+        title="Inbox"
+        description="Every customer request, in one place."
+        action={
+          <>
+            <Input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search tickets…"
+              aria-label="Search tickets"
+              className="w-full sm:w-64"
+            />
+            <Button onClick={() => setShowNew(true)}>New ticket</Button>
+          </>
+        }
+      />
 
       <div className="mb-3 flex flex-wrap gap-1.5">
         {STATUS_TABS.map((s) => (
