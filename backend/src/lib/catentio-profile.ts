@@ -58,7 +58,12 @@ export const SUPPUO_PROFILE: ProductAgentProfile<SuppuoLimits> = {
   multiStepExample: 'write a FAQ AND a canned reply that points at it',
   writablesSummary: 'help centre articles and canned replies',
   endpointsLine:
-    '- Key endpoints: POST /api/v1/help (create; body fields below) · PATCH /api/v1/help/{id} · DELETE /api/v1/help/{id} · POST /api/v1/canned-replies · PATCH /api/v1/canned-replies/{id} · DELETE /api/v1/canned-replies/{id} · GET /api/v1/help, /api/v1/canned-replies.',
+    // Help articles live at /help/ARTICLES — the /help router mounts its
+    // collection under /articles, so a bare /api/v1/help is a 404. Naming
+    // the wrong base here is not cosmetic: it is the only path the agent
+    // has, and it spent a whole run probing /help, /help/, /help-articles
+    // before giving up. Verified live 2026-08-06 against staging.
+    '- Key endpoints: POST /api/v1/help/articles (create; body fields below) · PATCH /api/v1/help/articles/{id} · DELETE /api/v1/help/articles/{id} · POST /api/v1/canned-replies · PATCH /api/v1/canned-replies/{id} · DELETE /api/v1/canned-replies/{id} · GET /api/v1/help/articles, /api/v1/canned-replies.',
   extraNotes: [
     "A 'faq' is a question and its answer and needs no slug; an 'article' is a titled markdown page and takes a lowercase-kebab slug, unique per workspace. New entries are created as drafts — say so rather than implying they are live.",
     'You can read tickets to understand what customers keep asking, but you cannot write to them, reply to anyone, or touch a channel — propose a help article or a canned reply instead.',
