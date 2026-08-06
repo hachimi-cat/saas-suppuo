@@ -8,6 +8,7 @@
  * The accountId comes from /api/v1/auth/me (the BFF session).
  */
 
+import { AssistantSection } from '@/components/catentio/assistant-section';
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest, ApiRequestError, apiUrl } from '@/lib/api';
 import { PageHeader } from '@/components/dashboard/page-header';
@@ -33,6 +34,10 @@ export default function SettingsPage() {
       <PageHeader title="Settings" />
 
       <ProfileSection />
+
+      {/* Assistant — renders only when the catentio pilot flag is on for
+          this user, so the page is unchanged for everyone else. */}
+      <AssistantSection />
 
       <section className="rounded-xl border border-border p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">

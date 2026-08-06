@@ -25,6 +25,7 @@ import adminTransactionsRouter from './admin-transactions.js';
 import adminSystemHealthRouter from './admin-system-health.js';
 import adminFeatureFlagsRouter from './admin-feature-flags.js';
 import billingRouter from './billing.js';
+import catentioRouter from './catentio.js';
 import attachmentsRouter from './attachments.js';
 import apiKeysRouter from './api-keys.js';
 import webhookSubscriptionsRouter from './webhook-subscriptions.js';
@@ -147,6 +148,10 @@ export default function routes(_opts: RoutesOptions = {}): ExpressRouter {
   router.use('/public', rateLimit('ingress'), publicTicketsRouter);
   /** Billing — Plugipay-powered plan subscriptions. */
   router.use('/billing', requireAuth, billingRouter);
+  // The embedded catentio assistant's BFF. Carries its own auth inside
+  // the package router; delegated agent runs are refused here by name
+  // (middleware/auth.ts) so a run cannot drive its own BFF recursively.
+  router.use('/catentio', catentioRouter);
   /** Inbound channel webhooks (Twilio WhatsApp, Telegram bots). */
   router.use('/webhooks/twilio', webhooksTwilioRouter);
   /** WhatsApp Cloud API (Meta direct) — handshake GET + message POST. */

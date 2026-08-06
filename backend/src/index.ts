@@ -1,4 +1,5 @@
 import { createApp } from './app.js';
+import { registerFeatureFlags } from './lib/feature-flag-registry.js';
 import { startOutboxWorker } from './services/outbox-worker.js';
 
 const app = createApp();
@@ -7,6 +8,17 @@ const port = Number(process.env.PORT ?? 4170);
 app.listen(port, () => {
   console.log(`[api] ${process.env.FORJIO_SERVICE ?? 'suppuo'} listening on ${port}`);
 });
+
+// Declare this product's feature flags at BOOT, not from the admin page.
+// Registering them only when someone opens /admin/feature-flags means the
+// row exists in no database until then — and `isEnabled` fails closed on a
+// missing row, so a staged flag gates nothing for exactly the accounts it
+// was allowlisted for. Idempotent: seeds enabled/rollout/allowlist on
+// CREATE only, so a redeploy never re-enables something turned off during
+// an incident.
+registerFeatureFlags().catch((err) =>
+  console.error('[feature-flags] boot registration failed:', err),
+);
 
 // Outbox worker runs alongside the API process. For production, prefer a
 // separate pm2 entry: `node dist/services/outbox-worker.js`. Tests

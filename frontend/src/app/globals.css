@@ -29,6 +29,11 @@
     --input: 214 32% 87%;
     --ring: 206 100% 50%;
     --radius: 0.5rem;
+    /* The docked assistant composer. Suppuo is the family's only
+       light-themed dashboard — the page is pure white, so the
+       composer is a faint grey card (the --muted value) rather than
+       the darker surface the navy products use. */
+    --agent-composer-bg: hsl(210 40% 96%);
   }
 }
 

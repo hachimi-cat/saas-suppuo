@@ -43,13 +43,18 @@ export async function registerFeatureFlags(): Promise<void> {
 /**
  * Is the catentio pilot on for this user?
  *
- * NOT YET CALLED ANYWHERE, and deliberately so: the embedded catentio
- * layer this gates is not built in this product yet. The flag is staged
- * ahead of it — off, with the two pilot accounts allowlisted — so that
- * when the integration lands it is one import and one `if`, and nobody
- * has to remember to add the gate afterwards. Delete this helper if the
- * pilot is abandoned; do not leave it here reading a flag nobody flips.
+ * Called by routes/catentio.ts (the embedded agent layer landed
+ * 2026-08-06 via @forjio/catentio-embed — the P5 fan-out); the flag it
+ * reads was staged ahead of the integration on 2026-07-31.
  */
-export function catentioPilotEnabled(huudisUserId: string | null | undefined): Promise<boolean> {
-  return isEnabled(CATENTIO_PILOT_FLAG, huudisUserId ?? null);
+export async function catentioPilotEnabled(
+  huudisUserId: string | null | undefined,
+  email?: string | null,
+): Promise<boolean> {
+  if (await isEnabled(CATENTIO_PILOT_FLAG, huudisUserId ?? null)) return true;
+  // The email is tried as a second allowlist subject (linksnap lesson,
+  // 2026-08-05): `usr_…` ids are per-Huudis-instance — staging mints
+  // different ids for the same person, so an id-only check quietly
+  // excludes the pilot accounts everywhere but prod.
+  return !!email && isEnabled(CATENTIO_PILOT_FLAG, email);
 }
