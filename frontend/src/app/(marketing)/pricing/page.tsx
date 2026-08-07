@@ -143,8 +143,8 @@ export default function PricingPage() {
           One flat price for the whole team.
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Suppuo is priced per workspace, not per agent. Rp 99,000 flat per month for the
-          whole team — not Rp 400,000 per agent like other tools. Every plan includes
+          Suppuo is priced per workspace, not per agent. Rp 99.000 flat per month for the
+          whole team — not Rp 400.000 per agent like other tools. Every plan includes
           the omnichannel inbox: hosted form, live chat widget, email-to-ticket, and more.
         </p>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
@@ -211,8 +211,8 @@ export default function PricingPage() {
         <p className="font-medium text-foreground">Early access, honestly.</p>
         <p className="mt-2">
           While Suppuo is in early access, all workspaces get Growth-level features free.
-          Founding members get 50% off for 12 months when billing starts (Starter Rp 49,000 ·
-          Growth Rp 149,000) — announced 30+ days in advance. If you don&apos;t pay later, you
+          Founding members get 50% off for 12 months when billing starts (Starter Rp 49.000 ·
+          Growth Rp 149.000) — announced 30+ days in advance. If you don&apos;t pay later, you
           keep your data and drop to Free; export available on every tier.
         </p>
       </div>
