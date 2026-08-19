@@ -45,15 +45,18 @@ export function CatentioDockedChat() {
   if (!enabled) return null;
 
   // Insets mirror <main>'s padding so the dock lines up with the page
-  // content. Expanded: full SCREEN on mobile (fixed inset-0 over
-  // everything), full column height on desktop at the same content
-  // width (the linksnap layout decisions, 2026-08-05).
+  // content (linksnap's layout decision, 2026-08-05). suppuo's shell
+  // pads `p-4 md:p-6` (dashboard-shell.tsx), so the step is at `md:`
+  // here — copying linksnap's `sm:` verbatim left the dock 8px inside
+  // the content between 640 and 767px. Expanded: full SCREEN below md
+  // (fixed inset-0 over everything), full column height above it at
+  // the same content width.
   return (
     <div
       className={
         open
-          ? 'fixed inset-0 z-50 flex flex-col sm:absolute sm:inset-x-6 sm:bottom-6 sm:top-6 sm:z-40 sm:mx-auto sm:max-w-4xl'
-          : 'absolute inset-x-4 bottom-4 z-40 mx-auto flex max-w-4xl flex-col sm:inset-x-6 sm:bottom-6'
+          ? 'fixed inset-0 z-50 flex flex-col md:absolute md:inset-x-6 md:bottom-6 md:top-6 md:z-40 md:mx-auto md:max-w-4xl'
+          : 'absolute inset-x-4 bottom-4 z-40 mx-auto flex max-w-4xl flex-col md:inset-x-6 md:bottom-6'
       }
     >
       <DockedChat
@@ -62,11 +65,28 @@ export function CatentioDockedChat() {
         open={open}
         onOpenChange={setOpen}
         title="Suppuo Assistant"
+        // The assistant's bubble avatar. Served from public/ — until
+        // 2026-08-19 this pointed at a file suppuo never shipped (the
+        // value was copied from linksnap, which ships one), and every
+        // reply carried the browser's broken-image glyph.
         avatarUrl="/apple-touch-icon.png"
         // The detached circle left of the resting dock, on the product's
         // primary fill (bang, 2026-08-06). A life ring is suppuo's
-        // support mark.
+        // support mark — LogoMark is already a bare currentColor glyph
+        // on lucide's 24-box, exactly what this slot expects.
         brandIcon={<LogoMark />}
+        // Starter prompts on a new session (bang, 2026-08-08: a greeting
+        // and three ways in). Phrased as the support team talking, not as
+        // menu items, and drawn from what the agent can actually finish
+        // here: help-centre articles/FAQs and canned replies (created as
+        // drafts), plus listing them. Tickets, channels and reports are
+        // refused at the auth layer — no chip may open on a refusal.
+        // Clicking SENDS.
+        suggestions={[
+          'Draft a FAQ explaining our refund policy',
+          'Write a canned reply for delayed-order apologies',
+          'Show me my help centre articles and their status',
+        ]}
         onApplyAction={onApplyAction}
       />
     </div>
