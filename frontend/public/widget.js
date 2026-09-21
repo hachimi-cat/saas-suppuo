@@ -58,6 +58,27 @@
   // widget-config fetch below still recolors for plain embeds.
   var ACCENT_ATTR = script.getAttribute('data-suppuo-accent');
   var BLUE = ACCENT_ATTR && /^#[0-9a-fA-F]{6}$/.test(ACCENT_ATTR) ? ACCENT_ATTR : '#0080FF';
+  var HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+  // Pick the black/white foreground with the stronger WCAG contrast.
+  // The 0.179 crossover is where the black and white contrast ratios
+  // are equal after relative-luminance conversion.
+  function contrastForeground(background) {
+    if (!HEX_COLOR.test(background)) return '#ffffff';
+    var channels = [background.slice(1, 3), background.slice(3, 5), background.slice(5, 7)];
+    var weights = [0.2126, 0.7152, 0.0722];
+    var luminance = 0;
+    for (var i = 0; i < channels.length; i++) {
+      var channel = parseInt(channels[i], 16) / 255;
+      channel = channel <= 0.04045
+        ? channel / 12.92
+        : Math.pow((channel + 0.055) / 1.055, 2.4);
+      luminance += channel * weights[i];
+    }
+    return luminance > 0.179 ? '#000000' : '#ffffff';
+  }
+
+  var ACCENT_FOREGROUND = contrastForeground(BLUE);
   // Font doctrine (bang 2026-08-05): the tab + panel headings carry the
   // Forjio display face (Gellix — loaded by every Forjio host; graceful
   // fallback elsewhere); panel BODY text inherits the host product's own
@@ -168,6 +189,15 @@
 
   // ── DOM scaffold ───────────────────────────────────────────────────
   var root = el('div', null, { id: 'suppuo-widget-root' });
+  root.style.setProperty('--suppuo-accent', BLUE);
+  root.style.setProperty('--suppuo-accent-foreground', ACCENT_FOREGROUND);
+
+  function applyWidgetColors(accent, foreground) {
+    BLUE = accent;
+    ACCENT_FOREGROUND = foreground;
+    root.style.setProperty('--suppuo-accent', BLUE);
+    root.style.setProperty('--suppuo-accent-foreground', ACCENT_FOREGROUND);
+  }
 
   var sideStyle = {};
   sideStyle[POSITION] = '0';
@@ -187,8 +217,8 @@
       position: 'fixed',
       bottom: '25%',
       border: 'none',
-      background: BLUE,
-      color: '#fff',
+      background: 'var(--suppuo-accent)',
+      color: 'var(--suppuo-accent-foreground)',
       cursor: 'pointer',
       boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
       zIndex: '2147483000',
@@ -262,8 +292,8 @@
   // Header — carries the panel's close button: the edge tab HIDES while
   // the panel is open (bang 2026-08-05), so the panel must close itself.
   var header = el('div', {
-    background: BLUE,
-    color: '#fff',
+    background: 'var(--suppuo-accent)',
+    color: 'var(--suppuo-accent-foreground)',
     padding: '14px 16px',
     flexShrink: '0',
     display: 'flex',
@@ -286,7 +316,7 @@
     {
       border: 'none',
       background: 'transparent',
-      color: '#fff',
+      color: 'var(--suppuo-accent-foreground)',
       cursor: 'pointer',
       padding: '2px',
       lineHeight: '0',
@@ -336,11 +366,11 @@
       // Accent follows the workspace brand — recolor the bubble + panel
       // header now; primaryButton() reads BLUE at call time so forms
       // opened later pick it up too.
-      if (b.data.accentColor) {
-        BLUE = b.data.accentColor;
-        bubble.style.background = BLUE;
-        header.style.background = BLUE;
-      }
+      var accent = HEX_COLOR.test(b.data.accentColor || '') ? b.data.accentColor : BLUE;
+      var foreground = HEX_COLOR.test(b.data.widgetTextColor || '')
+        ? b.data.widgetTextColor
+        : contrastForeground(accent);
+      applyWidgetColors(accent, foreground);
     })
     .catch(function () {});
 
@@ -378,8 +408,8 @@
         width: '100%',
         border: 'none',
         borderRadius: '8px',
-        background: BLUE,
-        color: '#fff',
+        background: 'var(--suppuo-accent)',
+        color: 'var(--suppuo-accent-foreground)',
         fontWeight: '700',
         fontSize: '14px',
         fontFamily: FONT,

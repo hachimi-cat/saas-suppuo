@@ -125,6 +125,9 @@ router.get(
       hideBranding: settings?.hideBranding ?? false,
       // The widget bubble + panel accent follow the workspace brand.
       accentColor: settings?.accentColor ?? null,
+      // Null means the widget derives whichever of black/white has the
+      // stronger WCAG contrast against accentColor.
+      widgetTextColor: settings?.widgetTextColor ?? null,
     });
   }),
 );

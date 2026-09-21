@@ -20,6 +20,10 @@ interface AttRow {
 
 const attachments: AttRow[] = [];
 const messages: Array<Record<string, unknown>> = [];
+const emailMocks = vi.hoisted(() => ({
+  sendAgentRepliedEmail: vi.fn(async () => undefined),
+  sendTicketReceivedEmail: vi.fn(async () => undefined),
+}));
 
 const AGENT_ACCOUNT = 'acc_agent_workspace_1';
 const OTHER_ACCOUNT = 'acc_someone_else_9';
@@ -32,7 +36,7 @@ const TICKET = {
   status: 'open',
   priority: 'normal',
   channel: 'web',
-  requesterEmail: null,
+  requesterEmail: 'customer@example.com',
   requesterName: 'Budi',
   requesterPhone: null,
   requesterExternalId: null,
@@ -109,6 +113,7 @@ const prismaMock = {
 };
 
 vi.mock('../lib/db.js', () => ({ prisma: prismaMock }));
+vi.mock('../lib/email.js', () => emailMocks);
 
 vi.mock('../middleware/auth.js', () => ({
   requireAuth: (
@@ -136,6 +141,8 @@ const {
 beforeEach(() => {
   attachments.length = 0;
   messages.length = 0;
+  emailMocks.sendAgentRepliedEmail.mockClear();
+  emailMocks.sendTicketReceivedEmail.mockClear();
 });
 
 // ─── lib unit tests ───────────────────────────────────────────────────
@@ -292,6 +299,31 @@ describe('GET /api/v1/attachments/:id (agent download)', () => {
 });
 
 describe('staged-binding via POST /api/v1/tickets/:id/messages', () => {
+  it('emails a public inbox reply to the customer with the persisted ticket context', async () => {
+    const res = await request(createApp())
+      .post(`/api/v1/tickets/${TICKET.id}/messages`)
+      .send({ body: 'Your order is on the way', authorName: 'Ayu' });
+    expect(res.status).toBe(201);
+    await vi.waitFor(() => expect(emailMocks.sendAgentRepliedEmail).toHaveBeenCalledOnce());
+    expect(emailMocks.sendAgentRepliedEmail).toHaveBeenCalledWith({
+      accountId: AGENT_ACCOUNT,
+      to: 'customer@example.com',
+      ticketNumber: 7,
+      subject: 'Help',
+      accessToken: 'tok_public_abc',
+      replyBody: 'Your order is on the way',
+      agentName: 'Ayu',
+    });
+  });
+
+  it('never emails an internal note to the customer', async () => {
+    const res = await request(createApp())
+      .post(`/api/v1/tickets/${TICKET.id}/messages`)
+      .send({ body: 'Check with fulfilment', isInternal: true });
+    expect(res.status).toBe(201);
+    expect(emailMocks.sendAgentRepliedEmail).not.toHaveBeenCalled();
+  });
+
   it('binds staged attachments to the new message in the same transaction', async () => {
     const app = createApp();
     const a = await stage(app);

@@ -183,6 +183,7 @@ const BRAND_DEFAULTS = {
   brandLogoUrl: null as string | null,
   accentColor: null as string | null,
   brandColor: null as string | null,
+  widgetTextColor: null as string | null,
 };
 
 const hexColor = z
@@ -214,6 +215,7 @@ const brandPutBody = z.object({
   brandLogoUrl: urlOrEmpty.nullable().optional(),
   accentColor: hexColor.nullable().optional(),
   brandColor: hexColor.nullable().optional(),
+  widgetTextColor: hexColor.nullable().optional(),
 });
 
 function brandView(s: typeof BRAND_DEFAULTS): typeof BRAND_DEFAULTS {
@@ -223,6 +225,7 @@ function brandView(s: typeof BRAND_DEFAULTS): typeof BRAND_DEFAULTS {
     brandLogoUrl: s.brandLogoUrl ?? null,
     accentColor: s.accentColor ?? null,
     brandColor: s.brandColor ?? null,
+    widgetTextColor: s.widgetTextColor ?? null,
   };
 }
 
@@ -241,7 +244,13 @@ router.put(
     const accountId = req.auth!.accountId as string;
     const input = brandPutBody.parse(req.body);
     const data: Record<string, unknown> = {};
-    for (const k of ['brandName', 'brandLogoUrl', 'accentColor', 'brandColor'] as const) {
+    for (const k of [
+      'brandName',
+      'brandLogoUrl',
+      'accentColor',
+      'brandColor',
+      'widgetTextColor',
+    ] as const) {
       if (input[k] !== undefined) data[k] = emptyToNull(input[k] ?? null);
     }
     if (input.slug !== undefined) {

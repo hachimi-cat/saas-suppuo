@@ -80,6 +80,18 @@ const helpArticle = {
 const accountSettings = {
   findUnique: async (args: { where: { accountId: string } }) =>
     settings.get(args.where.accountId) ?? null,
+  upsert: async (args: {
+    where: { accountId: string };
+    create: Record<string, unknown>;
+    update: Record<string, unknown>;
+  }) => {
+    const current = settings.get(args.where.accountId);
+    const saved = current
+      ? { ...current, ...args.update }
+      : { ...args.create };
+    settings.set(args.where.accountId, saved);
+    return saved;
+  },
 };
 
 vi.mock('../lib/db.js', () => ({
@@ -183,5 +195,38 @@ describe('help public read surface', () => {
     const res = await request(app).get('/api/v1/public/help/not-an-account');
     expect(res.status).toBe(200);
     expect(res.body.data.faqs).toHaveLength(0);
+  });
+});
+
+describe('widget branding configuration', () => {
+  it('persists and publicly returns the manual widget foreground color', async () => {
+    const put = await request(app).put('/api/v1/settings/branding').send({
+      accentColor: '#f5e942',
+      widgetTextColor: '#111111',
+    });
+    expect(put.status).toBe(200);
+    expect(put.body.data.widgetTextColor).toBe('#111111');
+
+    const get = await request(app).get(
+      `/api/v1/public/widget-config?account=${AGENT_ACCOUNT}`,
+    );
+    expect(get.status).toBe(200);
+    expect(get.body.data).toMatchObject({
+      accentColor: '#f5e942',
+      widgetTextColor: '#111111',
+    });
+  });
+
+  it('accepts null to restore automatic contrast', async () => {
+    settings.set(AGENT_ACCOUNT, {
+      accountId: AGENT_ACCOUNT,
+      accentColor: '#f5e942',
+      widgetTextColor: '#111111',
+    });
+    const put = await request(app).put('/api/v1/settings/branding').send({
+      widgetTextColor: null,
+    });
+    expect(put.status).toBe(200);
+    expect(put.body.data.widgetTextColor).toBeNull();
   });
 });

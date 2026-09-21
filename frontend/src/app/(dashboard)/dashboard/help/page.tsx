@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, MessageCircle } from 'lucide-react';
 import { apiRequest, ApiRequestError, uploadFile } from '@/lib/api';
 import { PageHeader } from '@/components/dashboard/page-header';
 import {
@@ -50,6 +50,7 @@ interface Branding {
   brandLogoUrl: string | null;
   accentColor: string | null;
   brandColor: string | null;
+  widgetTextColor: string | null;
 }
 
 // Forjio family defaults — the swatch fallback when a workspace hasn't
@@ -124,6 +125,7 @@ export default function HelpCenterAdminPage() {
           brandLogoUrl: branding.brandLogoUrl || null,
           accentColor: branding.accentColor || null,
           brandColor: branding.brandColor || null,
+          widgetTextColor: branding.widgetTextColor || null,
         },
       });
       setBrandSaved(true);
@@ -377,6 +379,17 @@ export default function HelpCenterAdminPage() {
                 onChange={(v) => setBranding({ ...branding, brandColor: v })}
               />
             </Field>
+            <Field label="Widget text + icon color (blank = automatic)" full>
+              <ColorField
+                value={branding.widgetTextColor}
+                fallback={contrastForeground(branding.accentColor || DEFAULT_ACCENT)}
+                onChange={(v) => setBranding({ ...branding, widgetTextColor: v })}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Leave blank to use whichever of black or white gives the strongest contrast
+                against the accent color.
+              </p>
+            </Field>
 
             {/* Live preview swatch — the themed surfaces at a glance. */}
             <div className="sm:col-span-2">
@@ -384,6 +397,7 @@ export default function HelpCenterAdminPage() {
               <BrandPreview
                 accent={branding.accentColor || DEFAULT_ACCENT}
                 brand={branding.brandColor || DEFAULT_BRAND}
+                widgetTextColor={branding.widgetTextColor}
                 logoUrl={branding.brandLogoUrl}
                 name={branding.brandName}
               />
@@ -537,7 +551,26 @@ function blankCfg(): HelpConfig {
 }
 
 function blankBranding(): Branding {
-  return { slug: null, brandName: null, brandLogoUrl: null, accentColor: null, brandColor: null };
+  return {
+    slug: null,
+    brandName: null,
+    brandLogoUrl: null,
+    accentColor: null,
+    brandColor: null,
+    widgetTextColor: null,
+  };
+}
+
+function contrastForeground(background: string): '#000000' | '#ffffff' {
+  const rgb = [background.slice(1, 3), background.slice(3, 5), background.slice(5, 7)].map(
+    (part) => Number.parseInt(part, 16) / 255,
+  );
+  const luminance = rgb
+    .map((channel) =>
+      channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+    )
+    .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index]!, 0);
+  return luminance > 0.179 ? '#000000' : '#ffffff';
 }
 
 // Paired color picker + hex text input, both bound to the same value.
@@ -577,14 +610,17 @@ function ColorField({
 function BrandPreview({
   accent,
   brand,
+  widgetTextColor,
   logoUrl,
   name,
 }: {
   accent: string;
   brand: string;
+  widgetTextColor: string | null;
   logoUrl: string | null;
   name: string | null;
 }) {
+  const accentForeground = widgetTextColor || contrastForeground(accent);
   return (
     <div
       className="flex items-center gap-3 rounded-xl border border-border p-4"
@@ -608,10 +644,11 @@ function BrandPreview({
         <p className="text-xs text-white/60">How can we help?</p>
       </div>
       <span
-        className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
-        style={{ background: accent }}
+        className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
+        style={{ background: accent, color: accentForeground }}
       >
-        Submit a request
+        <MessageCircle className="size-3.5" />
+        Ask Support
       </span>
     </div>
   );

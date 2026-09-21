@@ -1,7 +1,8 @@
-// Requester email notifications — Resend via the shared Forjio account
+// Outbound email notifications — Resend via the shared Forjio account
 // (RESEND_API_KEY). Env-gated: silent console no-op when unset (dev,
-// tests, fresh deploys). Fire-and-forget at every call site — a mail
-// failure must never fail a ticket write.
+// tests, fresh deploys). Requester-mail call sites stay fire-and-forget
+// so a mail failure never rolls back an already-persisted ticket write;
+// the outbox worker awaits workspace inbox notifications before publish.
 
 import { resolveEmailForAccount } from './channels.js';
 import { accountHidesBranding } from './branding.js';
@@ -24,6 +25,7 @@ async function send(
   subject: string,
   html: string,
   text: string,
+  options: { replyToInbox?: boolean } = {},
 ): Promise<void> {
   // BYO Resend (the workspace's own key + from address) wins over the
   // platform sender.
@@ -35,21 +37,33 @@ async function send(
   // Reply-To = the workspace's inbound alias, so a plain email reply
   // threads straight back into the ticket (email-to-ticket webhook).
   const inboundDomain = process.env.SUPPUO_INBOUND_EMAIL_DOMAIN ?? 'in.suppuo.com';
+  const payload: Record<string, unknown> = {
+    from: resolved.from,
+    to,
+    subject,
+    html,
+    text,
+  };
+  if (options.replyToInbox !== false) {
+    payload.reply_to = `${accountId}@${inboundDomain}`;
+  }
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${resolved.apiKey}`, 'content-type': 'application/json' },
-    body: JSON.stringify({
-      from: resolved.from,
-      to,
-      subject,
-      html,
-      text,
-      reply_to: `${accountId}@${inboundDomain}`,
-    }),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     throw new Error(`resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
   }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function statusLink(token: string): string {
@@ -140,5 +154,34 @@ export async function sendAgentRepliedEmail(opts: {
     `[#${opts.ticketNumber}] New reply — ${opts.subject}`,
     `<div style="font-family:sans-serif;max-width:520px"><p><strong>${who}</strong> replied to your ticket <strong>#${opts.ticketNumber}</strong>:</p><blockquote style="border-left:3px solid #F43F5E;margin:0;padding:8px 14px;white-space:pre-wrap">${opts.replyBody.replace(/</g, '&lt;')}</blockquote><p>Reply on the ticket page:</p><p><a href="${link}">${link}</a></p></div>`,
     `${who} replied to ticket #${opts.ticketNumber}:\n\n${opts.replyBody}\n\nReply: ${link}`,
+  );
+}
+
+/** Notify a Suppuo workspace member that a customer opened or replied
+ *  to an inbox ticket. Unlike requester mail, this deliberately has no
+ *  inbound Reply-To alias: replying from an agent's email client must
+ *  not create a requester message. The CTA always lands on the exact
+ *  ticket in the authenticated inbox portal. */
+export async function sendInboxNotificationEmail(opts: {
+  accountId: string;
+  to: string;
+  kind: 'created' | 'replied';
+  ticketId: string;
+  ticketNumber: number;
+  subject: string;
+  requester: string;
+}): Promise<void> {
+  const link = `${PORTAL}/dashboard/tickets/${encodeURIComponent(opts.ticketId)}`;
+  const heading =
+    opts.kind === 'created'
+      ? `New inbox ticket #${opts.ticketNumber}`
+      : `Customer replied on ticket #${opts.ticketNumber}`;
+  await send(
+    opts.accountId,
+    opts.to,
+    `${heading} — ${opts.subject}`,
+    `<div style="font-family:sans-serif;max-width:560px"><h2 style="font-size:18px">${escapeHtml(heading)}</h2><p><strong>${escapeHtml(opts.subject)}</strong></p><p>From ${escapeHtml(opts.requester)}</p><p><a href="${link}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Open in Suppuo</a></p><p style="color:#666;font-size:13px">Or paste this URL: ${link}</p></div>`,
+    `${heading}\n${opts.subject}\nFrom ${opts.requester}\n\nOpen in Suppuo: ${link}`,
+    { replyToInbox: false },
   );
 }

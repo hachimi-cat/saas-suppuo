@@ -1,6 +1,7 @@
 import { prisma } from '../lib/db.js';
 import { buildWebhookSignature, SIGNATURE_HEADER } from '../lib/webhook-signature.js';
 import { notifyTeamChannels } from '../lib/team-notify.js';
+import { notifyInboxMembers } from '../lib/inbox-notify.js';
 import { maybeSendAutoResponse } from '../lib/auto-response.js';
 import { maybeSendCsatSurvey } from '../lib/csat.js';
 import { sweepStagedAttachments } from '../lib/attachments.js';
@@ -104,6 +105,14 @@ async function deliver(ev: {
     // types (created + requester replies) and applies the 5s timeout.
     void notifyTeamChannels(ev).catch((e) =>
       console.error('[outbox] team notification fan-out failed', ev.id, e),
+    );
+
+    // Email is the universal inbox notification channel: every known
+    // workspace member gets a direct ticket link for new tickets and
+    // requester replies. Await it so the outbox row is not published
+    // while delivery is still merely queued in this process.
+    await notifyInboxMembers(ev).catch((e) =>
+      console.error('[outbox] inbox email notification failed', ev.id, e),
     );
 
     // Feature wave: CSAT + automation. Both consumers filter their own
