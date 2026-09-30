@@ -2,8 +2,9 @@
 
 Typed Go client for the [suppuo.com](https://suppuo.com) helpdesk REST API.
 
-Current version: **v0.2.0** — adds billing, channels, reports, settings,
-CSAT, attachments, ticket tags + the full inbox filter set.
+Current version: **v0.3.0** — adds `Client.API`, every feature route
+generated from the API spec. (v0.2.0 added billing, channels, reports,
+settings, CSAT, attachments, ticket tags + the full inbox filter set.)
 
 ```bash
 go get github.com/hachimi-cat/suppuo-go
@@ -93,6 +94,21 @@ _, err = c.Public.ReplyTicket(ctx, sub.AccessToken, "Any update?")
 | `Attachments` | `Upload` (raw bytes + filename, 8MB max), `Download` |
 | `CannedReplies` | `List`, `Create`, `Update`, `Delete` |
 | `Public` | `SubmitTicket`, `GetTicket`, `ReplyTicket` (no token) |
+| `API` | Every feature route, one method each — generated from the API spec (`api_generated.go`) |
+
+`c.API.<Area><Action>(ctx, pathParams…, *<Area><Action>Args)` covers every
+route of the API, Bearer-authenticated like the resources above (the
+`/api/v1/public/*` routes without a token), and returns the response's
+`data` as `json.RawMessage`. Required fields are plain values, optional ones
+pointers (`suppuo.Ptr`), slices or maps; `Body` passes the whole JSON body (a
+body field named `body` is `BodyField`).
+
+```go
+data, err := c.API.TicketsCreate(ctx, &suppuo.TicketsCreateArgs{
+	Subject: "Refund", BodyField: "Please refund order 12",
+	RequesterEmail: "a@b.co", Channel: suppuo.Ptr("email"),
+})
+```
 
 Failures return `*suppuo.Error` carrying the API envelope's `error.code`
 (`NOT_FOUND`, `VALIDATION_ERROR`, `AUTH_REQUIRED`, …), the HTTP status,

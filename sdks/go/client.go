@@ -40,6 +40,10 @@ type Client struct {
 	CSAT          *CSATResource
 	Attachments   *AttachmentsResource
 	Public        *PublicResource
+
+	// API has every feature route, one method each (generated from the API
+	// spec: api_generated.go), Bearer-authenticated like every other call.
+	API *GeneratedAPI
 }
 
 // Config holds the credentials + endpoint overrides.
@@ -86,7 +90,24 @@ func New(cfg Config) *Client {
 	c.CSAT = &CSATResource{c: c}
 	c.Attachments = &AttachmentsResource{c: c}
 	c.Public = &PublicResource{c: c}
+	c.API = &GeneratedAPI{c: c}
 	return c
+}
+
+// apigenRequest is the call behind Client.API (api_generated.go):
+// Bearer-authenticated like every other request, with the same envelope
+// handling; the requester-facing /api/v1/public/* routes go without a
+// token, as Client.Public does.
+func (c *Client) apigenRequest(ctx context.Context, method, path string, query url.Values, body map[string]any) (json.RawMessage, error) {
+	var send any
+	if body != nil {
+		send = body
+	}
+	var out json.RawMessage
+	if err := c.do(ctx, strings.ToUpper(method), path, query, send, strings.HasPrefix(path, "/api/v1/public/"), &out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // envelope mirrors the Forjio data/error/meta API envelope.
