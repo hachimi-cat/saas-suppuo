@@ -17,7 +17,7 @@ export class GeneratedApi {
   }
 
   /** Create an api key (POST /api/v1/api-keys) */
-  apiKeysCreate(input: { "name": string }): Promise<unknown> {
+  apiKeysCreate(input: { "name": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/api-keys`, query, all);
@@ -34,7 +34,7 @@ export class GeneratedApi {
   }
 
   /** Create an attachment (POST /api/v1/attachments) */
-  attachmentsCreate(input?: { "length"?: unknown }): Promise<unknown> {
+  attachmentsCreate(input?: { "length"?: unknown; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/attachments`, query, all);
@@ -46,7 +46,7 @@ export class GeneratedApi {
   }
 
   /** POST /checkout {tier} — create a Plugipay hosted checkout session for a paid tier; the browser redirects to data.hostedUrl. (POST /api/v1/billing/checkout) */
-  billingCheckout(input: { "tier": "free" | "starter" | "growth" | "business" }): Promise<unknown> {
+  billingCheckout(input: { "tier": "free" | "starter" | "growth" | "business"; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/billing/checkout`, query, all);
@@ -58,7 +58,7 @@ export class GeneratedApi {
   }
 
   /** Create a canned reply (POST /api/v1/canned-replies) */
-  cannedRepliesCreate(input: { "title": string; "body": string }): Promise<unknown> {
+  cannedRepliesCreate(input: { "title": string; "body": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/canned-replies`, query, all);
@@ -75,15 +75,17 @@ export class GeneratedApi {
   }
 
   /** Update a canned reply (PATCH /api/v1/canned-replies/{id}) */
-  cannedRepliesUpdate(id: string, input?: { "title"?: string; "body"?: string }): Promise<unknown> {
+  cannedRepliesUpdate(id: string, input?: { "title"?: string; "body"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/canned-replies/${encodeURIComponent(id)}`, query, all);
   }
 
   /** Create a channel (POST /api/v1/channels) */
-  channelsCreate(): Promise<unknown> {
-    return this.call("POST", `/api/v1/channels`, {}, undefined);
+  channelsCreate(input?: { "provider"?: "whatsapp_twilio" | "whatsapp_cloud" | "email_resend" | "telegram_bot" | "slack_webhook" | "discord_webhook"; "accountSid"?: string; "authToken"?: string; "whatsappNumber"?: string; "displayName"?: string; "accessToken"?: string; "phoneNumberId"?: string; "wabaId"?: string; "displayNumber"?: string; "verifyToken"?: string; "appSecret"?: string; "apiKey"?: string; "fromEmail"?: string; "fromName"?: string; "botToken"?: string; "webhookUrl"?: string; [field: string]: unknown }): Promise<unknown> {
+    const all: Record<string, unknown> = { ...(input ?? {}) };
+    const query: Record<string, unknown> = {};
+    return this.call("POST", `/api/v1/channels`, query, all);
   }
 
   /** Delete a channel (DELETE /api/v1/channels/{id}) */
@@ -102,7 +104,7 @@ export class GeneratedApi {
   }
 
   /** Create a domain (POST /api/v1/domains) */
-  domainsCreate(input: { "domain": string }): Promise<unknown> {
+  domainsCreate(input: { "domain": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/domains`, query, all);
@@ -134,7 +136,7 @@ export class GeneratedApi {
   }
 
   /** Create an article (POST /api/v1/help/articles) */
-  helpCreateArticles(input: { "kind"?: "faq" | "article"; "slug"?: string; "category"?: string; "title": string; "body": string; "status"?: "draft" | "published"; "position"?: number }): Promise<unknown> {
+  helpCreateArticles(input: { "kind"?: "faq" | "article"; "slug"?: string; "category"?: string; "title": string; "body": string; "status"?: "draft" | "published"; "position"?: number; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/help/articles`, query, all);
@@ -146,7 +148,7 @@ export class GeneratedApi {
   }
 
   /** Update an article (PATCH /api/v1/help/articles/{id}) */
-  helpUpdateArticles(id: string, input?: { "kind"?: "faq" | "article"; "slug"?: string; "category"?: string; "title"?: string; "body"?: string; "status"?: "draft" | "published"; "position"?: number }): Promise<unknown> {
+  helpUpdateArticles(id: string, input?: { "kind"?: "faq" | "article"; "slug"?: string; "category"?: string; "title"?: string; "body"?: string; "status"?: "draft" | "published"; "position"?: number; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/help/articles/${encodeURIComponent(id)}`, query, all);
@@ -168,28 +170,28 @@ export class GeneratedApi {
   }
 
   /** Set avatar (PUT /api/v1/profile/avatar) */
-  profileSetAvatar(input?: { "length"?: unknown }): Promise<unknown> {
+  profileSetAvatar(input?: { "length"?: unknown; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PUT", `/api/v1/profile/avatar`, query, all);
   }
 
   /** Create a ticket (POST /api/v1/public/tickets) */
-  publicCreateTickets(input: { "accountId": string; "subject": string; "body": string; "email": string; "name"?: string; "company"?: string }): Promise<unknown> {
+  publicCreateTickets(input: { "accountId": string; "subject": string; "body": string; "email": string; "name"?: string; "company"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/tickets`, query, all);
   }
 
   /** Attachments a ticket (POST /api/v1/public/tickets/{accessToken}/attachments) */
-  publicCreateTicketsAttachments(accessToken: string, input?: { "length"?: unknown }): Promise<unknown> {
+  publicCreateTicketsAttachments(accessToken: string, input?: { "length"?: unknown; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/tickets/${encodeURIComponent(accessToken)}/attachments`, query, all);
   }
 
   /** Create a provision callback (POST /api/v1/public/domains/provision-callback) */
-  publicDomainsProvisionCallback(input: { "domain": string; "status": "success" | "failed"; "error"?: string }): Promise<unknown> {
+  publicDomainsProvisionCallback(input: { "domain": string; "status": "success" | "failed"; "error"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/domains/provision-callback`, query, all);
@@ -232,7 +234,7 @@ export class GeneratedApi {
   }
 
   /** Create a verify (POST /api/v1/public/requester/verify) */
-  publicRequesterVerify(input: { "token": string }): Promise<unknown> {
+  publicRequesterVerify(input: { "token": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/requester/verify`, query, all);
@@ -249,14 +251,14 @@ export class GeneratedApi {
   }
 
   /** Csat a ticket (POST /api/v1/public/tickets/{accessToken}/csat) */
-  publicTicketsCsat(accessToken: string, input: { "score": number; "comment"?: string }): Promise<unknown> {
+  publicTicketsCsat(accessToken: string, input: { "score": number; "comment"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/tickets/${encodeURIComponent(accessToken)}/csat`, query, all);
   }
 
   /** Messages a ticket (POST /api/v1/public/tickets/{accessToken}/messages) */
-  publicTicketsMessages(accessToken: string, input: { "body": string; "attachmentIds"?: unknown[] }): Promise<unknown> {
+  publicTicketsMessages(accessToken: string, input: { "body": string; "attachmentIds"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/public/tickets/${encodeURIComponent(accessToken)}/messages`, query, all);
@@ -279,7 +281,7 @@ export class GeneratedApi {
   }
 
   /** Create a ticket (POST /api/v1/requester/tickets) */
-  requesterCreateTickets(input: { "subject": string; "body": string }): Promise<unknown> {
+  requesterCreateTickets(input: { "subject": string; "body": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/requester/tickets`, query, all);
@@ -304,7 +306,7 @@ export class GeneratedApi {
   }
 
   /** Messages a ticket (POST /api/v1/requester/tickets/{number}/messages) */
-  requesterTicketsMessages(number: string, input: { "body": string }): Promise<unknown> {
+  requesterTicketsMessages(number: string, input: { "body": string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/requester/tickets/${encodeURIComponent(number)}/messages`, query, all);
@@ -321,7 +323,7 @@ export class GeneratedApi {
   }
 
   /** Create a logo (POST /api/v1/settings/branding/logo) */
-  settingsCreateBrandingLogo(input?: { "length"?: unknown }): Promise<unknown> {
+  settingsCreateBrandingLogo(input?: { "length"?: unknown; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/settings/branding/logo`, query, all);
@@ -338,28 +340,28 @@ export class GeneratedApi {
   }
 
   /** Set automation (PUT /api/v1/settings/automation) */
-  settingsSetAutomation(input?: { "businessHours"?: Record<string, unknown>; "autoResponseEnabled"?: boolean; "autoResponseInside"?: string; "autoResponseOutside"?: string; "hideBranding"?: boolean }): Promise<unknown> {
+  settingsSetAutomation(input?: { "businessHours"?: Record<string, unknown>; "autoResponseEnabled"?: boolean; "autoResponseInside"?: string; "autoResponseOutside"?: string; "hideBranding"?: boolean; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PUT", `/api/v1/settings/automation`, query, all);
   }
 
   /** Set branding (PUT /api/v1/settings/branding) */
-  settingsSetBranding(input?: { "slug"?: string; "brandName"?: string; "brandLogoUrl"?: string; "accentColor"?: unknown; "brandColor"?: unknown; "widgetTextColor"?: unknown }): Promise<unknown> {
+  settingsSetBranding(input?: { "slug"?: string; "brandName"?: string; "brandLogoUrl"?: string; "accentColor"?: unknown; "brandColor"?: unknown; "widgetTextColor"?: unknown; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PUT", `/api/v1/settings/branding`, query, all);
   }
 
   /** Set help (PUT /api/v1/settings/help) */
-  settingsSetHelp(input?: { "contactEmail"?: unknown; "contactPhone"?: string; "contactAddress"?: string; "docsUrl"?: string; "contactUrl"?: string; "helpIntro"?: string }): Promise<unknown> {
+  settingsSetHelp(input?: { "contactEmail"?: unknown; "contactPhone"?: string; "contactAddress"?: string; "docsUrl"?: string; "contactUrl"?: string; "helpIntro"?: string; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PUT", `/api/v1/settings/help`, query, all);
   }
 
   /** Agent-created ticket (logging an inquiry that arrived out-of-band, e.g. (POST /api/v1/tickets) */
-  ticketsCreate(input: { "subject": string; "body": string; "requesterEmail": string; "requesterName"?: string; "priority"?: string; "channel"?: "web" | "email" | "whatsapp" }): Promise<unknown> {
+  ticketsCreate(input: { "subject": string; "body": string; "requesterEmail": string; "requesterName"?: string; "priority"?: string; "channel"?: "web" | "email" | "whatsapp"; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/tickets`, query, all);
@@ -386,7 +388,7 @@ export class GeneratedApi {
   }
 
   /** Messages a ticket (POST /api/v1/tickets/{id}/messages) */
-  ticketsMessages(id: string, input: { "body": string; "isInternal"?: boolean; "authorName"?: string; "attachmentIds"?: unknown[] }): Promise<unknown> {
+  ticketsMessages(id: string, input: { "body": string; "isInternal"?: boolean; "authorName"?: string; "attachmentIds"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/tickets/${encodeURIComponent(id)}/messages`, query, all);
@@ -398,14 +400,14 @@ export class GeneratedApi {
   }
 
   /** Update a ticket (PATCH /api/v1/tickets/{id}) */
-  ticketsUpdate(id: string, input?: { "status"?: string; "priority"?: string; "assigneeSub"?: string; "tags"?: unknown[] }): Promise<unknown> {
+  ticketsUpdate(id: string, input?: { "status"?: string; "priority"?: string; "assigneeSub"?: string; "tags"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/tickets/${encodeURIComponent(id)}`, query, all);
   }
 
   /** Create a webhook subscription (POST /api/v1/webhook-subscriptions) */
-  webhookSubscriptionsCreate(input: { "url": string; "events"?: unknown[] }): Promise<unknown> {
+  webhookSubscriptionsCreate(input: { "url": string; "events"?: unknown[]; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("POST", `/api/v1/webhook-subscriptions`, query, all);
@@ -422,7 +424,7 @@ export class GeneratedApi {
   }
 
   /** Update a webhook subscription (PATCH /api/v1/webhook-subscriptions/{id}) */
-  webhookSubscriptionsUpdate(id: string, input: { "active": boolean }): Promise<unknown> {
+  webhookSubscriptionsUpdate(id: string, input: { "active": boolean; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, query, all);

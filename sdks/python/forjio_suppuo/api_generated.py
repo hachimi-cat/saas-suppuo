@@ -102,9 +102,45 @@ class GeneratedApi:
             payload["body"] = body
         return self._call("PATCH", f"/api/v1/canned-replies/{_q(id_)}", {}, payload)
 
-    def channels_create(self) -> Any:
-        """Create a channel (POST /api/v1/channels)."""
-        return self._call("POST", f"/api/v1/channels", {}, None)
+    def channels_create(self, *, provider: Optional[str] = None, account_sid: Optional[str] = None, auth_token: Optional[str] = None, whatsapp_number: Optional[str] = None, display_name: Optional[str] = None, access_token: Optional[str] = None, phone_number_id: Optional[str] = None, waba_id: Optional[str] = None, display_number: Optional[str] = None, verify_token: Optional[str] = None, app_secret: Optional[str] = None, api_key: Optional[str] = None, from_email: Optional[str] = None, from_name: Optional[str] = None, bot_token: Optional[str] = None, webhook_url: Optional[str] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
+        """Create a channel (POST /api/v1/channels).
+        
+        Body fields are keyword arguments; `json_body=` passes the whole body (fields override it).
+        provider: one of whatsapp_twilio, whatsapp_cloud, email_resend, telegram_bot, slack_webhook, discord_webhook"""
+        payload: Dict[str, Any] = dict(json_body or {})
+        if provider is not None:
+            payload["provider"] = provider
+        if account_sid is not None:
+            payload["accountSid"] = account_sid
+        if auth_token is not None:
+            payload["authToken"] = auth_token
+        if whatsapp_number is not None:
+            payload["whatsappNumber"] = whatsapp_number
+        if display_name is not None:
+            payload["displayName"] = display_name
+        if access_token is not None:
+            payload["accessToken"] = access_token
+        if phone_number_id is not None:
+            payload["phoneNumberId"] = phone_number_id
+        if waba_id is not None:
+            payload["wabaId"] = waba_id
+        if display_number is not None:
+            payload["displayNumber"] = display_number
+        if verify_token is not None:
+            payload["verifyToken"] = verify_token
+        if app_secret is not None:
+            payload["appSecret"] = app_secret
+        if api_key is not None:
+            payload["apiKey"] = api_key
+        if from_email is not None:
+            payload["fromEmail"] = from_email
+        if from_name is not None:
+            payload["fromName"] = from_name
+        if bot_token is not None:
+            payload["botToken"] = bot_token
+        if webhook_url is not None:
+            payload["webhookUrl"] = webhook_url
+        return self._call("POST", f"/api/v1/channels", {}, payload)
 
     def channels_delete(self, id_: str) -> Any:
         """Delete a channel (DELETE /api/v1/channels/{id})."""

@@ -193,7 +193,96 @@ export const API_ROUTES: Array<{ area: string; routes: Route[] }> = [
     "summary": "Create a channel",
     "pathParams": [],
     "query": [],
-    "body": null
+    "body": [
+     {
+      "name": "provider",
+      "kind": "string",
+      "required": false,
+      "choices": [
+       "whatsapp_twilio",
+       "whatsapp_cloud",
+       "email_resend",
+       "telegram_bot",
+       "slack_webhook",
+       "discord_webhook"
+      ]
+     },
+     {
+      "name": "accountSid",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "authToken",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "whatsappNumber",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "displayName",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "accessToken",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "phoneNumberId",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "wabaId",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "displayNumber",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "verifyToken",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "appSecret",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "apiKey",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "fromEmail",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "fromName",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "botToken",
+      "kind": "string",
+      "required": false
+     },
+     {
+      "name": "webhookUrl",
+      "kind": "string",
+      "required": false
+     }
+    ]
    },
    {
     "name": "delete",
