@@ -20,30 +20,40 @@ suppuo --version
 
 ## Authentication
 
+Sign in once and every command uses it:
+
+```bash
+suppuo auth login                          # your Huudis account, in the browser
+suppuo auth login --api-key - < key.txt    # or an API key, for servers and CI
+suppuo auth whoami
+```
+
+| Command | What it does |
+|---|---|
+| `suppuo auth login` | Sign in with your Huudis account: the CLI prints a code and opens the browser (Huudis device flow); approve it there. `--no-browser` only prints the link. |
+| `suppuo auth login --api-key <key>` | Save an [`sk_live_…` API key](/docs/api-keys) (create one at [/dashboard/api-keys](/dashboard/api-keys)) instead — for servers and CI. Pass `-` as the key to read it from stdin, so it stays out of your shell history. |
+| `suppuo auth whoami` | Show what the CLI is signed in as (the Huudis user, or which key) and the workspace Suppuo resolves it to. |
+| `suppuo auth logout` | Delete the saved session or key. |
+
+Each `auth` command takes `--json`. `auth login` saves to
+`~/.suppuo/session.json` (readable only by you; a Huudis session refreshes
+itself).
+
 The CLI resolves its credential in this order:
 
-1. **`SUPPUO_TOKEN`** environment variable — an
-   [`sk_live_…` API key](/docs/api-keys) (recommended; create one at
-   [/dashboard/api-keys](/dashboard/api-keys)) or a Huudis access
-   token. Explicit and CI-friendly.
-2. The session stored by `suppuo auth login` at
-   `~/.suppuo/session.json`.
+1. **`SUPPUO_TOKEN`** environment variable — an `sk_live_…` API key or a
+   Huudis access token. Explicit and CI-friendly; no `auth login` needed.
+2. What `suppuo auth login` saved.
 
 ```bash
 export SUPPUO_TOKEN=sk_live_…
 suppuo tickets list
 ```
 
-`SUPPUO_BASE_URL` overrides the API host (defaults to
-`https://suppuo.com`).
-
-### `suppuo auth login` / `whoami` / `logout`
-
-Device-flow sign-in via Huudis. **Honest status:** the device flow
-isn't live yet — `auth login` prints a clear "not yet wired" notice
-instead of pretending to sign you in. Until it lands, use
-`SUPPUO_TOKEN` with an API key — every ticket command below works
-that way today.
+`SUPPUO_BASE_URL` overrides the API host (defaults to `https://suppuo.com`).
+`--issuer <url>` (or `SUPPUO_HUUDIS_ISSUER`) and `--client-id <id>` (or
+`SUPPUO_CLI_CLIENT_ID`, default `suppuo-cli`) point the sign-in at another
+Huudis or OIDC client.
 
 ## Ticket commands
 

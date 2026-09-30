@@ -10,7 +10,7 @@ const brand = process.env.SUPPUO ?? 'suppuo';
 const program = new Command()
   .name(brand)
   .description(`CLI for ${brand} — part of the Forjio commerce suite.`)
-  .version('0.2.0');
+  .version('0.2.3');
 
 program.addCommand(auth);
 program.addCommand(tickets);
