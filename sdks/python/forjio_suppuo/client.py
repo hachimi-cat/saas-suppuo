@@ -421,6 +421,28 @@ class SuppuoClient:
         self.csat = _Csat(self)
         self.attachments = _Attachments(self)
         self.public = _Public(self)
+        # Every feature route, one method each (generated from the API spec).
+        from .api_generated import GeneratedApi
+
+        self.api = GeneratedApi(self)
+
+    def _apigen_request(
+        self,
+        method: str,
+        path: str,
+        *,
+        query: Optional[Dict[str, Any]] = None,
+        body: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        """The call behind ``client.api.*`` (api_generated.py): Bearer-authenticated
+        like every other request (the requester-facing ``/api/v1/public/*`` routes go
+        without a token, as ``client.public`` does)."""
+        return self.request(
+            method,
+            path + _qs(query),
+            body=body,
+            no_auth=path.startswith("/api/v1/public/"),
+        )
 
     def request(
         self,

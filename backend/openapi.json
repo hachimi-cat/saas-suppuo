@@ -1,0 +1,3680 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "suppuo",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/api/v1/admin/crm/customers": {
+   "get": {
+    "operationId": "getAdminCrmCustomers",
+    "summary": "List customers",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-crm.ts:40",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/crm/stats": {
+   "get": {
+    "operationId": "getAdminCrmStats",
+    "summary": "List stats",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-crm.ts:17",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/crm/transactions": {
+   "get": {
+    "operationId": "getAdminCrmTransactions",
+    "summary": "List transactions",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-crm.ts:92",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/customers": {
+   "get": {
+    "operationId": "getAdminCustomers",
+    "summary": "List customers",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "cursor",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-customers.ts:37",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/feature-flags": {
+   "get": {
+    "operationId": "getAdminFeatureFlags",
+    "summary": "List feature flags",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-feature-flags.ts:26",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/feature-flags/{key}": {
+   "patch": {
+    "operationId": "patchAdminFeatureFlagsKey",
+    "summary": "Update a feature flag",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-feature-flags.ts:40",
+     "guards": [
+      "adminGuard"
+     ],
+     "body": "read-unknown"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/admin/metrics": {
+   "get": {
+    "operationId": "getAdminMetrics",
+    "summary": "List metrics",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/admin-metrics.ts:103",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/system-health": {
+   "get": {
+    "operationId": "getAdminSystemHealth",
+    "summary": "List system health",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-system-health.ts:50",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/admin/transactions": {
+   "get": {
+    "operationId": "getAdminTransactions",
+    "summary": "List transactions",
+    "tags": [
+     "admin"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/admin-transactions.ts:40",
+     "guards": [
+      "adminGuard"
+     ]
+    }
+   }
+  },
+  "/api/v1/api-keys": {
+   "get": {
+    "operationId": "getApiKeys",
+    "summary": "List api keys",
+    "tags": [
+     "api-keys"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/api-keys.ts:30",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postApiKeys",
+    "summary": "Create an api key",
+    "tags": [
+     "api-keys"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/api-keys.ts:47",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/api-keys/{id}": {
+   "delete": {
+    "operationId": "deleteApiKeysId",
+    "summary": "Delete an api key",
+    "tags": [
+     "api-keys"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/api-keys.ts:68",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ]
+    }
+   }
+  },
+  "/api/v1/attachments": {
+   "post": {
+    "operationId": "postAttachments",
+    "summary": "Create an attachment",
+    "tags": [
+     "attachments"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/attachments.ts:114",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "rawBody"
+     ],
+     "body": "read-unvalidated"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "length": {}
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/attachments/{id}": {
+   "get": {
+    "operationId": "getAttachmentsId",
+    "summary": "Get an attachment",
+    "tags": [
+     "attachments"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/attachments.ts:122",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/auth/huudis/callback": {
+   "get": {
+    "operationId": "getAuthHuudisCallback",
+    "summary": "List callback",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/auth/huudis/start": {
+   "get": {
+    "operationId": "getAuthHuudisStart",
+    "summary": "List start",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/auth/login": {
+   "post": {
+    "operationId": "postAuthLogin",
+    "summary": "Create a login",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public-requester.ts:84",
+     "guards": [],
+     "body": "validated",
+     "bodySchema": "loginBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "accountId": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+         },
+         "email": {
+          "type": "string",
+          "format": "email"
+         },
+         "origin": {
+          "type": "string",
+          "maxLength": 255
+         }
+        },
+        "required": [
+         "accountId",
+         "email"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/auth/logout": {
+   "post": {
+    "operationId": "postAuthLogout",
+    "summary": "Create a logout",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public-requester.ts:135",
+     "guards": [],
+     "body": "none"
+    }
+   }
+  },
+  "/api/v1/auth/me": {
+   "get": {
+    "operationId": "getAuthMe",
+    "summary": "List me",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/requester.ts:32",
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/auth/password-reset/complete": {
+   "post": {
+    "operationId": "postAuthPasswordResetComplete",
+    "summary": "Create a complete",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/auth/password-reset/request": {
+   "post": {
+    "operationId": "postAuthPasswordResetRequest",
+    "summary": "Create a request",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/auth/signup": {
+   "post": {
+    "operationId": "postAuthSignup",
+    "summary": "Create a signup",
+    "tags": [
+     "auth"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/billing": {
+   "get": {
+    "operationId": "getBilling",
+    "summary": "Current subscription (free default when no row) + the tier table the portal renders.",
+    "description": "GET / — current subscription (free default when no row) + the\n tier table the portal renders.",
+    "tags": [
+     "billing"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/billing.ts:25",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/billing/checkout": {
+   "post": {
+    "operationId": "postBillingCheckout",
+    "summary": "POST /checkout {tier} — create a Plugipay hosted checkout session for a paid tier; the browser redirects to data.hostedUrl.",
+    "description": "POST /checkout {tier} — create a Plugipay hosted checkout session\n for a paid tier; the browser redirects to data.hostedUrl. The\n subscription itself is only written when the\n plugipay.checkout_session.completed.v1 webhook lands.",
+    "tags": [
+     "billing"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/billing.ts:53",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "validated",
+     "bodySchema": "checkoutBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "tier": {
+          "type": "string",
+          "enum": [
+           "free",
+           "starter",
+           "growth",
+           "business"
+          ]
+         }
+        },
+        "required": [
+         "tier"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/canned-replies": {
+   "get": {
+    "operationId": "getCannedReplies",
+    "summary": "List canned replies",
+    "tags": [
+     "canned-replies"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/canned-replies.ts:17",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postCannedReplies",
+    "summary": "Create a canned reply",
+    "tags": [
+     "canned-replies"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/canned-replies.ts:28",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "upsertBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         }
+        },
+        "required": [
+         "title",
+         "body"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/canned-replies/{id}": {
+   "patch": {
+    "operationId": "patchCannedRepliesId",
+    "summary": "Update a canned reply",
+    "tags": [
+     "canned-replies"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/canned-replies.ts:44",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "upsertBody.partial()"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteCannedRepliesId",
+    "summary": "Delete a canned reply",
+    "tags": [
+     "canned-replies"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/canned-replies.ts:61",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat": {
+   "post": {
+    "operationId": "postCatentioChat",
+    "summary": "Create a chat",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/chat/attachments": {
+   "post": {
+    "operationId": "postCatentioChatAttachments",
+    "summary": "Create an attachment",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/chat/media": {
+   "get": {
+    "operationId": "getCatentioChatMedia",
+    "summary": "List media",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat/runs/{runId}": {
+   "get": {
+    "operationId": "getCatentioChatRunsRunId",
+    "summary": "Get a run",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "runId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat/sessions": {
+   "get": {
+    "operationId": "getCatentioChatSessions",
+    "summary": "List sessions",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/chat/sessions/{id}": {
+   "get": {
+    "operationId": "getCatentioChatSessionsId",
+    "summary": "Get a session",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   },
+   "put": {
+    "operationId": "putCatentioChatSessionsId",
+    "summary": "Replace a session",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "unknown"
+    }
+   },
+   "delete": {
+    "operationId": "deleteCatentioChatSessionsId",
+    "summary": "Delete a session",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/credits": {
+   "get": {
+    "operationId": "getCatentioCredits",
+    "summary": "List credits",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/credits/topup": {
+   "post": {
+    "operationId": "postCatentioCreditsTopup",
+    "summary": "Create a topup",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/plan": {
+   "post": {
+    "operationId": "postCatentioPlan",
+    "summary": "Create a plan",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/runs/{runId}/media/{filename}": {
+   "get": {
+    "operationId": "getCatentioRunsRunIdMediaFilename",
+    "summary": "Get a media",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [
+     {
+      "name": "runId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "filename",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/catentio/settings": {
+   "get": {
+    "operationId": "getCatentioSettings",
+    "summary": "List settings",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   },
+   "patch": {
+    "operationId": "patchCatentioSettings",
+    "summary": "Update settings",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "unknown"
+    }
+   }
+  },
+  "/api/v1/catentio/status": {
+   "get": {
+    "operationId": "getCatentioStatus",
+    "summary": "List status",
+    "tags": [
+     "catentio"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/channels": {
+   "get": {
+    "operationId": "getChannels",
+    "summary": "List channels",
+    "tags": [
+     "channels"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/channels.ts:83",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postChannels",
+    "summary": "Create a channel",
+    "tags": [
+     "channels"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/channels.ts:147",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "anyOf": [
+         {
+          "type": "object",
+          "properties": {
+           "provider": {
+            "type": "string",
+            "enum": [
+             "whatsapp_twilio"
+            ]
+           },
+           "accountSid": {
+            "type": "string",
+            "pattern": "^AC[a-f0-9]{32}$"
+           },
+           "authToken": {
+            "type": "string",
+            "minLength": 16
+           },
+           "whatsappNumber": {
+            "type": "string",
+            "pattern": "^\\+\\d{6,16}$"
+           },
+           "displayName": {
+            "type": "string",
+            "maxLength": 120
+           }
+          },
+          "required": [
+           "provider",
+           "accountSid",
+           "authToken",
+           "whatsappNumber"
+          ],
+          "additionalProperties": false
+         },
+         {
+          "type": "object",
+          "properties": {
+           "provider": {
+            "type": "string",
+            "enum": [
+             "whatsapp_cloud"
+            ]
+           },
+           "accessToken": {
+            "type": "string",
+            "minLength": 16
+           },
+           "phoneNumberId": {
+            "type": "string",
+            "pattern": "^\\d{5,20}$"
+           },
+           "wabaId": {
+            "type": "string",
+            "pattern": "^\\d{5,20}$"
+           },
+           "displayNumber": {
+            "type": "string",
+            "pattern": "^\\+\\d{6,16}$"
+           },
+           "verifyToken": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+           },
+           "appSecret": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+           },
+           "displayName": {
+            "type": "string",
+            "maxLength": 120
+           }
+          },
+          "required": [
+           "provider",
+           "accessToken",
+           "phoneNumberId",
+           "displayNumber"
+          ],
+          "additionalProperties": false
+         },
+         {
+          "type": "object",
+          "properties": {
+           "provider": {
+            "type": "string",
+            "enum": [
+             "email_resend"
+            ]
+           },
+           "apiKey": {
+            "type": "string",
+            "minLength": 8
+           },
+           "fromEmail": {
+            "type": "string",
+            "format": "email"
+           },
+           "fromName": {
+            "type": "string",
+            "maxLength": 120
+           }
+          },
+          "required": [
+           "provider",
+           "apiKey",
+           "fromEmail"
+          ],
+          "additionalProperties": false
+         },
+         {
+          "type": "object",
+          "properties": {
+           "provider": {
+            "type": "string",
+            "enum": [
+             "telegram_bot"
+            ]
+           },
+           "botToken": {
+            "type": "string",
+            "pattern": "^\\d+:[A-Za-z0-9_-]{20,}$"
+           },
+           "displayName": {
+            "type": "string",
+            "maxLength": 120
+           }
+          },
+          "required": [
+           "provider",
+           "botToken"
+          ],
+          "additionalProperties": false
+         },
+         {
+          "type": "object",
+          "properties": {
+           "provider": {
+            "type": "string",
+            "enum": [
+             "slack_webhook"
+            ]
+           },
+           "webhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 500
+           },
+           "displayName": {
+            "type": "string",
+            "maxLength": 120
+           }
+          },
+          "required": [
+           "provider",
+           "webhookUrl"
+          ],
+          "additionalProperties": false
+         },
+         {
+          "type": "object",
+          "properties": {
+           "provider": {
+            "type": "string",
+            "enum": [
+             "discord_webhook"
+            ]
+           },
+           "webhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 500
+           },
+           "displayName": {
+            "type": "string",
+            "maxLength": 120
+           }
+          },
+          "required": [
+           "provider",
+           "webhookUrl"
+          ],
+          "additionalProperties": false
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/channels/{id}": {
+   "delete": {
+    "operationId": "deleteChannelsId",
+    "summary": "Delete a channel",
+    "tags": [
+     "channels"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/channels.ts:391",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/csat/stats": {
+   "get": {
+    "operationId": "getCsatStats",
+    "summary": "List stats",
+    "tags": [
+     "csat"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/csat.ts:14",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/domains": {
+   "get": {
+    "operationId": "getDomains",
+    "summary": "List domains",
+    "tags": [
+     "domains"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/domains.ts:20",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postDomains",
+    "summary": "Create a domain",
+    "tags": [
+     "domains"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/domains.ts:27",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "addBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "domain": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 253
+         }
+        },
+        "required": [
+         "domain"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/domains/{id}": {
+   "delete": {
+    "operationId": "deleteDomainsId",
+    "summary": "Delete a domain",
+    "tags": [
+     "domains"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/domains.ts:42",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/domains/{id}/verify": {
+   "post": {
+    "operationId": "postDomainsIdVerify",
+    "summary": "Verify a domain",
+    "tags": [
+     "domains"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/domains.ts:35",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "none"
+    }
+   }
+  },
+  "/api/v1/health": {
+   "get": {
+    "operationId": "getHealth",
+    "summary": "No auth, returns service name + status + dependency checks.",
+    "description": "GET /api/v1/health — no auth, returns service name + status +\n dependency checks. Every Forjio service exposes the same shape\n so uptime monitors are uniform.",
+    "tags": [
+     "health"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/index.ts:78",
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/help/articles": {
+   "get": {
+    "operationId": "getHelpArticles",
+    "summary": "List articles",
+    "tags": [
+     "help"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/help.ts:80",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postHelpArticles",
+    "summary": "Create an article",
+    "tags": [
+     "help"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/help.ts:92",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "kind": {
+          "type": "string",
+          "enum": [
+           "faq",
+           "article"
+          ],
+          "default": "faq"
+         },
+         "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 120
+         },
+         "category": {
+          "type": "string",
+          "maxLength": 80,
+          "nullable": true
+         },
+         "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50000
+         },
+         "status": {
+          "type": "string",
+          "enum": [
+           "draft",
+           "published"
+          ],
+          "default": "draft"
+         },
+         "position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+         }
+        },
+        "required": [
+         "title",
+         "body"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/help/articles/{id}": {
+   "get": {
+    "operationId": "getHelpArticlesId",
+    "summary": "Get an article",
+    "tags": [
+     "help"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/help.ts:124",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "patch": {
+    "operationId": "patchHelpArticlesId",
+    "summary": "Update an article",
+    "tags": [
+     "help"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/help.ts:136",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "patchBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "kind": {
+          "type": "string",
+          "enum": [
+           "faq",
+           "article"
+          ]
+         },
+         "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 120,
+          "nullable": true
+         },
+         "category": {
+          "type": "string",
+          "maxLength": 80,
+          "nullable": true
+         },
+         "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50000
+         },
+         "status": {
+          "type": "string",
+          "enum": [
+           "draft",
+           "published"
+          ]
+         },
+         "position": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteHelpArticlesId",
+    "summary": "Delete an article",
+    "tags": [
+     "help"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/help.ts:176",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/huudis*": {
+   "get": {
+    "operationId": "getHuudis",
+    "summary": "List huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   },
+   "post": {
+    "operationId": "postHuudis",
+    "summary": "Create a huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   },
+   "patch": {
+    "operationId": "patchHuudis",
+    "summary": "Update huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": [],
+     "body": "unknown"
+    }
+   },
+   "delete": {
+    "operationId": "deleteHuudis",
+    "summary": "Delete huudis*",
+    "tags": [
+     "huudis*"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": null,
+     "guards": []
+    }
+   }
+  },
+  "/api/v1/me": {
+   "get": {
+    "operationId": "getMe",
+    "summary": "List me",
+    "tags": [
+     "me"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/me.ts:12",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/profile/avatar": {
+   "put": {
+    "operationId": "putProfileAvatar",
+    "summary": "Set avatar",
+    "tags": [
+     "profile"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/profile.ts:35",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "rawBody"
+     ],
+     "body": "read-unvalidated"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "length": {}
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteProfileAvatar",
+    "summary": "Delete avatar",
+    "tags": [
+     "profile"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/profile.ts:68",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/profile/avatar/{sub}": {
+   "get": {
+    "operationId": "getProfileAvatarSub",
+    "summary": "Get an avatar",
+    "tags": [
+     "profile"
+    ],
+    "parameters": [
+     {
+      "name": "sub",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/profile.ts:77",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/domains/provision-callback": {
+   "post": {
+    "operationId": "postPublicDomainsProvisionCallback",
+    "summary": "Create a provision callback",
+    "tags": [
+     "public"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/domains.ts:59",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "callbackBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "domain": {
+          "type": "string"
+         },
+         "status": {
+          "type": "string",
+          "enum": [
+           "success",
+           "failed"
+          ]
+         },
+         "error": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "domain",
+         "status"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/domains/resolve": {
+   "get": {
+    "operationId": "getPublicDomainsResolve",
+    "summary": "Host → accountId — used by the frontend middleware to route a custom domain's request to the right workspace.",
+    "description": "Host → accountId — used by the frontend middleware to route a custom\ndomain's request to the right workspace. Returns null for Suppuo hosts /\nunknown domains.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "host",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/domains.ts:75",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/help/{accountId}": {
+   "get": {
+    "operationId": "getPublicHelpAccountId",
+    "summary": "The help-center bundle.",
+    "description": "GET /public/help/:accountId — the help-center bundle.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accountId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-help.ts:83",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/help/{accountId}/a/{slug}": {
+   "get": {
+    "operationId": "getPublicHelpAccountIdASlug",
+    "summary": "A single published article.",
+    "description": "GET /public/help/:accountId/a/:slug — a single published article.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accountId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-help.ts:144",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/help/{accountId}/branding": {
+   "get": {
+    "operationId": "getPublicHelpAccountIdBranding",
+    "summary": "Public branding (logo + colors + name) for the help center AND the hosted portal's pre-auth screen.",
+    "description": "GET /public/help/:accountId/branding — public branding (logo + colors +\nname) for the help center AND the hosted portal's pre-auth screen.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accountId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-help.ts:48",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/help/{accountId}/logo": {
+   "get": {
+    "operationId": "getPublicHelpAccountIdLogo",
+    "summary": "Serve the uploaded brand logo bytes.",
+    "description": "GET /public/help/:accountId/logo — serve the uploaded brand logo bytes.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accountId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-help.ts:61",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/help/{accountId}/search": {
+   "get": {
+    "operationId": "getPublicHelpAccountIdSearch",
+    "summary": "List search",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accountId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "maxLength": 200,
+       "default": ""
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-help.ts:130",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/requester/login": {
+   "post": {
+    "operationId": "postPublicRequesterLogin",
+    "summary": "Create a login",
+    "tags": [
+     "public"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public-requester.ts:84",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "loginBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "accountId": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+         },
+         "email": {
+          "type": "string",
+          "format": "email"
+         },
+         "origin": {
+          "type": "string",
+          "maxLength": 255
+         }
+        },
+        "required": [
+         "accountId",
+         "email"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/requester/logout": {
+   "post": {
+    "operationId": "postPublicRequesterLogout",
+    "summary": "Create a logout",
+    "tags": [
+     "public"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public-requester.ts:135",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "none"
+    }
+   }
+  },
+  "/api/v1/public/requester/verify": {
+   "post": {
+    "operationId": "postPublicRequesterVerify",
+    "summary": "Create a verify",
+    "tags": [
+     "public"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public-requester.ts:115",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "verifyBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "token": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 2000
+         }
+        },
+        "required": [
+         "token"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/tickets": {
+   "post": {
+    "operationId": "postPublicTickets",
+    "summary": "Create a ticket",
+    "tags": [
+     "public"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/public-tickets.ts:135",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "validated",
+     "bodySchema": "submitBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "accountId": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+         },
+         "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         },
+         "email": {
+          "type": "string",
+          "format": "email"
+         },
+         "name": {
+          "type": "string",
+          "maxLength": 200
+         },
+         "company": {
+          "type": "string",
+          "maxLength": 300
+         }
+        },
+        "required": [
+         "accountId",
+         "subject",
+         "body",
+         "email"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/tickets/{accessToken}": {
+   "get": {
+    "operationId": "getPublicTicketsAccessToken",
+    "summary": "Tokenized status view — public messages only, no internal notes.",
+    "description": "Tokenized status view — public messages only, no internal notes.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accessToken",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-tickets.ts:215",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/tickets/{accessToken}/attachments": {
+   "post": {
+    "operationId": "postPublicTicketsAccessTokenAttachments",
+    "summary": "Attachments a ticket",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accessToken",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/attachments.ts:142",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rawBody"
+     ],
+     "body": "read-unvalidated"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "length": {}
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/tickets/{accessToken}/attachments/{id}": {
+   "get": {
+    "operationId": "getPublicTicketsAccessTokenAttachmentsId",
+    "summary": "Get an attachment",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accessToken",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/attachments.ts:155",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/public/tickets/{accessToken}/csat": {
+   "post": {
+    "operationId": "postPublicTicketsAccessTokenCsat",
+    "summary": "Csat a ticket",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accessToken",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-tickets.ts:322",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "validated",
+     "bodySchema": "csatBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "score": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+         },
+         "comment": {
+          "type": "string",
+          "maxLength": 2000
+         }
+        },
+        "required": [
+         "score"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/tickets/{accessToken}/messages": {
+   "post": {
+    "operationId": "postPublicTicketsAccessTokenMessages",
+    "summary": "Messages a ticket",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "accessToken",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-tickets.ts:261",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "validated",
+     "bodySchema": "replyBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         },
+         "attachmentIds": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 5
+         }
+        },
+        "required": [
+         "body"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/public/widget-config": {
+   "get": {
+    "operationId": "getPublicWidgetConfig",
+    "summary": "Pre-ticket config for the embeddable widget + hosted form (the branding footer renders before any ticket exists).",
+    "description": "Pre-ticket config for the embeddable widget + hosted form (the\n branding footer renders before any ticket exists). No secrets.",
+    "tags": [
+     "public"
+    ],
+    "parameters": [
+     {
+      "name": "account",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/public-tickets.ts:115",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/reports/summary": {
+   "get": {
+    "operationId": "getReportsSummary",
+    "summary": "List summary",
+    "tags": [
+     "reports"
+    ],
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/reports.ts:23",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/requester/me": {
+   "get": {
+    "operationId": "getRequesterMe",
+    "summary": "List me",
+    "tags": [
+     "requester"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/requester.ts:32",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/requester/tickets": {
+   "get": {
+    "operationId": "getRequesterTickets",
+    "summary": "List tickets",
+    "tags": [
+     "requester"
+    ],
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "open",
+        "resolved",
+        "all"
+       ],
+       "default": "all"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/requester.ts:42",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postRequesterTickets",
+    "summary": "Create a ticket",
+    "tags": [
+     "requester"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/requester.ts:147",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         }
+        },
+        "required": [
+         "subject",
+         "body"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/requester/tickets/{number}": {
+   "get": {
+    "operationId": "getRequesterTicketsNumber",
+    "summary": "Get a ticket",
+    "tags": [
+     "requester"
+    ],
+    "parameters": [
+     {
+      "name": "number",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/requester.ts:74",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   }
+  },
+  "/api/v1/requester/tickets/{number}/messages": {
+   "post": {
+    "operationId": "postRequesterTicketsNumberMessages",
+    "summary": "Messages a ticket",
+    "tags": [
+     "requester"
+    ],
+    "parameters": [
+     {
+      "name": "number",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/requester.ts:105",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "validated",
+     "bodySchema": "replyBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         }
+        },
+        "required": [
+         "body"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/settings/automation": {
+   "get": {
+    "operationId": "getSettingsAutomation",
+    "summary": "List automation",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:64",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "put": {
+    "operationId": "putSettingsAutomation",
+    "summary": "Set automation",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:73",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "putBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "businessHours": {
+          "type": "object",
+          "properties": {
+           "tz": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+           },
+           "days": {
+            "type": "array",
+            "items": {
+             "anyOf": [
+              {
+               "type": "object",
+               "properties": {
+                "dow": {
+                 "type": "integer",
+                 "minimum": 0,
+                 "maximum": 6
+                },
+                "open": {
+                 "type": "string",
+                 "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "close": {
+                 "type": "string",
+                 "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                }
+               },
+               "required": [
+                "dow",
+                "open",
+                "close"
+               ],
+               "additionalProperties": false
+              },
+              {
+               "enum": [
+                "null"
+               ],
+               "nullable": true
+              }
+             ]
+            },
+            "minItems": 7,
+            "maxItems": 7
+           }
+          },
+          "required": [
+           "tz",
+           "days"
+          ],
+          "additionalProperties": false,
+          "nullable": true
+         },
+         "autoResponseEnabled": {
+          "type": "boolean"
+         },
+         "autoResponseInside": {
+          "type": "string",
+          "maxLength": 5000,
+          "nullable": true
+         },
+         "autoResponseOutside": {
+          "type": "string",
+          "maxLength": 5000,
+          "nullable": true
+         },
+         "hideBranding": {
+          "type": "boolean"
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/settings/branding": {
+   "get": {
+    "operationId": "getSettingsBranding",
+    "summary": "List branding",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:232",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "put": {
+    "operationId": "putSettingsBranding",
+    "summary": "Set branding",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:241",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "brandPutBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "slug": {
+          "type": "string",
+          "maxLength": 40,
+          "nullable": true
+         },
+         "brandName": {
+          "type": "string",
+          "maxLength": 80,
+          "nullable": true
+         },
+         "brandLogoUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+         },
+         "accentColor": {
+          "anyOf": [
+           {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+           },
+           {
+            "type": "string",
+            "enum": [
+             ""
+            ]
+           }
+          ],
+          "nullable": true
+         },
+         "brandColor": {
+          "anyOf": [
+           {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+           },
+           {
+            "type": "string",
+            "enum": [
+             ""
+            ]
+           }
+          ],
+          "nullable": true
+         },
+         "widgetTextColor": {
+          "anyOf": [
+           {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+           },
+           {
+            "type": "string",
+            "enum": [
+             ""
+            ]
+           }
+          ],
+          "nullable": true
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/settings/branding/logo": {
+   "post": {
+    "operationId": "postSettingsBrandingLogo",
+    "summary": "Create a logo",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:291",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "logoRawBody"
+     ],
+     "body": "read-unvalidated"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "length": {}
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteSettingsBrandingLogo",
+    "summary": "Delete logo",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:325",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/settings/help": {
+   "get": {
+    "operationId": "getSettingsHelp",
+    "summary": "List help",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:144",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "put": {
+    "operationId": "putSettingsHelp",
+    "summary": "Set help",
+    "tags": [
+     "settings"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/settings.ts:153",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "helpPutBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "contactEmail": {
+          "anyOf": [
+           {
+            "type": "string",
+            "format": "email"
+           },
+           {
+            "type": "string",
+            "enum": [
+             ""
+            ]
+           }
+          ],
+          "nullable": true
+         },
+         "contactPhone": {
+          "type": "string",
+          "maxLength": 40,
+          "nullable": true
+         },
+         "contactAddress": {
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+         },
+         "docsUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+         },
+         "contactUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "nullable": true
+         },
+         "helpIntro": {
+          "type": "string",
+          "maxLength": 280,
+          "nullable": true
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tickets": {
+   "get": {
+    "operationId": "getTickets",
+    "summary": "List tickets",
+    "tags": [
+     "tickets"
+    ],
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "open",
+        "pending",
+        "resolved",
+        "closed",
+        "all"
+       ]
+      }
+     },
+     {
+      "name": "assignee",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200
+      }
+     },
+     {
+      "name": "tag",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 40
+      }
+     },
+     {
+      "name": "channel",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "web",
+        "email",
+        "whatsapp",
+        "telegram"
+       ]
+      }
+     },
+     {
+      "name": "priority",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+       ]
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "maxLength": 200
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 100
+      }
+     },
+     {
+      "name": "cursor",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tickets.ts:49",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postTickets",
+    "summary": "Agent-created ticket (logging an inquiry that arrived out-of-band, e.g.",
+    "description": "Agent-created ticket (logging an inquiry that arrived out-of-band,\n e.g. WhatsApp). The requester still gets the status-link email.",
+    "tags": [
+     "tickets"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/tickets.ts:132",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+         },
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         },
+         "requesterEmail": {
+          "type": "string",
+          "format": "email"
+         },
+         "requesterName": {
+          "type": "string",
+          "maxLength": 200
+         },
+         "priority": {
+          "type": "string"
+         },
+         "channel": {
+          "type": "string",
+          "enum": [
+           "web",
+           "email",
+           "whatsapp"
+          ]
+         }
+        },
+        "required": [
+         "subject",
+         "body",
+         "requesterEmail"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tickets/{id}": {
+   "get": {
+    "operationId": "getTicketsId",
+    "summary": "Get a ticket",
+    "tags": [
+     "tickets"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tickets.ts:189",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   },
+   "patch": {
+    "operationId": "patchTicketsId",
+    "summary": "Update a ticket",
+    "tags": [
+     "tickets"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tickets.ts:334",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "patchBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "status": {
+          "type": "string"
+         },
+         "priority": {
+          "type": "string"
+         },
+         "assigneeSub": {
+          "type": "string",
+          "nullable": true
+         },
+         "tags": {
+          "type": "array",
+          "items": {
+           "type": "string",
+           "maxLength": 200
+          },
+          "maxItems": 100
+         }
+        },
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tickets/{id}/messages": {
+   "post": {
+    "operationId": "postTicketsIdMessages",
+    "summary": "Messages a ticket",
+    "tags": [
+     "tickets"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/tickets.ts:216",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ],
+     "body": "validated",
+     "bodySchema": "messageBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+         },
+         "isInternal": {
+          "type": "boolean"
+         },
+         "authorName": {
+          "type": "string",
+          "maxLength": 200
+         },
+         "attachmentIds": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 5
+         }
+        },
+        "required": [
+         "body"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/tickets/tags": {
+   "get": {
+    "operationId": "getTicketsTags",
+    "summary": "Distinct tags across the workspace's tickets — autocomplete feed.",
+    "description": "Distinct tags across the workspace's tickets — autocomplete feed.\n (Must be mounted before /:id so 'tags' isn't read as a ticket id.)",
+    "tags": [
+     "tickets"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/tickets.ts:108",
+     "guards": [
+      "adminGuard",
+      "requireAuth"
+     ]
+    }
+   }
+  },
+  "/api/v1/webhook-subscriptions": {
+   "get": {
+    "operationId": "getWebhookSubscriptions",
+    "summary": "List webhook subscriptions",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:38",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postWebhookSubscriptions",
+    "summary": "Create a webhook subscription",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:56",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ],
+     "body": "validated",
+     "bodySchema": "createBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "url": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2000,
+          "pattern": "^http"
+         },
+         "events": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 20
+         }
+        },
+        "required": [
+         "url"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/webhook-subscriptions/{id}": {
+   "patch": {
+    "operationId": "patchWebhookSubscriptionsId",
+    "summary": "Update a webhook subscription",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:81",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ],
+     "body": "validated",
+     "bodySchema": "patchBody"
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "active": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "active"
+        ],
+        "additionalProperties": false
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteWebhookSubscriptionsId",
+    "summary": "Delete a webhook subscription",
+    "tags": [
+     "webhook-subscriptions"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhook-subscriptions.ts:100",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "rateLimit"
+     ]
+    }
+   }
+  },
+  "/api/v1/webhooks/plugipay": {
+   "post": {
+    "operationId": "postWebhooksPlugipay",
+    "summary": "Create a plugipay",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhooks-plugipay.ts:27",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "none"
+    }
+   }
+  },
+  "/api/v1/webhooks/resend": {
+   "post": {
+    "operationId": "postWebhooksResend",
+    "summary": "Create a resend",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhooks-resend.ts:141",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "read-unknown"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/webhooks/telegram/{integrationId}": {
+   "post": {
+    "operationId": "postWebhooksTelegramIntegrationId",
+    "summary": "Act on a telegram",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [
+     {
+      "name": "integrationId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "secret",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhooks-telegram.ts:56",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "read-unknown"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/webhooks/twilio/whatsapp": {
+   "post": {
+    "operationId": "postWebhooksTwilioWhatsapp",
+    "summary": "Create a whatsapp",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [
+     {
+      "name": "secret",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhooks-twilio.ts:42",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester",
+      "express.urlencoded"
+     ],
+     "body": "read-unvalidated"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "Body": {},
+         "From": {},
+         "NumMedia": {},
+         "ProfileName": {},
+         "To": {}
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/webhooks/whatsapp-cloud": {
+   "get": {
+    "operationId": "getWebhooksWhatsappCloud",
+    "summary": "GET — subscription verification handshake.",
+    "description": "GET — subscription verification handshake.",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [
+     {
+      "name": "hub.challenge",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "hub.mode",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     },
+     {
+      "name": "hub.verify_token",
+      "in": "query",
+      "required": false,
+      "schema": {}
+     }
+    ],
+    "x-forjio": {
+     "source": "src/routes/webhooks-whatsapp-cloud.ts:39",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ]
+    }
+   },
+   "post": {
+    "operationId": "postWebhooksWhatsappCloud",
+    "summary": "POST — message events (JSON; raw bytes captured by the app-level parser's verify hook for signature checks).",
+    "description": "POST — message events (JSON; raw bytes captured by the app-level\nparser's verify hook for signature checks).",
+    "tags": [
+     "webhooks"
+    ],
+    "parameters": [],
+    "x-forjio": {
+     "source": "src/routes/webhooks-whatsapp-cloud.ts:71",
+     "guards": [
+      "adminGuard",
+      "requireAuth",
+      "requireRequester"
+     ],
+     "body": "read-unknown"
+    },
+    "requestBody": {
+     "required": false,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {}
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "x-apigen": {
+  "routes": 112,
+  "matched": 88,
+  "bodies": {
+   "validated": 25,
+   "fieldsOnly": 5,
+   "takesBody": 34
+  }
+ }
+}

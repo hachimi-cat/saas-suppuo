@@ -3,6 +3,7 @@ import { auth } from './commands/auth.js';
 import { tickets } from './commands/tickets.js';
 import { billing } from './commands/billing.js';
 import { reports } from './commands/reports.js';
+import { buildApiCommand } from './commands/api.generated.js';
 
 const brand = process.env.SUPPUO ?? 'suppuo';
 
@@ -15,6 +16,7 @@ program.addCommand(auth);
 program.addCommand(tickets);
 program.addCommand(billing);
 program.addCommand(reports);
+program.addCommand(buildApiCommand());
 
 program.parseAsync(process.argv).catch((e) => {
   console.error(e);

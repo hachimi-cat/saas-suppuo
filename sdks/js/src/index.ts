@@ -12,6 +12,10 @@
  * `error.code`) on failure.
  */
 
+import { GeneratedApi } from './api.generated.js';
+
+export { GeneratedApi } from './api.generated.js';
+
 // ─── Envelope + error ─────────────────────────────────────────────────
 
 export interface ApiEnvelope<T> {
@@ -413,6 +417,28 @@ export class SuppuoClient {
       );
     }
     return envelope.data as T;
+  }
+
+  /** Every feature route, one method each (generated from the API spec: api.generated.ts). */
+  readonly api: GeneratedApi = new GeneratedApi(this);
+
+  /** The call behind `client.api.*`: Bearer-authenticated like every other request
+   *  (the requester-facing `/api/v1/public/*` routes go without a token, as `public.*` does). */
+  async apigenRequest(
+    method: string,
+    path: string,
+    query: Record<string, unknown> | undefined,
+    body: unknown,
+  ): Promise<unknown> {
+    return this.request<unknown>({
+      method: method as FetchArgs['method'],
+      path,
+      query: Object.fromEntries(
+        Object.entries(query ?? {}).map(([k, v]): [string, string] => [k, typeof v === 'string' ? v : JSON.stringify(v)]),
+      ),
+      body,
+      noAuth: path.startsWith('/api/v1/public/'),
+    });
   }
 
   // ─── Tickets (agent workspace surface, Bearer auth) ───────────────

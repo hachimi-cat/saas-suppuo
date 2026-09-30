@@ -57,8 +57,10 @@ interface Envelope<T> {
   meta?: { requestId: string };
 }
 
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
 export async function apiRequest<T>(
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+  method: HttpMethod,
   path: string,
   opts: { body?: unknown; query?: Record<string, string | number | undefined> } = {},
 ): Promise<T> {
