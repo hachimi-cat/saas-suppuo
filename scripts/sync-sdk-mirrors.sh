@@ -12,7 +12,7 @@ set -euo pipefail
 
 PRODUCT=suppuo
 GH_OWNER=hachimi-cat
-LANGS=${LANGS:-"cli"}
+LANGS=${LANGS:-"cli go"}
 
 REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SRC_SHA=$(git -C "$REPO_ROOT" rev-parse --short HEAD)
@@ -39,7 +39,7 @@ for lang in $LANGS; do
   mirror="${PRODUCT}-${lang}"
   case "$lang" in
     cli) src="$REPO_ROOT/cli" ;;
-    *)   src="$REPO_ROOT/sdk/$lang" ;;
+    *)   src="$REPO_ROOT/sdk/$lang"; [ -d "$src" ] || src="$REPO_ROOT/sdks/$lang" ;;
   esac
   [ -d "$src" ] || { echo "skip $lang: no source dir"; continue; }
 
