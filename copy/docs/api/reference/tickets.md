@@ -13,7 +13,7 @@ Generated from Suppuo's own code: every route in this area, what it takes and ho
 | `GET` | `/api/v1/tickets/{id}` | [Get a ticket](#get-a-ticket) |
 | `PATCH` | `/api/v1/tickets/{id}` | [Update a ticket](#update-a-ticket) |
 | `POST` | `/api/v1/tickets/{id}/messages` | [Messages a ticket](#messages-a-ticket) |
-| `GET` | `/api/v1/tickets/tags` | [Distinct tags across the workspace's tickets — autocomplete feed.](#distinct-tags-across-the-workspaces-tickets-autocomplete-feed) |
+| `GET` | `/api/v1/tickets/tags` | [Distinct tags across the workspace's tickets — autocomplete feed. (Must be mounted before /:id so 'tags' isn't read as a ticket id.)](#distinct-tags-across-the-workspaces-tickets-autocomplete-feed-must-be-mounted-before-id-so-tags-isnt-read-as-a-ticket-id) |
 
 ## List tickets
 
@@ -149,7 +149,7 @@ curl -X POST "https://suppuo.com/api/v1/tickets/:id/messages" \
   -d '{"body":"…","isInternal":false,"authorName":"…","attachmentIds":[]}'
 ```
 
-## Distinct tags across the workspace's tickets — autocomplete feed.
+## Distinct tags across the workspace's tickets — autocomplete feed. (Must be mounted before /:id so 'tags' isn't read as a ticket id.)
 
 ```
 GET /api/v1/tickets/tags

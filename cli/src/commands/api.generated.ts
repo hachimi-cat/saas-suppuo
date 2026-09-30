@@ -1182,7 +1182,7 @@ export const API_ROUTES: Array<{ area: string; routes: Route[] }> = [
     "name": "tags",
     "method": "GET",
     "path": "/api/v1/tickets/tags",
-    "summary": "Distinct tags across the workspace's tickets — autocomplete feed.",
+    "summary": "Distinct tags across the workspace's tickets — autocomplete feed. (Must be mounted before /:id so 'tags' isn't read as a ticket id.)",
     "pathParams": [],
     "query": [],
     "body": null
@@ -1280,94 +1280,6 @@ export const API_ROUTES: Array<{ area: string; routes: Route[] }> = [
       "required": true
      }
     ]
-   }
-  ]
- },
- {
-  "area": "webhooks",
-  "routes": [
-   {
-    "name": "telegram",
-    "method": "POST",
-    "path": "/api/v1/webhooks/telegram/{integrationId}",
-    "summary": "Act on a telegram",
-    "pathParams": [
-     "integrationId"
-    ],
-    "query": [
-     {
-      "name": "secret",
-      "kind": "string",
-      "required": false
-     }
-    ],
-    "body": []
-   },
-   {
-    "name": "twilio-whatsapp",
-    "method": "POST",
-    "path": "/api/v1/webhooks/twilio/whatsapp",
-    "summary": "Create a whatsapp",
-    "pathParams": [],
-    "query": [
-     {
-      "name": "secret",
-      "kind": "string",
-      "required": false
-     }
-    ],
-    "body": [
-     {
-      "name": "Body",
-      "kind": "string",
-      "required": false
-     },
-     {
-      "name": "From",
-      "kind": "string",
-      "required": false
-     },
-     {
-      "name": "NumMedia",
-      "kind": "string",
-      "required": false
-     },
-     {
-      "name": "ProfileName",
-      "kind": "string",
-      "required": false
-     },
-     {
-      "name": "To",
-      "kind": "string",
-      "required": false
-     }
-    ]
-   },
-   {
-    "name": "whatsapp-cloud",
-    "method": "GET",
-    "path": "/api/v1/webhooks/whatsapp-cloud",
-    "summary": "GET — subscription verification handshake.",
-    "pathParams": [],
-    "query": [
-     {
-      "name": "hub.challenge",
-      "kind": "string",
-      "required": false
-     },
-     {
-      "name": "hub.mode",
-      "kind": "string",
-      "required": false
-     },
-     {
-      "name": "hub.verify_token",
-      "kind": "string",
-      "required": false
-     }
-    ],
-    "body": null
    }
   ]
  }

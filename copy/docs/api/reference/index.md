@@ -24,4 +24,3 @@ Every Suppuo feature, route by route, generated from the product's own code (the
 | [Settings](/docs/api/reference/settings) | 8 |
 | [Tickets](/docs/api/reference/tickets) | 6 |
 | [Webhook subscriptions](/docs/api/reference/webhook-subscriptions) | 4 |
-| [Webhooks](/docs/api/reference/webhooks) | 3 |

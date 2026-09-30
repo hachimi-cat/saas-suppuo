@@ -103,11 +103,5 @@ export const REFERENCE_NAV: DocMeta[] = [
     "title": "Webhook subscriptions",
     "group": "API reference (every route)",
     "href": "/docs/api/reference/webhook-subscriptions"
-  },
-  {
-    "slug": "api/reference/webhooks",
-    "title": "Webhooks",
-    "group": "API reference (every route)",
-    "href": "/docs/api/reference/webhooks"
   }
 ];

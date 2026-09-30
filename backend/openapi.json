@@ -220,9 +220,7 @@
     "x-forjio": {
      "source": "src/routes/api-keys.ts:30",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ]
     }
@@ -237,9 +235,7 @@
     "x-forjio": {
      "source": "src/routes/api-keys.ts:47",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ],
      "body": "validated",
@@ -288,9 +284,7 @@
     "x-forjio": {
      "source": "src/routes/api-keys.ts:68",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ]
     }
@@ -307,7 +301,6 @@
     "x-forjio": {
      "source": "src/routes/attachments.ts:114",
      "guards": [
-      "adminGuard",
       "requireAuth",
       "rawBody"
      ],
@@ -348,7 +341,6 @@
     "x-forjio": {
      "source": "src/routes/attachments.ts:122",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -514,9 +506,7 @@
     "x-forjio": {
      "source": "src/routes/billing.ts:25",
      "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
+      "requireAuth"
      ]
     }
    }
@@ -533,9 +523,7 @@
     "x-forjio": {
      "source": "src/routes/billing.ts:53",
      "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
+      "requireAuth"
      ],
      "body": "validated",
      "bodySchema": "checkoutBody"
@@ -578,7 +566,6 @@
     "x-forjio": {
      "source": "src/routes/canned-replies.ts:17",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -593,7 +580,6 @@
     "x-forjio": {
      "source": "src/routes/canned-replies.ts:28",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -648,7 +634,6 @@
     "x-forjio": {
      "source": "src/routes/canned-replies.ts:44",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -697,7 +682,6 @@
     "x-forjio": {
      "source": "src/routes/canned-replies.ts:61",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -713,11 +697,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -732,11 +712,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -751,11 +727,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -778,11 +750,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -796,11 +764,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -823,11 +787,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    },
    "put": {
@@ -848,11 +808,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    },
@@ -874,11 +830,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -892,11 +844,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -910,11 +858,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -929,11 +873,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -965,11 +905,7 @@
     ],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -983,11 +919,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    },
    "patch": {
@@ -999,11 +931,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "unknown"
     }
    }
@@ -1018,11 +946,7 @@
     "parameters": [],
     "x-forjio": {
      "source": null,
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -1037,7 +961,6 @@
     "x-forjio": {
      "source": "src/routes/channels.ts:83",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1052,7 +975,6 @@
     "x-forjio": {
      "source": "src/routes/channels.ts:147",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -1276,7 +1198,6 @@
     "x-forjio": {
      "source": "src/routes/channels.ts:391",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1293,7 +1214,6 @@
     "x-forjio": {
      "source": "src/routes/csat.ts:14",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1310,7 +1230,6 @@
     "x-forjio": {
      "source": "src/routes/domains.ts:20",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1325,7 +1244,6 @@
     "x-forjio": {
      "source": "src/routes/domains.ts:27",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -1374,7 +1292,6 @@
     "x-forjio": {
      "source": "src/routes/domains.ts:42",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1400,7 +1317,6 @@
     "x-forjio": {
      "source": "src/routes/domains.ts:35",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "none"
@@ -1433,7 +1349,6 @@
     "x-forjio": {
      "source": "src/routes/help.ts:80",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1448,7 +1363,6 @@
     "x-forjio": {
      "source": "src/routes/help.ts:92",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -1534,7 +1448,6 @@
     "x-forjio": {
      "source": "src/routes/help.ts:124",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1558,7 +1471,6 @@
     "x-forjio": {
      "source": "src/routes/help.ts:136",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -1637,7 +1549,6 @@
     "x-forjio": {
      "source": "src/routes/help.ts:176",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1706,7 +1617,6 @@
     "x-forjio": {
      "source": "src/routes/me.ts:12",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1723,7 +1633,6 @@
     "x-forjio": {
      "source": "src/routes/profile.ts:35",
      "guards": [
-      "adminGuard",
       "requireAuth",
       "rawBody"
      ],
@@ -1753,7 +1662,6 @@
     "x-forjio": {
      "source": "src/routes/profile.ts:68",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1779,7 +1687,6 @@
     "x-forjio": {
      "source": "src/routes/profile.ts:77",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -1795,10 +1702,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/domains.ts:59",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "callbackBody"
     },
@@ -1852,10 +1756,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/domains.ts:75",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ]
+     "guards": []
     }
    }
   },
@@ -1879,10 +1780,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-help.ts:83",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ]
+     "guards": []
     }
    }
   },
@@ -1914,10 +1812,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-help.ts:144",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ]
+     "guards": []
     }
    }
   },
@@ -1941,10 +1836,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-help.ts:48",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ]
+     "guards": []
     }
    }
   },
@@ -1968,10 +1860,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-help.ts:61",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ]
+     "guards": []
     }
    }
   },
@@ -2004,10 +1893,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-help.ts:130",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ]
+     "guards": []
     }
    }
   },
@@ -2021,10 +1907,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/public-requester.ts:84",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "loginBody"
     },
@@ -2070,10 +1953,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/public-requester.ts:135",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ],
+     "guards": [],
      "body": "none"
     }
    }
@@ -2088,10 +1968,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/public-requester.ts:115",
-     "guards": [
-      "adminGuard",
-      "requireAuth"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "verifyBody"
     },
@@ -2128,11 +2005,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/public-tickets.ts:135",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "submitBody"
     },
@@ -2204,11 +2077,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-tickets.ts:215",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -2232,9 +2101,6 @@
     "x-forjio": {
      "source": "src/routes/attachments.ts:142",
      "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester",
       "rawBody"
      ],
      "body": "read-unvalidated"
@@ -2281,11 +2147,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/attachments.ts:155",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -2308,11 +2170,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-tickets.ts:322",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "csatBody"
     },
@@ -2362,11 +2220,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-tickets.ts:261",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "validated",
      "bodySchema": "replyBody"
     },
@@ -2418,11 +2272,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/public-tickets.ts:115",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    }
   },
@@ -2444,7 +2294,6 @@
     "x-forjio": {
      "source": "src/routes/reports.ts:23",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -2461,8 +2310,6 @@
     "x-forjio": {
      "source": "src/routes/requester.ts:32",
      "guards": [
-      "adminGuard",
-      "requireAuth",
       "requireRequester"
      ]
     }
@@ -2494,8 +2341,6 @@
     "x-forjio": {
      "source": "src/routes/requester.ts:42",
      "guards": [
-      "adminGuard",
-      "requireAuth",
       "requireRequester"
      ]
     }
@@ -2510,8 +2355,6 @@
     "x-forjio": {
      "source": "src/routes/requester.ts:147",
      "guards": [
-      "adminGuard",
-      "requireAuth",
       "requireRequester"
      ],
      "body": "validated",
@@ -2566,8 +2409,6 @@
     "x-forjio": {
      "source": "src/routes/requester.ts:74",
      "guards": [
-      "adminGuard",
-      "requireAuth",
       "requireRequester"
      ]
     }
@@ -2593,8 +2434,6 @@
     "x-forjio": {
      "source": "src/routes/requester.ts:105",
      "guards": [
-      "adminGuard",
-      "requireAuth",
       "requireRequester"
      ],
      "body": "validated",
@@ -2634,7 +2473,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:64",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -2649,7 +2487,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:73",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -2752,7 +2589,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:232",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -2767,7 +2603,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:241",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -2859,7 +2694,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:291",
      "guards": [
-      "adminGuard",
       "requireAuth",
       "logoRawBody"
      ],
@@ -2889,7 +2723,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:325",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -2906,7 +2739,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:144",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -2921,7 +2753,6 @@
     "x-forjio": {
      "source": "src/routes/settings.ts:153",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -3084,7 +2915,6 @@
     "x-forjio": {
      "source": "src/routes/tickets.ts:49",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -3100,7 +2930,6 @@
     "x-forjio": {
      "source": "src/routes/tickets.ts:132",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -3175,7 +3004,6 @@
     "x-forjio": {
      "source": "src/routes/tickets.ts:189",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -3199,7 +3027,6 @@
     "x-forjio": {
      "source": "src/routes/tickets.ts:334",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -3258,7 +3085,6 @@
     "x-forjio": {
      "source": "src/routes/tickets.ts:216",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ],
      "body": "validated",
@@ -3304,7 +3130,7 @@
   "/api/v1/tickets/tags": {
    "get": {
     "operationId": "getTicketsTags",
-    "summary": "Distinct tags across the workspace's tickets — autocomplete feed.",
+    "summary": "Distinct tags across the workspace's tickets — autocomplete feed. (Must be mounted before /:id so 'tags' isn't read as a ticket id.)",
     "description": "Distinct tags across the workspace's tickets — autocomplete feed.\n (Must be mounted before /:id so 'tags' isn't read as a ticket id.)",
     "tags": [
      "tickets"
@@ -3313,7 +3139,6 @@
     "x-forjio": {
      "source": "src/routes/tickets.ts:108",
      "guards": [
-      "adminGuard",
       "requireAuth"
      ]
     }
@@ -3330,9 +3155,7 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:38",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ]
     }
@@ -3347,9 +3170,7 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:56",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ],
      "body": "validated",
@@ -3407,9 +3228,7 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:81",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ],
      "body": "validated",
@@ -3454,9 +3273,7 @@
     "x-forjio": {
      "source": "src/routes/webhook-subscriptions.ts:100",
      "guards": [
-      "adminGuard",
       "requireAuth",
-      "requireRequester",
       "rateLimit"
      ]
     }
@@ -3472,11 +3289,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/webhooks-plugipay.ts:27",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "none"
     }
    }
@@ -3491,11 +3304,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/webhooks-resend.ts:141",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "read-unknown"
     },
     "requestBody": {
@@ -3536,11 +3345,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/webhooks-telegram.ts:56",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "read-unknown"
     },
     "requestBody": {
@@ -3574,9 +3379,6 @@
     "x-forjio": {
      "source": "src/routes/webhooks-twilio.ts:42",
      "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester",
       "express.urlencoded"
      ],
      "body": "read-unvalidated"
@@ -3630,11 +3432,7 @@
     ],
     "x-forjio": {
      "source": "src/routes/webhooks-whatsapp-cloud.ts:39",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ]
+     "guards": []
     }
    },
    "post": {
@@ -3647,11 +3445,7 @@
     "parameters": [],
     "x-forjio": {
      "source": "src/routes/webhooks-whatsapp-cloud.ts:71",
-     "guards": [
-      "adminGuard",
-      "requireAuth",
-      "requireRequester"
-     ],
+     "guards": [],
      "body": "read-unknown"
     },
     "requestBody": {

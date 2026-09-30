@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 
 class GeneratedApi:
-    """All 70 feature routes of the Suppuo API."""
+    """All 67 feature routes of the Suppuo API."""
 
     def __init__(self, client: Any) -> None:
         self._client = client
@@ -525,7 +525,7 @@ class GeneratedApi:
         return self._call("POST", f"/api/v1/tickets/{_q(id_)}/messages", {}, payload)
 
     def tickets_tags(self) -> Any:
-        """Distinct tags across the workspace's tickets — autocomplete feed. (GET /api/v1/tickets/tags)."""
+        """Distinct tags across the workspace's tickets — autocomplete feed. (Must be mounted before /:id so 'tags' isn't read as a ticket id.) (GET /api/v1/tickets/tags)."""
         return self._call("GET", f"/api/v1/tickets/tags", {}, None)
 
     def tickets_update(self, id_: str, *, status: Optional[str] = None, priority: Optional[str] = None, assignee_sub: Optional[str] = None, tags: Optional[List[Any]] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
@@ -574,32 +574,6 @@ class GeneratedApi:
         if "active" not in payload:
             raise ValueError("webhook_subscriptions_update needs active")
         return self._call("PATCH", f"/api/v1/webhook-subscriptions/{_q(id_)}", {}, payload)
-
-    def webhooks_telegram(self, integration_id: str, *, secret: Optional[Any] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
-        """Act on a telegram (POST /api/v1/webhooks/telegram/{integrationId})."""
-        payload: Dict[str, Any] = dict(json_body or {})
-        return self._call("POST", f"/api/v1/webhooks/telegram/{_q(integration_id)}", {"secret": secret}, payload)
-
-    def webhooks_twilio_whatsapp(self, *, secret: Optional[Any] = None, body: Optional[Any] = None, from_: Optional[Any] = None, num_media: Optional[Any] = None, profile_name: Optional[Any] = None, to: Optional[Any] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
-        """Create a whatsapp (POST /api/v1/webhooks/twilio/whatsapp).
-        
-        Body fields are keyword arguments; `json_body=` passes the whole body (fields override it)."""
-        payload: Dict[str, Any] = dict(json_body or {})
-        if body is not None:
-            payload["Body"] = body
-        if from_ is not None:
-            payload["From"] = from_
-        if num_media is not None:
-            payload["NumMedia"] = num_media
-        if profile_name is not None:
-            payload["ProfileName"] = profile_name
-        if to is not None:
-            payload["To"] = to
-        return self._call("POST", f"/api/v1/webhooks/twilio/whatsapp", {"secret": secret}, payload)
-
-    def webhooks_whatsapp_cloud(self, *, hub_challenge: Optional[Any] = None, hub_mode: Optional[Any] = None, hub_verify_token: Optional[Any] = None) -> Any:
-        """GET — subscription verification handshake. (GET /api/v1/webhooks/whatsapp-cloud)."""
-        return self._call("GET", f"/api/v1/webhooks/whatsapp-cloud", {"hub.challenge": hub_challenge, "hub.mode": hub_mode, "hub.verify_token": hub_verify_token}, None)
 
 
 def _q(value: Any) -> str:

@@ -7,7 +7,7 @@ export interface ApigenTransport {
   apigenRequest(method: string, path: string, query: Record<string, unknown> | undefined, body: unknown): Promise<unknown>;
 }
 
-/** All 70 feature routes of the Suppuo API. */
+/** All 67 feature routes of the Suppuo API. */
 export class GeneratedApi {
   constructor(private readonly client: ApigenTransport) {}
 
@@ -392,7 +392,7 @@ export class GeneratedApi {
     return this.call("POST", `/api/v1/tickets/${encodeURIComponent(id)}/messages`, query, all);
   }
 
-  /** Distinct tags across the workspace's tickets — autocomplete feed. (GET /api/v1/tickets/tags) */
+  /** Distinct tags across the workspace's tickets — autocomplete feed. (Must be mounted before /:id so 'tags' isn't read as a ticket id.) (GET /api/v1/tickets/tags) */
   ticketsTags(): Promise<unknown> {
     return this.call("GET", `/api/v1/tickets/tags`, {}, undefined);
   }
@@ -426,31 +426,5 @@ export class GeneratedApi {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, query, all);
-  }
-
-  /** Act on a telegram (POST /api/v1/webhooks/telegram/{integrationId}) */
-  webhooksTelegram(integrationId: string, input?: { "secret"?: unknown }): Promise<unknown> {
-    const all: Record<string, unknown> = { ...(input ?? {}) };
-    const query: Record<string, unknown> = {};
-    query["secret"] = all["secret"]; delete all["secret"];
-    return this.call("POST", `/api/v1/webhooks/telegram/${encodeURIComponent(integrationId)}`, query, all);
-  }
-
-  /** Create a whatsapp (POST /api/v1/webhooks/twilio/whatsapp) */
-  webhooksTwilioWhatsapp(input?: { "secret"?: unknown; "Body"?: unknown; "From"?: unknown; "NumMedia"?: unknown; "ProfileName"?: unknown; "To"?: unknown }): Promise<unknown> {
-    const all: Record<string, unknown> = { ...(input ?? {}) };
-    const query: Record<string, unknown> = {};
-    query["secret"] = all["secret"]; delete all["secret"];
-    return this.call("POST", `/api/v1/webhooks/twilio/whatsapp`, query, all);
-  }
-
-  /** GET — subscription verification handshake. (GET /api/v1/webhooks/whatsapp-cloud) */
-  webhooksWhatsappCloud(input?: { "hub.challenge"?: unknown; "hub.mode"?: unknown; "hub.verify_token"?: unknown }): Promise<unknown> {
-    const all: Record<string, unknown> = { ...(input ?? {}) };
-    const query: Record<string, unknown> = {};
-    query["hub.challenge"] = all["hub.challenge"]; delete all["hub.challenge"];
-    query["hub.mode"] = all["hub.mode"]; delete all["hub.mode"];
-    query["hub.verify_token"] = all["hub.verify_token"]; delete all["hub.verify_token"];
-    return this.call("GET", `/api/v1/webhooks/whatsapp-cloud`, query, undefined);
   }
 }
