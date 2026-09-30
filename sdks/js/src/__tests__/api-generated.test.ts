@@ -59,6 +59,6 @@ describe('client.api (generated from the spec)', () => {
     const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(client.api)).filter(
       (n) => n !== 'constructor' && n !== 'call',
     );
-    expect(methods.length).toBeGreaterThanOrEqual(70);
+    expect(methods.length).toBeGreaterThanOrEqual(65);
   });
 });

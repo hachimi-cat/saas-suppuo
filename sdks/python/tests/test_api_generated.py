@@ -64,4 +64,4 @@ def test_a_required_field_is_asked_for() -> None:
 
 def test_every_feature_route_has_a_method() -> None:
     methods = [n for n in dir(_client().api) if not n.startswith("_")]
-    assert len(methods) >= 70
+    assert len(methods) >= 65

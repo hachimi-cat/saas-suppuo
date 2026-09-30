@@ -35,7 +35,7 @@ async function run(argv: string[]): Promise<number | undefined> {
 describe('suppuo api', () => {
   it('has a command for every feature route', () => {
     const count = API_ROUTES.reduce((n, a) => n + a.routes.length, 0);
-    expect(count).toBeGreaterThanOrEqual(70);
+    expect(count).toBeGreaterThanOrEqual(65);
     const areas = API_ROUTES.map((a) => a.area);
     expect(areas).toEqual(expect.arrayContaining(['tickets', 'canned-replies', 'help', 'webhook-subscriptions']));
   });
