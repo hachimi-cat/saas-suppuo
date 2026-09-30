@@ -31,11 +31,36 @@ curl -X GET "https://suppuo.com/api/v1/channels" \
 POST /api/v1/channels
 ```
 
+### Body
+
+The body takes one of several shapes; these are the fields of all of them.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `provider` | `whatsapp_twilio` or `whatsapp_cloud` or `email_resend` or `telegram_bot` or `slack_webhook` or `discord_webhook` | no |  |
+| `accountSid` | string | no |  |
+| `authToken` | string | no | min length 16 |
+| `whatsappNumber` | string | no |  |
+| `displayName` | string | no | max length 120 |
+| `accessToken` | string | no | min length 16 |
+| `phoneNumberId` | string | no |  |
+| `wabaId` | string | no |  |
+| `displayNumber` | string | no |  |
+| `verifyToken` | string | no | min length 8; max length 128 |
+| `appSecret` | string | no | min length 8; max length 128 |
+| `apiKey` | string | no | min length 8 |
+| `fromEmail` | string (email) | no |  |
+| `fromName` | string | no | max length 120 |
+| `botToken` | string | no |  |
+| `webhookUrl` | string (uri) | no | max length 500 |
+
 ### Example
 
 ```bash
 curl -X POST "https://suppuo.com/api/v1/channels" \
-  -H "Authorization: Bearer sk_live_<your API key>"
+  -H "Authorization: Bearer sk_live_<your API key>" \
+  -H "Content-Type: application/json" \
+  -d '{"provider":"whatsapp_twilio","accountSid":"…","authToken":"…","whatsappNumber":"…","displayName":"…","accessToken":"…","phoneNumberId":"…","wabaId":"…","displayNumber":"…","verifyToken":"…","appSecret":"…","apiKey":"…","fromEmail":"…","fromName":"…","botToken":"…","webhookUrl":"…"}'
 ```
 
 ## Delete a channel
