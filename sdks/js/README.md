@@ -88,5 +88,5 @@ full method reference.
 ## Family
 
 Sister to:
-- [`forjio-suppuo`](https://pypi.org/project/forjio-suppuo/) (Python)
+- [`suppuo`](https://pypi.org/project/suppuo/) (Python)
 - [`hachimi-cat/suppuo-go`](https://github.com/hachimi-cat/suppuo-go) (Go)

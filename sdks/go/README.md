@@ -118,4 +118,4 @@ and the `meta.requestId`.
 
 Sister to:
 - [`@forjio/suppuo`](https://www.npmjs.com/package/@forjio/suppuo) (JS/TS)
-- [`forjio-suppuo`](https://pypi.org/project/forjio-suppuo/) (Python)
+- [`suppuo`](https://pypi.org/project/suppuo/) (Python)

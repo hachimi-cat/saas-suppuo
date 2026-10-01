@@ -126,10 +126,10 @@ const { tickets } = await client.tickets.list({ status: "open" });
 await client.tickets.reply(tickets[0].id, { body: "On it!" });
 ```
 
-### Python — [`forjio-suppuo`](https://pypi.org/project/forjio-suppuo/)
+### Python — [`suppuo`](https://pypi.org/project/suppuo/)
 
 ```bash
-pip install forjio-suppuo
+pip install suppuo
 ```
 
 ```python

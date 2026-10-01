@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.4.0
+- Published on PyPI as `suppuo` (`pip install suppuo`; the import, `forjio_suppuo`, is unchanged): the `forjio-suppuo` name belongs to an account Forjio no longer holds, so it stays at its last old upload.
 - Webhook deliveries are retried and logged. `client.api.webhook_subscriptions_deliveries(subscription_id=, status=, type_=, limit=, cursor=)` lists them (newest first, with every attempt), `webhook_subscriptions_get_deliveries(id_)` reads one, `webhook_subscriptions_deliveries_retry(id_)` sends one again (202; 409 when it is queued or its subscription is off), and `webhook_subscriptions_event_types()` returns the event catalogue.
 - `webhook_subscriptions_update(id_, url=, events=, active=)` changes the URL and the events too (it only took `active`); `active=True` re-enables a subscription Suppuo switched off for failing. Subscriptions carry `consecutiveFailures`, `failingSince`, `disabledAt`, `disabledReason`.
 - `events` takes prefixes (`suppuo.ticket.*`). New event type `suppuo.webhook_subscription.disabled.v1`; a requester-portal reply is now `suppuo.ticket.replied.v1` (`by: "requester"`) like every other requester follow-up (it was the undocumented `suppuo.ticket.message.created.v1`).

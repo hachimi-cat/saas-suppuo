@@ -1,9 +1,9 @@
-# forjio-suppuo
+# suppuo (Python SDK)
 
 Typed Python client for the [suppuo.com](https://suppuo.com) helpdesk REST API.
 
 ```bash
-pip install forjio-suppuo
+pip install suppuo
 ```
 
 ```python

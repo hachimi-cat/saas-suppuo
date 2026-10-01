@@ -1,5 +1,5 @@
 [project]
-name = "forjio-suppuo"
+name = "suppuo"
 version = "0.4.0"
 description = "Suppuo SDK — typed Python client for the suppuo.com REST API. Sister to the JS + Go SDKs."
 authors = [{ name = "Forjio", email = "support@forjio.com" }]

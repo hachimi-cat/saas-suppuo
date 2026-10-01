@@ -1,6 +1,6 @@
 /**
  * Suppuo SDK — typed JS/TS client for the suppuo.com REST API.
- * Sister to `forjio-suppuo` (Python) and `hachimi-cat/suppuo-go` (Go).
+ * Sister to `suppuo` (Python) and `hachimi-cat/suppuo-go` (Go).
  *
  * Auth = Bearer token — an `sk_live_…` API key from the dashboard (or a
  * Huudis-minted access token). Pass `token` or set `SUPPUO_TOKEN`. The
