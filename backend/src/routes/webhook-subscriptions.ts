@@ -1,15 +1,21 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/db.js';
 import { newId } from '../lib/ids.js';
-import { sendOk, sendCreated, sendErr } from '../lib/http.js';
+import { sendOk, sendCreated, sendErr, sendList } from '../lib/http.js';
 import { h as asyncHandler } from '../lib/async-handler.js';
+import { decodeCursor, encodeCursor } from '../lib/cursor.js';
 import { generateWebhookSecret } from '../lib/webhook-signature.js';
+import { assertSafeWebhookUrl, BlockedTargetError } from '../lib/webhook-target.js';
+import { EVENT_TYPES } from '../lib/event-types.js';
+import { failPendingDeliveries, retryWebhookDelivery } from '../services/webhook-delivery.js';
 import { rateLimit } from '../middleware/rate-limit.js';
 
 /*
- * /api/v1/webhook-subscriptions — customer endpoints receiving
- * suppuo.ticket.* events (delivered by services/outbox-worker.ts).
+ * /api/v1/webhook-subscriptions — a workspace's endpoints receiving
+ * suppuo.* events, and the log of what was delivered to them. Delivery,
+ * retries and auto-disable: services/webhook-delivery.ts.
  *
  * The signing secret is returned ONCE on creation; list responses
  * never include it.
@@ -22,18 +28,38 @@ const SAFE_SELECT = {
   url: true,
   events: true,
   active: true,
+  consecutiveFailures: true,
+  failingSince: true,
+  disabledAt: true,
+  disabledReason: true,
   createdAt: true,
   updatedAt: true,
 } as const;
 
-/** "*" or a versioned suppuo event type (suppuo.ticket.created.v1, …).
- *  Format-checked rather than catalog-checked so new event types don't
- *  require a portal redeploy to subscribe to. */
+/** "*", a versioned suppuo event type (suppuo.ticket.created.v1, …) or a
+ *  prefix ending in "*" (suppuo.ticket.*). Format-checked rather than
+ *  catalog-checked so new event types don't require a portal redeploy to
+ *  subscribe to. */
 const eventPattern = z
   .string()
-  .refine((s) => s === '*' || /^suppuo\.[a-z_]+(\.[a-z_]+)*\.v\d+$/.test(s), {
-    message: 'must be "*" or a versioned suppuo event type',
-  });
+  .refine(
+    (s) =>
+      s === '*'
+      || /^suppuo\.[a-z_]+(\.[a-z_]+)*\.v\d+$/.test(s)
+      || /^suppuo\.([a-z_]+\.)*\*$/.test(s),
+    { message: 'must be "*", a versioned suppuo event type, or a prefix like "suppuo.ticket.*"' },
+  );
+
+/** The SSRF guard (lib/webhook-target.ts) as a 400 the caller can act on. */
+async function urlRefusal(url: string): Promise<string | null> {
+  try {
+    await assertSafeWebhookUrl(url);
+    return null;
+  } catch (e) {
+    if (e instanceof BlockedTargetError) return e.message;
+    throw e;
+  }
+}
 
 router.get(
   '/',
@@ -48,16 +74,32 @@ router.get(
   }),
 );
 
+/** The event types a subscription can receive, with what each one means. */
+router.get(
+  '/event-types',
+  rateLimit('read'),
+  asyncHandler(async (req, res) => {
+    sendOk(res, req, { types: EVENT_TYPES });
+  }),
+);
+
 const createBody = z.object({
   url: z.string().trim().url().max(2000).startsWith('http'),
   events: z.array(eventPattern).min(1).max(20).optional(),
 });
 
+/**
+ * Register an endpoint. The response is the only time its signing secret
+ * is returned. The URL must be https and must not point at a private,
+ * loopback or link-local address.
+ */
 router.post(
   '/',
   rateLimit('mutating_light'),
   asyncHandler(async (req, res) => {
     const input = createBody.parse(req.body);
+    const refusal = await urlRefusal(input.url);
+    if (refusal) return sendErr(res, req, 400, 'VALIDATION_ERROR', `url: ${refusal}`, { param: 'url' });
     const secret = generateWebhookSecret();
     const row = await prisma.webhookSubscription.create({
       data: {
@@ -74,10 +116,22 @@ router.post(
   }),
 );
 
-const patchBody = z.object({
-  active: z.boolean(),
-});
+const patchBody = z
+  .object({
+    url: z.string().trim().url().max(2000).startsWith('http').optional(),
+    events: z.array(eventPattern).min(1).max(20).optional(),
+    active: z.boolean().optional(),
+  })
+  .refine((b) => b.url !== undefined || b.events !== undefined || b.active !== undefined, {
+    message: 'give at least one of url, events, active',
+  });
 
+/**
+ * Update a subscription. `active: false` pauses it (its queued deliveries
+ * become failed); `active: true` re-enables it — also after Suppuo switched
+ * it off for failing — and clears its failure streak. A new `url` goes
+ * through the same checks as on create; the signing secret stays the same.
+ */
 router.patch(
   '/:id',
   rateLimit('mutating_light'),
@@ -88,10 +142,28 @@ router.patch(
       where: { id: String(req.params.id), accountId },
     });
     if (!existing) return sendErr(res, req, 404, 'NOT_FOUND', 'webhook subscription not found');
-    const row = await prisma.webhookSubscription.update({
-      where: { id: existing.id },
-      data: { active: input.active },
-      select: SAFE_SELECT,
+    if (input.url !== undefined && input.url !== existing.url) {
+      const refusal = await urlRefusal(input.url);
+      if (refusal) return sendErr(res, req, 400, 'VALIDATION_ERROR', `url: ${refusal}`, { param: 'url' });
+    }
+    const data: Prisma.WebhookSubscriptionUpdateInput = {
+      ...(input.url !== undefined ? { url: input.url } : {}),
+      ...(input.events !== undefined ? { events: input.events } : {}),
+      ...(input.active !== undefined ? { active: input.active } : {}),
+      ...(input.active === true
+        ? { consecutiveFailures: 0, failingSince: null, disabledAt: null, disabledReason: null }
+        : {}),
+    };
+    const row = await prisma.$transaction(async (tx) => {
+      const updated = await tx.webhookSubscription.update({
+        where: { id: existing.id },
+        data,
+        select: SAFE_SELECT,
+      });
+      if (input.active === false && existing.active) {
+        await failPendingDeliveries(tx, existing.id, 'subscription is disabled');
+      }
+      return updated;
     });
     sendOk(res, req, row);
   }),
@@ -108,6 +180,129 @@ router.delete(
     if (!existing) return sendErr(res, req, 404, 'NOT_FOUND', 'webhook subscription not found');
     await prisma.webhookSubscription.delete({ where: { id: existing.id } });
     sendOk(res, req, { deleted: true });
+  }),
+);
+
+// ── the delivery log ────────────────────────────────────────────────
+
+/** A delivery as the API shows it: everything but the subscription's
+ *  secret, with its attempts oldest first. `body` is the exact JSON sent. */
+const DELIVERY_SELECT = {
+  id: true,
+  subscriptionId: true,
+  eventId: true,
+  type: true,
+  body: true,
+  status: true,
+  attempts: true,
+  nextRetryAt: true,
+  lastAttemptAt: true,
+  deliveredAt: true,
+  responseCode: true,
+  lastError: true,
+  durationMs: true,
+  createdAt: true,
+  updatedAt: true,
+  attemptLog: {
+    orderBy: { attemptNumber: 'asc' },
+    select: {
+      attemptNumber: true,
+      status: true,
+      responseCode: true,
+      durationMs: true,
+      error: true,
+      nextRetryAt: true,
+      attemptedAt: true,
+    },
+  },
+} as const satisfies Prisma.WebhookDeliverySelect;
+
+const listDeliveriesQuery = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  cursor: z.string().min(1).optional(),
+  subscriptionId: z.string().min(1).optional(),
+  status: z.enum(['pending', 'succeeded', 'failed']).optional(),
+  type: z.string().min(1).optional(),
+});
+
+/**
+ * List webhook deliveries. Newest first: one row per event per
+ * subscription, with its status (pending, succeeded, failed), attempt
+ * count, next retry, the body sent and every attempt made (`attemptLog`).
+ * Filter by `subscriptionId`, `status` or `type`; page with `limit`
+ * (1-100, default 20) and `meta.cursor` while `meta.hasMore`.
+ */
+router.get(
+  '/deliveries',
+  rateLimit('read'),
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const { limit, cursor: rawCursor, subscriptionId, status, type } = listDeliveriesQuery.parse(req.query);
+    const and: Prisma.WebhookDeliveryWhereInput[] = [{ accountId }];
+    if (subscriptionId) and.push({ subscriptionId });
+    if (status) and.push({ status });
+    if (type) and.push({ type });
+    // After the cursor's row in (createdAt, id) order, so a page boundary
+    // between rows made in the same millisecond skips none.
+    const cursor = decodeCursor(rawCursor);
+    if (cursor) {
+      const d = new Date(cursor.createdAt);
+      if (!Number.isNaN(d.getTime())) {
+        and.push({ OR: [{ createdAt: { lt: d } }, { createdAt: d, id: { lt: cursor.id } }] });
+      }
+    }
+    const rows = await prisma.webhookDelivery.findMany({
+      where: { AND: and },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+      select: DELIVERY_SELECT,
+    });
+    const page = rows.slice(0, limit);
+    const last = page[page.length - 1];
+    const hasMore = rows.length > limit;
+    sendList(
+      res,
+      req,
+      page,
+      hasMore && last ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id }) : null,
+      hasMore,
+    );
+  }),
+);
+
+/** Get a webhook delivery, with every attempt made at it. */
+router.get(
+  '/deliveries/:id',
+  rateLimit('read'),
+  asyncHandler(async (req, res) => {
+    const row = await prisma.webhookDelivery.findFirst({
+      where: { id: String(req.params.id), accountId: req.auth!.accountId as string },
+      select: DELIVERY_SELECT,
+    });
+    if (!row) return sendErr(res, req, 404, 'NOT_FOUND', 'webhook delivery not found');
+    sendOk(res, req, row);
+  }),
+);
+
+/**
+ * Retry a webhook delivery. Queues one more attempt now at a failed
+ * delivery (or sends a succeeded one again); it goes out within seconds —
+ * read it back with GET /webhook-subscriptions/deliveries/{id}. 202 with the
+ * delivery `pending`; 409 ALREADY_QUEUED when it is pending already, 409
+ * SUBSCRIPTION_DISABLED when its subscription is off.
+ */
+router.post(
+  '/deliveries/:id/retry',
+  rateLimit('mutating_light'),
+  asyncHandler(async (req, res) => {
+    const accountId = req.auth!.accountId as string;
+    const out = await retryWebhookDelivery(accountId, String(req.params.id));
+    if (!out.ok) return sendErr(res, req, out.status, out.code, out.message);
+    const row = await prisma.webhookDelivery.findUniqueOrThrow({
+      where: { id: out.deliveryId },
+      select: DELIVERY_SELECT,
+    });
+    sendOk(res, req, row, 202);
   }),
 );
 

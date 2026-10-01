@@ -127,11 +127,14 @@ router.post(
         where: { id: ticket.id },
         data: { status: nextStatus, lastMessageAt: new Date() },
       });
+      // The same event as every other requester follow-up (the public
+      // ticket page, email, chat): webhook subscribers, team channels and
+      // the inbox email all react to suppuo.ticket.replied.v1.
       await writeOutbox(tx, {
-        type: 'suppuo.ticket.message.created.v1',
+        type: 'suppuo.ticket.replied.v1',
         accountId: ticket.accountId,
         aggregateId: ticket.id,
-        data: { ticketId: ticket.id, number: ticket.number, authorType: 'requester' },
+        data: { ticketId: ticket.id, messageId: m.id, isInternal: false, by: 'requester' },
       });
       return m;
     });

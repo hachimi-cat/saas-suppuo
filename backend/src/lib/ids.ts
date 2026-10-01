@@ -19,6 +19,8 @@ export type IdPrefix =
   | 'bsub' // billing subscription
   | 'ak' // API key
   | 'whs' // webhook subscription
+  | 'whd' // webhook delivery (one event to one subscription)
+  | 'wha' // webhook delivery attempt
   | 'csat' // CSAT response
   | 'rst' // roster identity (SSO capture for admin CRM)
   | 'rmb' // roster membership (identity ↔ accountId sighting)

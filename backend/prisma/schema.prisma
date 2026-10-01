@@ -375,22 +375,103 @@ model ApiKey {
   @@map("api_keys")
 }
 
-/// A customer endpoint subscribed to suppuo.ticket.* events. The
-/// signing secret (`whsec_<hex>`) is shown ONCE at creation; deliveries
-/// carry `Suppuo-Signature: t=<unix>,v1=<hmac-sha256>`.
+/// A customer endpoint subscribed to suppuo.* events. The signing
+/// secret (`whsec_<hex>`) is shown ONCE at creation; deliveries carry
+/// `Suppuo-Signature: t=<unix>,v1=<hmac-sha256>` and are sent, retried
+/// and logged by services/webhook-delivery.ts.
 model WebhookSubscription {
-  id        String   @id // whs_<ulid>
-  accountId String
-  url       String
-  secret    String
-  /// Event-type allowlist as a JSON string array; ["*"] = everything.
-  events    Json     @default("[\"*\"]")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String    @id // whs_<ulid>
+  accountId           String
+  url                 String
+  secret              String
+  /// Event-type allowlist as a JSON string array: exact types, prefixes
+  /// ending in `*` (`suppuo.ticket.*`), or ["*"] = everything.
+  events              Json      @default("[\"*\"]")
+  active              Boolean   @default(true)
+  /// Failed attempts in a row since the last 2xx. Reset by a success and
+  /// by re-enabling the subscription.
+  consecutiveFailures Int       @default(0)
+  /// When the current run of failures started; null while healthy.
+  failingSince        DateTime?
+  /// Set when Suppuo switched the subscription off itself because it
+  /// kept failing (null for a manual pause). Cleared on re-enable.
+  disabledAt          DateTime?
+  disabledReason      String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  deliveries WebhookDelivery[]
 
   @@index([accountId, active])
   @@map("webhook_subscriptions")
+}
+
+enum WebhookDeliveryStatus {
+  pending // queued, or waiting for its next retry (nextRetryAt)
+  succeeded // the endpoint answered 2xx
+  failed // every attempt failed, or the subscription was switched off meanwhile
+}
+
+enum WebhookAttemptStatus {
+  succeeded
+  failed
+}
+
+/// One event queued for one webhook subscription (what
+/// GET /webhook-subscriptions/deliveries lists). The body is built once and
+/// sent byte-for-byte on every attempt.
+model WebhookDelivery {
+  id             String                @id // whd_<ulid>
+  accountId      String
+  subscriptionId String
+  /// outbox_events.id (evt_…): the body's `id`, the same on every attempt.
+  eventId        String
+  type           String
+  body           String
+  status         WebhookDeliveryStatus @default(pending)
+  attempts       Int                   @default(0)
+  /// When it is next due; null once succeeded or failed.
+  nextRetryAt    DateTime?
+  lastAttemptAt  DateTime?
+  deliveredAt    DateTime?
+  /// Of the last attempt; null when no response came back.
+  responseCode   Int?
+  lastError      String?
+  durationMs     Int?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  subscription WebhookSubscription      @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  attemptLog   WebhookDeliveryAttempt[]
+
+  @@unique([subscriptionId, eventId])
+  @@index([status, nextRetryAt])
+  @@index([accountId, createdAt])
+  @@map("webhook_deliveries")
+}
+
+/// One HTTP attempt at a WebhookDelivery. Append-only.
+model WebhookDeliveryAttempt {
+  id             String               @id // wha_<ulid>
+  deliveryId     String
+  accountId      String
+  subscriptionId String
+  attemptNumber  Int // 1-based
+  status         WebhookAttemptStatus
+  /// null when no response came back
+  responseCode   Int?
+  durationMs     Int
+  /// why it failed: "HTTP 503", "timed out after 10000ms", "blocked: …"
+  error          String?
+  /// the retry this failure scheduled; null on success or give-up
+  nextRetryAt    DateTime?
+  attemptedAt    DateTime             @default(now())
+
+  delivery WebhookDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@unique([deliveryId, attemptNumber])
+  @@index([accountId, attemptedAt])
+  @@map("webhook_delivery_attempts")
 }
 
 /// Identity roster — thin SSO capture (admin-CRM blind-spot fix). NOT

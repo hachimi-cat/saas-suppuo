@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { registerFeatureFlags } from './lib/feature-flag-registry.js';
 import { startOutboxWorker } from './services/outbox-worker.js';
+import { startWebhookDeliveryWorker } from './services/webhook-delivery.js';
 
 const app = createApp();
 
@@ -20,9 +21,12 @@ registerFeatureFlags().catch((err) =>
   console.error('[feature-flags] boot registration failed:', err),
 );
 
-// Outbox worker runs alongside the API process. For production, prefer a
-// separate pm2 entry: `node dist/services/outbox-worker.js`. Tests
-// (`NODE_ENV=test`) keep the worker off so stray deliveries don't leak.
+// The outbox worker (team notifications, inbox email, auto-response, CSAT,
+// and queueing webhook deliveries) and the webhook delivery worker (sending,
+// retrying and logging them) run INSIDE this API process — production runs
+// exactly this file (`pm2 start dist/index.js`). There is no separate worker
+// entrypoint: setting OUTBOX_WORKER_ENABLED=false stops all of the above.
+// Tests (`NODE_ENV=test`) keep both off so stray deliveries don't leak.
 const outboxDefaultOff = process.env.NODE_ENV === 'test';
 const outboxEnabled = process.env.OUTBOX_WORKER_ENABLED
   ? process.env.OUTBOX_WORKER_ENABLED !== 'false'
@@ -30,6 +34,10 @@ const outboxEnabled = process.env.OUTBOX_WORKER_ENABLED
 if (outboxEnabled) {
   startOutboxWorker().catch((e) => {
     console.error('[outbox] fatal', e);
+    process.exit(1);
+  });
+  startWebhookDeliveryWorker().catch((e) => {
+    console.error('[webhooks] fatal', e);
     process.exit(1);
   });
 }
