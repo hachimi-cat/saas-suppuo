@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 - `suppuo api webhook-subscriptions deliveries` (`--subscription-id`, `--status`, `--type`, `--limit`, `--cursor`), `get-deliveries <id>`, `deliveries-retry <id>` and `event-types`: the webhook delivery log, with every attempt, and a retry.
 - `suppuo api webhook-subscriptions update <id>` takes `--url` and `--events` too (it only took `--active`).
 

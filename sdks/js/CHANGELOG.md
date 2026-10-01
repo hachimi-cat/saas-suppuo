@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 - Webhook deliveries are retried and logged. `client.api.webhookSubscriptionsDeliveries({ subscriptionId?, status?, type?, limit?, cursor? })` lists them (newest first, with every attempt), `webhookSubscriptionsGetDeliveries(id)` reads one, `webhookSubscriptionsDeliveriesRetry(id)` sends one again (202; 409 when it is queued or its subscription is off), and `webhookSubscriptionsEventTypes()` returns the event catalogue.
 - `webhookSubscriptionsUpdate(id, { url?, events?, active? })` changes the URL and the events too (it only took `active`); `active: true` re-enables a subscription Suppuo switched off for failing. Subscriptions carry `consecutiveFailures`, `failingSince`, `disabledAt`, `disabledReason`.
 - `events` takes prefixes (`suppuo.ticket.*`). New event types: `suppuo.webhook_subscription.disabled.v1`; a requester-portal reply is now `suppuo.ticket.replied.v1` (`by: "requester"`) like every other requester follow-up (it was the undocumented `suppuo.ticket.message.created.v1`).
