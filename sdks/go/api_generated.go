@@ -371,12 +371,6 @@ func (a *GeneratedAPI) HelpArticles(ctx context.Context) (json.RawMessage, error
 	return a.c.apigenRequest(ctx, "GET", "/api/v1/help/articles", nil, nil)
 }
 
-// HelpArticles2 calls GET /api/v1/help/articles/{id}: Get an article.
-func (a *GeneratedAPI) HelpArticles2(ctx context.Context, id string) (json.RawMessage, error) {
-	path := "/api/v1/help/articles/" + url.PathEscape(id)
-	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
-}
-
 // HelpCreateArticlesArgs are the inputs of GeneratedAPI.HelpCreateArticles.
 type HelpCreateArticlesArgs struct {
 	// Kind is "kind" in the body. One of: faq, article.
@@ -445,6 +439,12 @@ func (a *GeneratedAPI) HelpCreateArticles(ctx context.Context, p *HelpCreateArti
 func (a *GeneratedAPI) HelpDeleteArticles(ctx context.Context, id string) (json.RawMessage, error) {
 	path := "/api/v1/help/articles/" + url.PathEscape(id)
 	return a.c.apigenRequest(ctx, "DELETE", path, nil, nil)
+}
+
+// HelpGetArticles calls GET /api/v1/help/articles/{id}: Get an article.
+func (a *GeneratedAPI) HelpGetArticles(ctx context.Context, id string) (json.RawMessage, error) {
+	path := "/api/v1/help/articles/" + url.PathEscape(id)
+	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
 }
 
 // HelpUpdateArticlesArgs are the inputs of GeneratedAPI.HelpUpdateArticles.
@@ -900,6 +900,12 @@ func (a *GeneratedAPI) RequesterCreateTickets(ctx context.Context, p *RequesterC
 	return a.c.apigenRequest(ctx, "POST", "/api/v1/requester/tickets", nil, payload)
 }
 
+// RequesterGetTickets calls GET /api/v1/requester/tickets/{number}: Get a ticket.
+func (a *GeneratedAPI) RequesterGetTickets(ctx context.Context, number string) (json.RawMessage, error) {
+	path := "/api/v1/requester/tickets/" + url.PathEscape(number)
+	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
+}
+
 // RequesterMe calls GET /api/v1/requester/me: List me.
 func (a *GeneratedAPI) RequesterMe(ctx context.Context) (json.RawMessage, error) {
 	return a.c.apigenRequest(ctx, "GET", "/api/v1/requester/me", nil, nil)
@@ -921,12 +927,6 @@ func (a *GeneratedAPI) RequesterTickets(ctx context.Context, p *RequesterTickets
 		q.Set("status", apigenQueryValue(*p.Status))
 	}
 	return a.c.apigenRequest(ctx, "GET", "/api/v1/requester/tickets", q, nil)
-}
-
-// RequesterTickets2 calls GET /api/v1/requester/tickets/{number}: Get a ticket.
-func (a *GeneratedAPI) RequesterTickets2(ctx context.Context, number string) (json.RawMessage, error) {
-	path := "/api/v1/requester/tickets/" + url.PathEscape(number)
-	return a.c.apigenRequest(ctx, "GET", path, nil, nil)
 }
 
 // RequesterTicketsMessagesArgs are the inputs of GeneratedAPI.RequesterTicketsMessages.
@@ -1427,6 +1427,20 @@ func (a *GeneratedAPI) WebhookSubscriptionsUpdate(ctx context.Context, id string
 	}
 	path := "/api/v1/webhook-subscriptions/" + url.PathEscape(id)
 	return a.c.apigenRequest(ctx, "PATCH", path, nil, payload)
+}
+
+// HelpArticles2 is the old name of HelpGetArticles (GET /api/v1/help/articles/{id}).
+//
+// Deprecated: use HelpGetArticles.
+func (a *GeneratedAPI) HelpArticles2(ctx context.Context, id string) (json.RawMessage, error) {
+	return a.HelpGetArticles(ctx, id)
+}
+
+// RequesterTickets2 is the old name of RequesterGetTickets (GET /api/v1/requester/tickets/{number}).
+//
+// Deprecated: use RequesterGetTickets.
+func (a *GeneratedAPI) RequesterTickets2(ctx context.Context, number string) (json.RawMessage, error) {
+	return a.RequesterGetTickets(ctx, number)
 }
 
 // apigenBody copies Body, so the fields set over it never change the caller's map.

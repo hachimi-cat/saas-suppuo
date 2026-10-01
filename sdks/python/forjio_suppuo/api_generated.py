@@ -181,10 +181,6 @@ class GeneratedApi:
         """List articles (GET /api/v1/help/articles)."""
         return self._call("GET", f"/api/v1/help/articles", {}, None)
 
-    def help_articles_2(self, id_: str) -> Any:
-        """Get an article (GET /api/v1/help/articles/{id})."""
-        return self._call("GET", f"/api/v1/help/articles/{_q(id_)}", {}, None)
-
     def help_create_articles(self, *, kind: Optional[str] = None, slug: Optional[str] = None, category: Optional[str] = None, title: Optional[str] = None, body: Optional[str] = None, status: Optional[str] = None, position: Optional[int] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
         """Create an article (POST /api/v1/help/articles).
         
@@ -215,6 +211,10 @@ class GeneratedApi:
     def help_delete_articles(self, id_: str) -> Any:
         """Delete an article (DELETE /api/v1/help/articles/{id})."""
         return self._call("DELETE", f"/api/v1/help/articles/{_q(id_)}", {}, None)
+
+    def help_get_articles(self, id_: str) -> Any:
+        """Get an article (GET /api/v1/help/articles/{id})."""
+        return self._call("GET", f"/api/v1/help/articles/{_q(id_)}", {}, None)
 
     def help_update_articles(self, id_: str, *, kind: Optional[str] = None, slug: Optional[str] = None, category: Optional[str] = None, title: Optional[str] = None, body: Optional[str] = None, status: Optional[str] = None, position: Optional[int] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
         """Update an article (PATCH /api/v1/help/articles/{id}).
@@ -406,6 +406,10 @@ class GeneratedApi:
             raise ValueError("requester_create_tickets needs body")
         return self._call("POST", f"/api/v1/requester/tickets", {}, payload)
 
+    def requester_get_tickets(self, number: str) -> Any:
+        """Get a ticket (GET /api/v1/requester/tickets/{number})."""
+        return self._call("GET", f"/api/v1/requester/tickets/{_q(number)}", {}, None)
+
     def requester_me(self) -> Any:
         """List me (GET /api/v1/requester/me)."""
         return self._call("GET", f"/api/v1/requester/me", {}, None)
@@ -413,10 +417,6 @@ class GeneratedApi:
     def requester_tickets(self, *, status: Optional[str] = None) -> Any:
         """List tickets (GET /api/v1/requester/tickets)."""
         return self._call("GET", f"/api/v1/requester/tickets", {"status": status}, None)
-
-    def requester_tickets_2(self, number: str) -> Any:
-        """Get a ticket (GET /api/v1/requester/tickets/{number})."""
-        return self._call("GET", f"/api/v1/requester/tickets/{_q(number)}", {}, None)
 
     def requester_tickets_messages(self, number: str, *, body: Optional[str] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
         """Messages a ticket (POST /api/v1/requester/tickets/{number}/messages).
@@ -610,6 +610,14 @@ class GeneratedApi:
         if "active" not in payload:
             raise ValueError("webhook_subscriptions_update needs active")
         return self._call("PATCH", f"/api/v1/webhook-subscriptions/{_q(id_)}", {}, payload)
+
+    def help_articles_2(self, *args: Any, **kwargs: Any) -> Any:
+        """Deprecated: the old name of ``help_get_articles`` (GET /api/v1/help/articles/{id})."""
+        return self.help_get_articles(*args, **kwargs)
+
+    def requester_tickets_2(self, *args: Any, **kwargs: Any) -> Any:
+        """Deprecated: the old name of ``requester_get_tickets`` (GET /api/v1/requester/tickets/{number})."""
+        return self.requester_get_tickets(*args, **kwargs)
 
 
 def _q(value: Any) -> str:

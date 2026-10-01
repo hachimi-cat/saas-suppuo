@@ -139,7 +139,7 @@
      "guards": [
       "adminGuard"
      ],
-     "body": "read-unknown"
+     "body": "read-unvalidated"
     },
     "requestBody": {
      "required": false,
@@ -147,7 +147,13 @@
       "application/json": {
        "schema": {
         "type": "object",
-        "properties": {}
+        "properties": {
+         "allowlist": {},
+         "description": {},
+         "enabled": {},
+         "label": {},
+         "rollout": {}
+        }
        }
       }
      }
@@ -3305,7 +3311,7 @@
     "x-forjio": {
      "source": "src/routes/webhooks-resend.ts:141",
      "guards": [],
-     "body": "read-unknown"
+     "body": "read-unvalidated"
     },
     "requestBody": {
      "required": false,
@@ -3313,7 +3319,10 @@
       "application/json": {
        "schema": {
         "type": "object",
-        "properties": {}
+        "properties": {
+         "data": {},
+         "type": {}
+        }
        }
       }
      }
@@ -3346,7 +3355,7 @@
     "x-forjio": {
      "source": "src/routes/webhooks-telegram.ts:56",
      "guards": [],
-     "body": "read-unknown"
+     "body": "read-unvalidated"
     },
     "requestBody": {
      "required": false,
@@ -3354,7 +3363,9 @@
       "application/json": {
        "schema": {
         "type": "object",
-        "properties": {}
+        "properties": {
+         "message": {}
+        }
        }
       }
      }
@@ -3467,7 +3478,7 @@
   "matched": 88,
   "bodies": {
    "validated": 25,
-   "fieldsOnly": 5,
+   "fieldsOnly": 8,
    "takesBody": 34
   }
  }

@@ -130,11 +130,6 @@ export class GeneratedApi {
     return this.call("GET", `/api/v1/help/articles`, {}, undefined);
   }
 
-  /** Get an article (GET /api/v1/help/articles/{id}) */
-  helpArticles2(id: string): Promise<unknown> {
-    return this.call("GET", `/api/v1/help/articles/${encodeURIComponent(id)}`, {}, undefined);
-  }
-
   /** Create an article (POST /api/v1/help/articles) */
   helpCreateArticles(input: { "kind"?: "faq" | "article"; "slug"?: string; "category"?: string; "title": string; "body": string; "status"?: "draft" | "published"; "position"?: number; [field: string]: unknown }): Promise<unknown> {
     const all: Record<string, unknown> = { ...(input ?? {}) };
@@ -145,6 +140,11 @@ export class GeneratedApi {
   /** Delete an article (DELETE /api/v1/help/articles/{id}) */
   helpDeleteArticles(id: string): Promise<unknown> {
     return this.call("DELETE", `/api/v1/help/articles/${encodeURIComponent(id)}`, {}, undefined);
+  }
+
+  /** Get an article (GET /api/v1/help/articles/{id}) */
+  helpGetArticles(id: string): Promise<unknown> {
+    return this.call("GET", `/api/v1/help/articles/${encodeURIComponent(id)}`, {}, undefined);
   }
 
   /** Update an article (PATCH /api/v1/help/articles/{id}) */
@@ -287,6 +287,11 @@ export class GeneratedApi {
     return this.call("POST", `/api/v1/requester/tickets`, query, all);
   }
 
+  /** Get a ticket (GET /api/v1/requester/tickets/{number}) */
+  requesterGetTickets(number: string): Promise<unknown> {
+    return this.call("GET", `/api/v1/requester/tickets/${encodeURIComponent(number)}`, {}, undefined);
+  }
+
   /** List me (GET /api/v1/requester/me) */
   requesterMe(): Promise<unknown> {
     return this.call("GET", `/api/v1/requester/me`, {}, undefined);
@@ -298,11 +303,6 @@ export class GeneratedApi {
     const query: Record<string, unknown> = {};
     query["status"] = all["status"]; delete all["status"];
     return this.call("GET", `/api/v1/requester/tickets`, query, undefined);
-  }
-
-  /** Get a ticket (GET /api/v1/requester/tickets/{number}) */
-  requesterTickets2(number: string): Promise<unknown> {
-    return this.call("GET", `/api/v1/requester/tickets/${encodeURIComponent(number)}`, {}, undefined);
   }
 
   /** Messages a ticket (POST /api/v1/requester/tickets/{number}/messages) */
@@ -428,5 +428,15 @@ export class GeneratedApi {
     const all: Record<string, unknown> = { ...(input ?? {}) };
     const query: Record<string, unknown> = {};
     return this.call("PATCH", `/api/v1/webhook-subscriptions/${encodeURIComponent(id)}`, query, all);
+  }
+
+  /** @deprecated The old name of `helpGetArticles` (GET /api/v1/help/articles/{id}). */
+  helpArticles2(...args: Parameters<GeneratedApi["helpGetArticles"]>): Promise<unknown> {
+    return this.helpGetArticles(...args);
+  }
+
+  /** @deprecated The old name of `requesterGetTickets` (GET /api/v1/requester/tickets/{number}). */
+  requesterTickets2(...args: Parameters<GeneratedApi["requesterGetTickets"]>): Promise<unknown> {
+    return this.requesterGetTickets(...args);
   }
 }
