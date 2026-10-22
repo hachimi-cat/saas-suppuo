@@ -36,21 +36,24 @@ copy this file into the forked repo and replace `SUPPUO` /
 | `frontend/` | Next.js 15 App Router. Marketing at `/`, dashboard at `/dashboard`, OIDC at `/callback`. Built-in admin portal at `/admin/*` (the `(admin)` route group: login/forgot/reset + a gated `(portal)` dashboard via `@forjio/portal-ui` `brandTag="Admin"`; admin BFF proxy at `app/api/v1/console/[...path]`). `src/lib/api.ts` (client fetch) + `src/lib/api-server.ts` (RSC cookie forwarding). Error + loading boundaries at `src/app/(dashboard)/` and `src/app/(admin)/admin/(portal)/`. |
 | `deploy/` | `nginx/<brand>.conf` — reference vhost. `^~ /api/v1/console/` → frontend (admin BFF proxy), everything else under `/api/v1/` → backend, default → frontend. `scripts/install.sh` symlinks it into `sites-enabled`. |
 | `cli/` | Commander-based CLI. `auth login/whoami/logout` ship; session stored via `src/lib/session.ts` at `~/.SUPPUO/session.json`. |
-| `e2e/` | Playwright. `playwright.config.ts` (local dev) + `playwright.ci.config.ts` (CI against staging — see ci-cd.yml). Health smoke ships; add per-flow tests per milestone. |
+| `e2e/` | Playwright. `playwright.config.ts` (local dev) + `playwright.ci.config.ts` (run locally; there is no staging, so CI does not run them). Health smoke ships; add per-flow tests per milestone. |
 
-### CI/CD — shared staging E2E pattern
+### CI/CD — no staging
 
-- `.github/workflows/ci-cd.yml` is parameterized via three env vars at
-  the top: `SUPPUO`, `BACKEND_PORT`, `FRONTEND_PORT`. Set these
-  when forking; the rest is mechanical.
-- Job sequence: `lint → test → build → deploy-staging → e2e-staging →
-  deploy-production → release`.
-- **E2E reaches staging over Tailscale MagicDNS** at
-  `http://staging-SUPPUO/` (nginx :80 on `tailscale0`). Requires
-  secrets `TS_AUTHKEY` + `E2E_BYPASS_SECRET` + `SSH_PRIVATE_KEY` +
-  `STAGING_HOST` + `PRODUCTION_HOST`. Battle-tested in saas-linksnap;
-  plugipay converged to this pattern on 2026-04-20 after hitting
-  UFW-blocked :443 on public DNS.
+- **There is no staging** (bang, 22 Oct 2026: "no more staging server";
+  the shared staging box was destroyed on 11 Oct 2026). Never add a
+  staging job, a `STAGING_HOST` secret or a `staging-<brand>` DNS record.
+- Depllo runs `.depllo-ci.yml` on every push to master: checks → build →
+  `deploy-production` → `verify-production` (read-only: the site must
+  answer 200 within two minutes). `.github/workflows/ci-cd.yml` is the
+  manual (workflow_dispatch) fallback.
+- `deploy-production` rsyncs over ssh with `SSH_PRIVATE_KEY`; its public
+  half is in root's `authorized_keys` on the production box
+  (prod-share-v2, 139.59.218.224). Without it every deploy fails with
+  "Permission denied (publickey)".
+- **Frontend deploys as a dynamic Next app** (`next start` under pm2):
+  the build job ships `.next/` and the deploy step runs
+  `npm ci --omit=dev` + `pm2 start npm -- start`. No static `out/`.
 
 ### Backend conventions
 
@@ -99,7 +102,8 @@ copy this file into the forked repo and replace `SUPPUO` /
   runs with `--passWithNoTests` so scaffolding doesn't break CI
   before coverage ramps.
 - E2E in `e2e/tests/` (Playwright). Run locally against
-  `localhost:3170/4000`; CI hits `staging-SUPPUO` over Tailscale.
+  `localhost:3170/4000`. There is no staging, so CI does not run them;
+  after each production deploy `verify-production` checks the site.
 - CLI tests in `cli/src/__tests__/`.
 - `npm run type-check` at each dir = `tsc --noEmit`. CI's
   Lint & Type Check job invokes this explicitly.
